@@ -261,7 +261,9 @@ const HTML_HOME = `
     <div class="hero">
         <h1>Smart Players Auction</h1>
         <p>The complete digital operating system for your sports league. From live franchise bidding to real-time courtside scoreboards.</p>
-        <button class="btn" onclick="alert('Admin Login Portal is active.')">Organizer Login</button>
+       <button onclick="window.location.href='/admin'" style="background-color: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold;">
+  Organizer Login
+</button>
     </div>
     
     <div class="features">
