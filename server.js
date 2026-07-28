@@ -330,6 +330,9 @@ body{background:#111827; color:white; font-family:sans-serif; margin:0; padding:
 app.get('/', (req, res) => res.send(HTML_HOME));
 app.get('/register', (req, res) => res.send(HTML_REGISTER));
 app.get('/umpire', (req, res) => res.send(HTML_UMPIRE));
+app.get('/admin', (req, res) => {
+    res.sendFile(__dirname + '/admin.html');
+});
 
 // ==========================================
 // 7. START SERVER
