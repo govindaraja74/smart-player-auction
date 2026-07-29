@@ -73,29 +73,35 @@
             if (pass === "MasterUnlock2026") {
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('controlRoom').style.display = 'block';
-                loadDashboard(); // Fetch MongoDB data instantly on login
+                loadDashboard(); 
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
             }
         }
 
         async function loadDashboard() {
-            const res = await fetch('/api/dashboard');
-            const data = await res.json();
-            
-            // Populate Players
-            const playerSelect = document.getElementById('playerSelect');
-            playerSelect.innerHTML = '<option value="">Select a Player...</option>';
-            data.players.forEach(p => {
-                playerSelect.innerHTML += `<option value="${p._id}">${p.name} (Base: ₹${p.basePrice})</option>`;
-            });
+            try {
+                const res = await fetch('/api/dashboard');
+                const data = await res.json();
+                
+                const playerSelect = document.getElementById('playerSelect');
+                playerSelect.innerHTML = '<option value="">Select a Player...</option>';
+                if(data.players) {
+                    data.players.forEach(p => {
+                        playerSelect.innerHTML += `<option value="${p._id}">${p.name} (Base: ₹${p.basePrice})</option>`;
+                    });
+                }
 
-            // Populate Teams
-            const teamSelect = document.getElementById('teamSelect');
-            teamSelect.innerHTML = '<option value="">Select a Team...</option>';
-            data.teams.forEach(t => {
-                teamSelect.innerHTML += `<option value="${t._id}">${t.name} (Purse: ₹${t.purseRemaining})</option>`;
-            });
+                const teamSelect = document.getElementById('teamSelect');
+                teamSelect.innerHTML = '<option value="">Select a Team...</option>';
+                if(data.teams) {
+                    data.teams.forEach(t => {
+                        teamSelect.innerHTML += `<option value="${t._id}">${t.name} (Purse: ₹${t.purseRemaining})</option>`;
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load dashboard data", err);
+            }
         }
 
         async function addTeam() {
@@ -104,16 +110,20 @@
             
             if(!name || !budget) return alert("Please enter both a name and a budget!");
             
-            await fetch('/api/teams', {
+            const response = await fetch('/api/teams', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, budget })
             });
             
-            alert(name + " successfully added to the league!");
-            document.getElementById('teamName').value = '';
-            document.getElementById('teamBudget').value = '';
-            loadDashboard(); // Refresh dropdowns automatically
+            if(response.ok) {
+                alert(name + " successfully added to the league!");
+                document.getElementById('teamName').value = '';
+                document.getElementById('teamBudget').value = '';
+                loadDashboard(); 
+            } else {
+                alert("Error saving team to database.");
+            }
         }
 
         function sellPlayer() {
@@ -123,7 +133,6 @@
             
             if(!playerId || !teamId || !soldPrice) return alert("Please select a player, a team, and enter the final price!");
             
-            // Send live update through WebSockets
             socket.emit('adminSellPlayer', { 
                 playerId, 
                 teamId, 
@@ -132,10 +141,9 @@
             });
             
             document.getElementById('winningBid').value = '';
-            setTimeout(loadDashboard, 500); // Give database a moment to save, then refresh
+            setTimeout(loadDashboard, 500);
         }
 
-        // Listen for successful sale
         socket.on('alert', (msg) => { alert(msg); });
         socket.on('bidError', (msg) => { alert("Error: " + msg); });
     </script>
