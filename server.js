@@ -335,6 +335,23 @@ app.get('/admin', (req, res) => {
 });
 
 // ==========================================
+// Admin Data Fetch
+app.get('/api/dashboard', async (req, res) => {
+    const players = await Player.find({ status: 'pending' });
+    const teams = await Franchise.find();
+    res.json({ players, teams });
+});
+
+// Create New Team
+app.post('/api/teams', async (req, res) => {
+    const team = new Franchise({ 
+        tournamentId: 'KBL2026', 
+        name: req.body.name, 
+        purseRemaining: req.body.budget 
+    });
+    await team.save();
+    res.json({ success: true });
+});
 // 7. START SERVER
 // ==========================================
 const PORT = process.env.PORT || 3000;
