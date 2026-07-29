@@ -41,6 +41,13 @@
             <!-- Manage Teams Panel -->
             <div class="panel">
                 <h2>Create Franchise</h2>
+                <!-- Create Player Panel -->
+<div class="panel">
+    <h2>Add New Player</h2>
+    <input type="text" id="playerName" placeholder="Player Name">
+    <input type="number" id="playerBasePrice" placeholder="Base Price (₹)">
+    <button onclick="addPlayer()" style="margin-top: 10px; background-color: #0284c7;">Add Player</button>
+</div>
                 <input type="text" id="teamName" placeholder="Team Name (e.g., Karkala Smashers)">
                 <input type="number" id="teamBudget" placeholder="Starting Budget (₹)">
                 <button onclick="addTeam()" style="margin-top: 10px;">Add Team</button>
@@ -65,6 +72,27 @@
     <!-- Connect to Real-Time Server -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        async function addPlayer() {
+    const name = document.getElementById('playerName').value;
+    const basePrice = document.getElementById('playerBasePrice').value;
+    
+    if(!name || !basePrice) return alert("Please enter both a player name and base price!");
+    
+    const response = await fetch('/api/players', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, basePrice, tournamentId: 'KBL2026' })
+    });
+    
+    if(response.ok) {
+        alert(name + " successfully added to the auction pool!");
+        document.getElementById('playerName').value = '';
+        document.getElementById('playerBasePrice').value = '';
+        loadDashboard(); 
+    } else {
+        alert("Error saving player.");
+    }
+}
         const socket = io();
         socket.emit('joinRoom', 'KBL2026');
 
