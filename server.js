@@ -352,6 +352,17 @@ app.post('/api/teams', async (req, res) => {
     await team.save();
     res.json({ success: true });
 });
+// Create New Player
+app.post('/api/players', async (req, res) => {
+    const player = new Player({ 
+        tournamentId: req.body.tournamentId || 'KBL2026', 
+        name: req.body.name, 
+        basePrice: req.body.basePrice,
+        status: 'pending'
+    });
+    await player.save();
+    res.json({ success: true });
+});
 // 7. START SERVER
 // ==========================================
 const PORT = process.env.PORT || 3000;
