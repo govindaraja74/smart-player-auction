@@ -283,31 +283,61 @@
             }
         }
 
+ // --- UPGRADED ADD TEAMS ---
         async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const game = document.getElementById('selectedGame').value;
             const budget = document.getElementById('setupBudget').value; 
-            if(num === 0) return;
+            
+            if(num === 0) return alert("Enter number of teams first.");
+            
             const btn = document.getElementById('addTeamBtn');
-            btn.innerText = "Uploading..."; btn.disabled = true;
+            btn.innerText = "Uploading Teams Please Wait..."; 
+            btn.disabled = true;
 
-            for(let i=1; i<=num; i++) {
-                const name = document.getElementById('tName_'+i).value;
-                const logoInput = document.getElementById('tLogo_'+i);
-                if(!name) continue;
+            try {
+                let addedCount = 0;
+                for(let i=1; i<=num; i++) {
+                    const name = document.getElementById('tName_'+i).value;
+                    const logoInput = document.getElementById('tLogo_'+i);
+                    if(!name) continue;
 
-                let logoDataUrl = "";
-                if (logoInput.files[0]) {
-                    logoDataUrl = await new Promise(res => {
-                        const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(logoInput.files[0]);
+                    let logoDataUrl = "";
+                    if (logoInput && logoInput.files[0]) {
+                        logoDataUrl = await new Promise(res => {
+                            const r = new FileReader(); 
+                            r.onload = e => res(e.target.result); 
+                            r.readAsDataURL(logoInput.files[0]);
+                        });
+                    }
+                    
+                    const response = await fetch('/api/franchises', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ 
+                            name, 
+                            logoUrl: logoDataUrl, 
+                            budget: Number(budget),
+                            purseRemaining: Number(budget), // <-- THIS FIXES THE SAVE ISSUE!
+                            game, 
+                            tournamentId: 'KBL2026' 
+                        }) 
                     });
+                    
+                    if(response.ok) addedCount++;
                 }
-                await fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, logoUrl: logoDataUrl, budget, game, tournamentId: 'KBL2026' }) });
+                
+                alert(addedCount + " teams added successfully to " + game + "!");
+                document.getElementById('numOfTeams').value = '';
+                document.getElementById('teamInputsContainer').innerHTML = '';
+                
+            } catch(err) {
+                alert("Failed to upload some teams: " + err.message);
             }
-            document.getElementById('numOfTeams').value = '';
-            document.getElementById('teamInputsContainer').innerHTML = '';
-            btn.innerText = "Add All Teams"; btn.disabled = false;
-            loadDashboard(); 
+            
+            btn.innerText = "Add All Teams"; 
+            btn.disabled = false;
+            await loadDashboard(); 
         }
 
         async function importFromGoogleSheet() { 
