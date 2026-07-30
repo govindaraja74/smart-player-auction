@@ -19,7 +19,12 @@
         .btn-warning { background-color: #f59e0b; }
         .btn-primary { background-color: #0284c7; }
         h1, h2 { margin-top: 0; text-align: center; color: #f8fafc; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        
+        /* New Header Layout to center the logo */
+        .header-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 15px; }
+        .header-bar h1 { text-align: left; margin: 0; font-size: 24px; }
+        .header-bar .logo-container { display: flex; justify-content: center; }
+        .header-bar .btn-container { display: flex; justify-content: flex-end; }
     </style>
 </head>
 <body>
@@ -88,11 +93,20 @@
         </form>
     </div>
 
-    <!-- 3. Hidden Control Room (The Next Page) -->
+    <!-- 3. Hidden Control Room -->
     <div class="box hidden" id="controlRoom">
+        
+        <!-- Header Bar with Centered Logo -->
         <div class="header-bar">
-            <h1 id="displayTournamentName">Tournament Control Room</h1>
-            <button class="btn-danger" onclick="window.location.reload()">End Session</button>
+            <div>
+                <h1 id="displayTournamentName">Tournament Control Room</h1>
+            </div>
+            <div class="logo-container">
+                <img id="displayTournamentLogo" src="" alt="Tournament Logo" style="display: none; height: 75px; max-width: 250px; object-fit: contain; border-radius: 8px;">
+            </div>
+            <div class="btn-container">
+                <button class="btn-danger" onclick="window.location.reload()">End Session</button>
+            </div>
         </div>
 
         <div class="panel" style="background-color: #374151;">
@@ -121,7 +135,6 @@
                 <button class="btn-primary" onclick="addPlayer()">Add Player Manually</button>
             </div>
 
-            <!-- Live Auction Panel with Dynamic Bid Increase -->
             <div class="panel">
                 <h2>Live Player Draft</h2>
                 <select id="playerSelect"><option value="">Loading Players...</option></select>
@@ -153,35 +166,39 @@
             }
         }
 
-        // Handles Setup Form Submission
+        // Handles Setup Form Submission & Loading Logo
         function submitSetup(event) {
-            event.preventDefault(); // Prevents page from reloading
+            event.preventDefault(); 
             
-            // Capture the Bid Increase rule
+            // Apply Setup Rules
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
-            
-            // Update the Quick Bid button text on the next page
             document.getElementById('quickBidBtn').innerText = `+ ₹${currentBidIncrease}`;
-            
-            // Set default budget based on rules
             document.getElementById('teamBudget').value = document.getElementById('setupBudget').value;
             
-            // Update Dashboard Title
+            // Update Title
             const tourneyName = document.getElementById('setupName').value;
             document.getElementById('displayTournamentName').innerText = `${tourneyName} Control Room`;
 
-            // Transition to Next Page (Control Room)
+            // Process and Display the Uploaded Image
+            const logoInput = document.getElementById('setupLogo');
+            if (logoInput.files && logoInput.files[0]) {
+                const logoURL = URL.createObjectURL(logoInput.files[0]);
+                const logoImg = document.getElementById('displayTournamentLogo');
+                logoImg.src = logoURL;
+                logoImg.style.display = 'block'; // Make it visible
+            }
+
+            // Move to Next Page
             document.getElementById('setupRoom').classList.add('hidden');
             document.getElementById('controlRoom').classList.remove('hidden');
             
             loadDashboard(); 
         }
 
-        // Automatically adds the bid increase amount to the current price
         function applyBidIncrease() {
             let currentBid = Number(document.getElementById('winningBid').value);
             if (currentBid === 0) {
-                currentBid = Number(document.getElementById('setupMinBid').value); // Start at Min Bid
+                currentBid = Number(document.getElementById('setupMinBid').value); 
             } else {
                 currentBid += currentBidIncrease;
             }
@@ -213,9 +230,59 @@
             });
         }
 
-        async function addTeam() { /* Logic Remains the Same */ }
-        async function addPlayer() { /* Logic Remains the Same */ }
-        function sellPlayer() { /* Logic Remains the Same */ }
+        async function addTeam() {
+            const name = document.getElementById('teamName').value;
+            const logoUrl = document.getElementById('teamLogo').value;
+            const budget = document.getElementById('teamBudget').value;
+            const game = document.getElementById('selectedGame').value;
+            
+            if(!name || !budget) return alert("Please enter team name and budget!");
+            
+            await fetch('/api/franchises', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, logoUrl, budget, game, tournamentId: 'KBL2026' })
+            });
+            
+            alert(name + " added successfully for " + game + "!");
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamLogo').value = '';
+            loadDashboard(); 
+        }
+
+        async function addPlayer() {
+            const name = document.getElementById('playerName').value;
+            const basePrice = document.getElementById('playerBasePrice').value;
+            const game = document.getElementById('selectedGame').value;
+            
+            if(!name || !basePrice) return alert("Enter player name and base price!");
+            
+            await fetch('/api/players/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, basePrice, game, tournamentId: 'KBL2026' })
+            });
+            
+            alert(name + " added to the " + game + " player pool!");
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerBasePrice').value = '';
+            loadDashboard();
+        }
+
+        function sellPlayer() {
+            const playerId = document.getElementById('playerSelect').value;
+            const teamId = document.getElementById('teamSelect').value;
+            const soldPrice = document.getElementById('winningBid').value;
+            
+            if(!playerId || !teamId || !soldPrice) return alert("Select player, team, and bid price!");
+            
+            socket.emit('adminSellPlayer', { playerId, teamId, soldPrice: Number(soldPrice), tournamentId: 'KBL2026' });
+            document.getElementById('winningBid').value = '';
+            setTimeout(loadDashboard, 500);
+        }
+
+        socket.on('alert', (msg) => { alert(msg); });
+        socket.on('bidError', (msg) => { alert("Error: " + msg); });
     </script>
 </body>
 </html>
