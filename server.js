@@ -367,6 +367,25 @@ app.post('/api/players/register', async (req, res) => {
     await player.save();
     res.json({ success: true });
 });
+// Edit a Franchise
+app.put('/api/franchises/:id', async (req, res) => {
+    try {
+        await Team.findByIdAndUpdate(req.params.id, req.body);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete a Franchise
+app.delete('/api/franchises/:id', async (req, res) => {
+    try {
+        await Team.findByIdAndDelete(req.params.id);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 // 7. START SERVER
 // ==========================================
 const PORT = process.env.PORT || 3000;
