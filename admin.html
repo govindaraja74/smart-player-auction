@@ -20,7 +20,6 @@
         .btn-primary { background-color: #0284c7; }
         h1, h2 { margin-top: 0; text-align: center; color: #f8fafc; }
         
-        /* New Header Layout to center the logo */
         .header-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 15px; }
         .header-bar h1 { text-align: left; margin: 0; font-size: 24px; }
         .header-bar .logo-container { display: flex; justify-content: center; }
@@ -45,7 +44,6 @@
         
         <form id="setupForm" onsubmit="submitSetup(event)">
             <div class="grid-2">
-                <!-- Mandatory Fields -->
                 <div>
                     <label>Auction Name *</label>
                     <input type="text" id="setupName" placeholder="e.g., Karla Badminton League" required>
@@ -78,8 +76,6 @@
                     <label>Max Players Per Team *</label>
                     <input type="number" id="setupMaxPlayers" placeholder="e.g., 15" required>
                 </div>
-
-                <!-- Optional Fields -->
                 <div>
                     <label>Venue (Optional)</label>
                     <input type="text" id="setupVenue" placeholder="e.g., Karkala Indoor Stadium">
@@ -95,8 +91,6 @@
 
     <!-- 3. Hidden Control Room -->
     <div class="box hidden" id="controlRoom">
-        
-        <!-- Header Bar with Centered Logo -->
         <div class="header-bar">
             <div>
                 <h1 id="displayTournamentName">Tournament Control Room</h1>
@@ -120,10 +114,12 @@
         </div>
 
         <div class="grid-container">
+            <!-- Add Franchise Panel Updated for Image Upload -->
             <div class="panel">
                 <h2>Add Franchise</h2>
                 <input type="text" id="teamName" placeholder="Team Name">
-                <input type="text" id="teamLogo" placeholder="Logo Image URL">
+                <label style="margin-top: 10px; display: block;">Team Logo Upload</label>
+                <input type="file" id="teamLogo" accept="image/jpeg, image/png" style="padding: 7px; margin-bottom: 5px;">
                 <input type="number" id="teamBudget" placeholder="Starting Budget (₹)">
                 <button onclick="addTeam()">Add Team</button>
             </div>
@@ -166,29 +162,24 @@
             }
         }
 
-        // Handles Setup Form Submission & Loading Logo
         function submitSetup(event) {
             event.preventDefault(); 
             
-            // Apply Setup Rules
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
             document.getElementById('quickBidBtn').innerText = `+ ₹${currentBidIncrease}`;
             document.getElementById('teamBudget').value = document.getElementById('setupBudget').value;
             
-            // Update Title
             const tourneyName = document.getElementById('setupName').value;
             document.getElementById('displayTournamentName').innerText = `${tourneyName} Control Room`;
 
-            // Process and Display the Uploaded Image
             const logoInput = document.getElementById('setupLogo');
             if (logoInput.files && logoInput.files[0]) {
                 const logoURL = URL.createObjectURL(logoInput.files[0]);
                 const logoImg = document.getElementById('displayTournamentLogo');
                 logoImg.src = logoURL;
-                logoImg.style.display = 'block'; // Make it visible
+                logoImg.style.display = 'block'; 
             }
 
-            // Move to Next Page
             document.getElementById('setupRoom').classList.add('hidden');
             document.getElementById('controlRoom').classList.remove('hidden');
             
@@ -230,14 +221,29 @@
             });
         }
 
+        // Updated Add Team logic to handle image uploads
         async function addTeam() {
             const name = document.getElementById('teamName').value;
-            const logoUrl = document.getElementById('teamLogo').value;
             const budget = document.getElementById('teamBudget').value;
             const game = document.getElementById('selectedGame').value;
+            const logoInput = document.getElementById('teamLogo');
             
             if(!name || !budget) return alert("Please enter team name and budget!");
             
+            let logoDataUrl = "";
+            if (logoInput.files && logoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    logoDataUrl = e.target.result;
+                    await saveTeamToDb(name, logoDataUrl, budget, game);
+                };
+                reader.readAsDataURL(logoInput.files[0]);
+            } else {
+                await saveTeamToDb(name, "", budget, game);
+            }
+        }
+
+        async function saveTeamToDb(name, logoUrl, budget, game) {
             await fetch('/api/franchises', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -247,6 +253,7 @@
             alert(name + " added successfully for " + game + "!");
             document.getElementById('teamName').value = '';
             document.getElementById('teamLogo').value = '';
+            document.getElementById('teamBudget').value = document.getElementById('setupBudget').value; // Reset to default budget
             loadDashboard(); 
         }
 
