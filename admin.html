@@ -15,6 +15,7 @@
         input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: none; font-size: 15px; box-sizing: border-box; background-color: #f8fafc; }
         button { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 20px; }
         button:hover { background-color: #218838; }
+        button:disabled { background-color: #64748b; cursor: not-allowed; }
         .btn-danger { background-color: #dc3545; width: auto; padding: 10px 20px; margin-top: 0; }
         .btn-warning { background-color: #f59e0b; }
         .btn-primary { background-color: #0284c7; }
@@ -24,6 +25,9 @@
         .header-bar h1 { text-align: left; margin: 0; font-size: 24px; }
         .header-bar .logo-container { display: flex; justify-content: center; }
         .header-bar .btn-container { display: flex; justify-content: flex-end; }
+        
+        .team-input-box { background-color: #0d1b2a; padding: 15px; margin-top: 15px; border-radius: 8px; border: 1px solid #334155; }
+        .team-input-box h4 { margin: 0 0 10px 0; color: #38bdf8; }
     </style>
 </head>
 <body>
@@ -114,14 +118,16 @@
         </div>
 
         <div class="grid-container">
-            <!-- Add Franchise Panel Updated for Image Upload -->
+            
+            <!-- Dynamic Add Franchise Panel -->
             <div class="panel">
-                <h2>Add Franchise</h2>
-                <input type="text" id="teamName" placeholder="Team Name">
-                <label style="margin-top: 10px; display: block;">Team Logo Upload</label>
-                <input type="file" id="teamLogo" accept="image/jpeg, image/png" style="padding: 7px; margin-bottom: 5px;">
-                <input type="number" id="teamBudget" placeholder="Starting Budget (₹)">
-                <button onclick="addTeam()">Add Team</button>
+                <h2>Add Franchises</h2>
+                <label>Number of Teams to Add</label>
+                <input type="number" id="numOfTeams" min="1" placeholder="e.g., 4" oninput="generateTeamInputs()">
+                
+                <div id="teamInputsContainer"></div>
+                
+                <button id="addTeamBtn" onclick="addMultipleTeams()">Add All Teams</button>
             </div>
 
             <div class="panel">
@@ -167,7 +173,6 @@
             
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
             document.getElementById('quickBidBtn').innerText = `+ ₹${currentBidIncrease}`;
-            document.getElementById('teamBudget').value = document.getElementById('setupBudget').value;
             
             const tourneyName = document.getElementById('setupName').value;
             document.getElementById('displayTournamentName').innerText = `${tourneyName} Control Room`;
@@ -221,39 +226,75 @@
             });
         }
 
-        // Updated Add Team logic to handle image uploads
-        async function addTeam() {
-            const name = document.getElementById('teamName').value;
-            const budget = document.getElementById('teamBudget').value;
-            const game = document.getElementById('selectedGame').value;
-            const logoInput = document.getElementById('teamLogo');
+        // --- NEW MULTIPLE TEAM GENERATION LOGIC ---
+        function generateTeamInputs() {
+            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
+            const container = document.getElementById('teamInputsContainer');
+            container.innerHTML = ''; 
             
-            if(!name || !budget) return alert("Please enter team name and budget!");
-            
-            let logoDataUrl = "";
-            if (logoInput.files && logoInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = async function(e) {
-                    logoDataUrl = e.target.result;
-                    await saveTeamToDb(name, logoDataUrl, budget, game);
-                };
-                reader.readAsDataURL(logoInput.files[0]);
-            } else {
-                await saveTeamToDb(name, "", budget, game);
+            for(let i=1; i<=num; i++) {
+                container.innerHTML += `
+                    <div class="team-input-box">
+                        <h4>Team ${i}</h4>
+                        <input type="text" id="tName_${i}" placeholder="Enter Team Name">
+                        <label style="font-size: 13px; margin-top: 10px;">Upload Team Logo</label>
+                        <input type="file" id="tLogo_${i}" accept="image/jpeg, image/png" style="padding: 5px;">
+                    </div>
+                `;
             }
         }
 
-        async function saveTeamToDb(name, logoUrl, budget, game) {
-            await fetch('/api/franchises', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, logoUrl, budget, game, tournamentId: 'KBL2026' })
-            });
+        // --- NEW BULK UPLOAD LOGIC ---
+        async function addMultipleTeams() {
+            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
+            const game = document.getElementById('selectedGame').value;
+            const budget = document.getElementById('setupBudget').value; // Pulls budget from your setup rules!
             
-            alert(name + " added successfully for " + game + "!");
-            document.getElementById('teamName').value = '';
-            document.getElementById('teamLogo').value = '';
-            document.getElementById('teamBudget').value = document.getElementById('setupBudget').value; // Reset to default budget
+            if(num === 0) return alert("Please enter the number of teams to add.");
+
+            // Change button text while saving
+            const btn = document.getElementById('addTeamBtn');
+            btn.innerText = "Uploading Teams Please Wait...";
+            btn.disabled = true;
+
+            for(let i=1; i<=num; i++) {
+                const name = document.getElementById('tName_'+i).value;
+                const logoInput = document.getElementById('tLogo_'+i);
+                
+                if(!name) {
+                    alert('Please enter a name for Team ' + i);
+                    btn.innerText = "Add All Teams";
+                    btn.disabled = false;
+                    return;
+                }
+
+                let logoDataUrl = "";
+                if (logoInput.files && logoInput.files[0]) {
+                    logoDataUrl = await new Promise(resolve => {
+                        const reader = new FileReader();
+                        reader.onload = e => resolve(e.target.result);
+                        reader.readAsDataURL(logoInput.files[0]);
+                    });
+                }
+
+                // Send each team to your database
+                await fetch('/api/franchises', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, logoUrl: logoDataUrl, budget, game, tournamentId: 'KBL2026' })
+                });
+            }
+
+            alert(num + " teams added successfully to " + game + "!");
+            
+            // Clear inputs
+            document.getElementById('numOfTeams').value = '';
+            document.getElementById('teamInputsContainer').innerHTML = '';
+            
+            // Reset button
+            btn.innerText = "Add All Teams";
+            btn.disabled = false;
+            
             loadDashboard(); 
         }
 
