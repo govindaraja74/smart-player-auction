@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Control Room | Smart Players Auction</title>
+    <!-- Adds Excel Reading Powers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
         body { font-family: Arial, sans-serif; background-color: #0d1b2a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
         .box { background-color: #1b263b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 1100px; }
@@ -26,8 +29,9 @@
         .header-bar .logo-container { display: flex; justify-content: center; }
         .header-bar .btn-container { display: flex; justify-content: flex-end; }
         
-        .team-input-box { background-color: #0d1b2a; padding: 15px; margin-top: 15px; border-radius: 8px; border: 1px solid #334155; }
-        .team-input-box h4 { margin: 0 0 10px 0; color: #38bdf8; }
+        .dynamic-box { background-color: #0d1b2a; padding: 15px; margin-top: 15px; border-radius: 8px; border: 1px solid #334155; }
+        .dynamic-box h4 { margin: 0 0 10px 0; color: #38bdf8; }
+        .excel-upload-btn { background-color: #10b981; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -45,49 +49,18 @@
     <div class="box hidden" id="setupRoom">
         <h1>Auction Setup Room</h1>
         <p style="text-align: center; color: #94a3b8;">Configure your tournament rules before entering the live draft.</p>
-        
         <form id="setupForm" onsubmit="submitSetup(event)">
             <div class="grid-2">
-                <div>
-                    <label>Auction Name *</label>
-                    <input type="text" id="setupName" placeholder="e.g., Karla Badminton League" required>
-                </div>
-                <div>
-                    <label>Season *</label>
-                    <input type="text" id="setupSeason" placeholder="e.g., 2026" required>
-                </div>
-                <div>
-                    <label>Auction Logo Upload *</label>
-                    <input type="file" id="setupLogo" accept="image/jpeg, image/png, application/pdf" required style="padding: 7px;">
-                </div>
-                <div>
-                    <label>Auction Date *</label>
-                    <input type="date" id="setupDate" required>
-                </div>
-                <div>
-                    <label>Points/Budget Per Team (₹) *</label>
-                    <input type="number" id="setupBudget" placeholder="e.g., 50000" required>
-                </div>
-                <div>
-                    <label>Minimum Bid (₹) *</label>
-                    <input type="number" id="setupMinBid" placeholder="e.g., 500" required>
-                </div>
-                <div>
-                    <label>Bid Increase (₹) *</label>
-                    <input type="number" id="setupBidIncrease" placeholder="e.g., 100" required>
-                </div>
-                <div>
-                    <label>Max Players Per Team *</label>
-                    <input type="number" id="setupMaxPlayers" placeholder="e.g., 15" required>
-                </div>
-                <div>
-                    <label>Venue (Optional)</label>
-                    <input type="text" id="setupVenue" placeholder="e.g., Karkala Indoor Stadium">
-                </div>
-                <div>
-                    <label>Min Players Per Team (Optional)</label>
-                    <input type="number" id="setupMinPlayers" placeholder="e.g., 11">
-                </div>
+                <div><label>Auction Name *</label><input type="text" id="setupName" placeholder="e.g., Karla Badminton League" required></div>
+                <div><label>Season *</label><input type="text" id="setupSeason" placeholder="e.g., 2026" required></div>
+                <div><label>Auction Logo Upload *</label><input type="file" id="setupLogo" accept="image/jpeg, image/png, application/pdf" required style="padding: 7px;"></div>
+                <div><label>Auction Date *</label><input type="date" id="setupDate" required></div>
+                <div><label>Points/Budget Per Team (₹) *</label><input type="number" id="setupBudget" placeholder="e.g., 50000" required></div>
+                <div><label>Minimum Bid (₹) *</label><input type="number" id="setupMinBid" placeholder="e.g., 500" required></div>
+                <div><label>Bid Increase (₹) *</label><input type="number" id="setupBidIncrease" placeholder="e.g., 100" required></div>
+                <div><label>Max Players Per Team *</label><input type="number" id="setupMaxPlayers" placeholder="e.g., 15" required></div>
+                <div><label>Venue (Optional)</label><input type="text" id="setupVenue"></div>
+                <div><label>Min Players Per Team (Optional)</label><input type="number" id="setupMinPlayers"></div>
             </div>
             <button type="submit" class="btn-primary">Submit & Open Control Room</button>
         </form>
@@ -96,55 +69,77 @@
     <!-- 3. Hidden Control Room -->
     <div class="box hidden" id="controlRoom">
         <div class="header-bar">
-            <div>
-                <h1 id="displayTournamentName">Tournament Control Room</h1>
-            </div>
-            <div class="logo-container">
-                <img id="displayTournamentLogo" src="" alt="Tournament Logo" style="display: none; height: 75px; max-width: 250px; object-fit: contain; border-radius: 8px;">
-            </div>
-            <div class="btn-container">
-                <button class="btn-danger" onclick="window.location.reload()">End Session</button>
-            </div>
+            <div><h1 id="displayTournamentName">Control Room</h1></div>
+            <div class="logo-container"><img id="displayTournamentLogo" src="" style="display: none; height: 75px; border-radius: 8px;"></div>
+            <div class="btn-container"><button class="btn-danger" onclick="window.location.reload()">End Session</button></div>
         </div>
 
+        <!-- Game & Category Selection Box -->
         <div class="panel" style="background-color: #374151;">
-            <h2>Select Tournament Game</h2>
+            <h2>Select Game & Categories</h2>
             <select id="selectedGame" onchange="filterByGame()">
                 <option value="Badminton">Badminton</option>
                 <option value="Table Tennis">Table Tennis</option>
                 <option value="Volleyball">Volleyball</option>
                 <option value="Cricket Tennis">Cricket Tennis</option>
             </select>
+
+            <hr style="border: 0; border-top: 1px solid #475569; margin: 15px 0;">
+            
+            <label>Number of Categories (Optional)</label>
+            <input type="number" id="numOfCategories" min="1" placeholder="e.g., 3" oninput="generateCategoryInputs()">
+            <div id="categoryInputsContainer"></div>
+            <button id="saveCatBtn" class="btn-primary" onclick="saveCategories()" style="display:none; margin-top: 10px;">Save Categories</button>
         </div>
 
         <div class="grid-container">
-            
-            <!-- Dynamic Add Franchise Panel -->
+            <!-- Add Franchise Panel -->
             <div class="panel">
                 <h2>Add Franchises</h2>
                 <label>Number of Teams to Add</label>
                 <input type="number" id="numOfTeams" min="1" placeholder="e.g., 4" oninput="generateTeamInputs()">
-                
                 <div id="teamInputsContainer"></div>
-                
                 <button id="addTeamBtn" onclick="addMultipleTeams()">Add All Teams</button>
             </div>
 
+            <!-- Import Players Panel (With Google Forms) -->
             <div class="panel">
-                <h2>Add Players</h2>
+                <h2>Import Players</h2>
+                
+                <label>1. Import via Google Forms (Sheets Link)</label>
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 0;">Make your linked Google Sheet "Public", then paste the link here.</p>
+                <input type="text" id="gSheetLink" placeholder="Paste Google Sheets link here">
+                <button class="btn-primary" id="gSheetBtn" onclick="importFromGoogleSheet()" style="margin-top: 5px;">Import from Link</button>
+
+                <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+
+                <label>2. Upload Excel/CSV File</label>
+                <input type="file" id="excelFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="padding: 5px;">
+                <button class="excel-upload-btn" onclick="importExcelPlayers()">Upload File</button>
+                
+                <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+                
+                <label>3. Or Add Manually:</label>
                 <input type="text" id="playerName" placeholder="Player Name">
                 <input type="number" id="playerBasePrice" placeholder="Base Price (₹)">
+                <select id="playerCategoryManual"><option value="">Select Category (Optional)</option></select>
                 <button class="btn-primary" onclick="addPlayer()">Add Player Manually</button>
             </div>
 
+            <!-- Live Player Draft Panel -->
             <div class="panel">
                 <h2>Live Player Draft</h2>
+                
+                <select id="draftCategoryFilter" onchange="filterByGame()" style="background-color: #0284c7; color: white;">
+                    <option value="All">All Categories</option>
+                </select>
+
                 <select id="playerSelect"><option value="">Loading Players...</option></select>
                 <select id="teamSelect"><option value="">Loading Franchises...</option></select>
                 
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <input type="number" id="winningBid" placeholder="Sold Price (₹)">
-                    <button type="button" class="btn-primary" id="quickBidBtn" onclick="applyBidIncrease()" style="margin-top: 5px; width: 50%;">+ Bid</button>
+                    <button type="button" class="btn-primary" id="quickBidBtn" onclick="applyBidIncrease()" style="width: 50%;">+ Bid</button>
                 </div>
 
                 <button class="btn-warning" onclick="sellPlayer()">Finalize Sale!</button>
@@ -157,6 +152,7 @@
         const socket = io();
         socket.emit('joinRoom', 'KBL2026');
         let currentBidIncrease = 0;
+        window.currentCategories = [];
 
         function checkPassword() {
             const pass = document.getElementById('adminPassword').value;
@@ -170,7 +166,6 @@
 
         function submitSetup(event) {
             event.preventDefault(); 
-            
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
             document.getElementById('quickBidBtn').innerText = `+ ₹${currentBidIncrease}`;
             
@@ -179,26 +174,168 @@
 
             const logoInput = document.getElementById('setupLogo');
             if (logoInput.files && logoInput.files[0]) {
-                const logoURL = URL.createObjectURL(logoInput.files[0]);
-                const logoImg = document.getElementById('displayTournamentLogo');
-                logoImg.src = logoURL;
-                logoImg.style.display = 'block'; 
+                document.getElementById('displayTournamentLogo').src = URL.createObjectURL(logoInput.files[0]);
+                document.getElementById('displayTournamentLogo').style.display = 'block'; 
             }
 
             document.getElementById('setupRoom').classList.add('hidden');
             document.getElementById('controlRoom').classList.remove('hidden');
-            
             loadDashboard(); 
         }
 
-        function applyBidIncrease() {
-            let currentBid = Number(document.getElementById('winningBid').value);
-            if (currentBid === 0) {
-                currentBid = Number(document.getElementById('setupMinBid').value); 
+        function generateCategoryInputs() {
+            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
+            const container = document.getElementById('categoryInputsContainer');
+            const btn = document.getElementById('saveCatBtn');
+            container.innerHTML = ''; 
+            
+            if(num > 0) {
+                btn.style.display = 'block';
+                for(let i=1; i<=num; i++) {
+                    container.innerHTML += `<input type="text" id="catName_${i}" placeholder="Category ${i} Name (e.g., Group A)">`;
+                }
             } else {
-                currentBid += currentBidIncrease;
+                btn.style.display = 'none';
             }
-            document.getElementById('winningBid').value = currentBid;
+        }
+
+        function saveCategories() {
+            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
+            window.currentCategories = [];
+            
+            for(let i=1; i<=num; i++) {
+                const val = document.getElementById('catName_'+i).value;
+                if(val) window.currentCategories.push(val);
+            }
+            
+            const manualDropdown = document.getElementById('playerCategoryManual');
+            const filterDropdown = document.getElementById('draftCategoryFilter');
+            
+            manualDropdown.innerHTML = '<option value="">Select Category (Optional)</option>';
+            filterDropdown.innerHTML = '<option value="All">All Categories</option>';
+            
+            window.currentCategories.forEach(cat => {
+                manualDropdown.innerHTML += `<option value="${cat}">${cat}</option>`;
+                filterDropdown.innerHTML += `<option value="${cat}">${cat}</option>`;
+            });
+            
+            alert("Categories Successfully Saved!");
+        }
+
+        // Google Sheets Import Logic
+        async function importFromGoogleSheet() {
+            const link = document.getElementById('gSheetLink').value;
+            const game = document.getElementById('selectedGame').value;
+            
+            if (!link.includes('spreadsheets/d/')) {
+                return alert("Please paste a valid Google Sheets link.");
+            }
+
+            const btn = document.getElementById('gSheetBtn');
+            btn.innerText = "Importing...";
+            btn.disabled = true;
+
+            try {
+                const sheetId = link.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)[1];
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`;
+
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error("Could not fetch data. Make sure the Google Sheet access is set to 'Anyone with the link can view'.");
+                
+                const csvText = await response.text();
+                
+                const workbook = XLSX.read(csvText, {type: 'string'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const playersArray = XLSX.utils.sheet_to_json(firstSheet);
+
+                let addedCount = 0;
+                for (let p of playersArray) {
+                    const name = p.Name || p.name || p.Player || p['Player Name'] || p['What is your name?'];
+                    const basePrice = p.BasePrice || p.baseprice || p.Price || p['Base Price'];
+                    const category = p.Category || p.category || '';
+
+                    if (name && basePrice) {
+                        await fetch('/api/players/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, basePrice, category, game, tournamentId: 'KBL2026' })
+                        });
+                        addedCount++;
+                    }
+                }
+                
+                alert(`${addedCount} players successfully imported from Google Forms!`);
+                document.getElementById('gSheetLink').value = '';
+                
+            } catch (err) {
+                alert("Error: " + err.message);
+            }
+            
+            btn.innerText = "Import from Link";
+            btn.disabled = false;
+            loadDashboard();
+        }
+
+        // Excel Import Logic
+        async function importExcelPlayers() {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            const game = document.getElementById('selectedGame').value;
+            
+            if (!file) return alert("Please select an Excel or CSV file first.");
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const playersArray = XLSX.utils.sheet_to_json(firstSheet);
+
+                let addedCount = 0;
+                
+                for (let p of playersArray) {
+                    const name = p.Name || p.name || p.Player || p.player;
+                    const basePrice = p.BasePrice || p.baseprice || p.Price || p.price;
+                    const category = p.Category || p.category || '';
+
+                    if (name && basePrice) {
+                        await fetch('/api/players/register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, basePrice, category, game, tournamentId: 'KBL2026' })
+                        });
+                        addedCount++;
+                    }
+                }
+                
+                alert(`${addedCount} players successfully imported to ${game}!`);
+                fileInput.value = '';
+                loadDashboard();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function filterByGame() {
+            const currentGame = document.getElementById('selectedGame').value;
+            const currentCat = document.getElementById('draftCategoryFilter').value;
+            
+            const playerSelect = document.getElementById('playerSelect');
+            playerSelect.innerHTML = '<option value="">Select a Player...</option>';
+            
+            window.allPlayers.filter(p => {
+                const matchesGame = (!p.game || p.game === currentGame);
+                const matchesCat = (currentCat === "All" || p.category === currentCat);
+                return matchesGame && matchesCat;
+            }).forEach(p => {
+                const catLabel = p.category ? ` [${p.category}]` : '';
+                playerSelect.innerHTML += `<option value="${p._id}">${p.name}${catLabel} (Base: ₹${p.basePrice})</option>`;
+            });
+
+            const teamSelect = document.getElementById('teamSelect');
+            teamSelect.innerHTML = '<option value="">Select a Team...</option>';
+            window.allTeams.filter(t => !t.game || t.game === currentGame).forEach(t => {
+                teamSelect.innerHTML += `<option value="${t._id}">${t.name} (Purse: ₹${t.purseRemaining})</option>`;
+            });
         }
 
         async function loadDashboard() {
@@ -211,30 +348,13 @@
             } catch (err) { console.error(err); }
         }
 
-        function filterByGame() {
-            const currentGame = document.getElementById('selectedGame').value;
-            const playerSelect = document.getElementById('playerSelect');
-            playerSelect.innerHTML = '<option value="">Select a Player...</option>';
-            window.allPlayers.filter(p => !p.game || p.game === currentGame).forEach(p => {
-                playerSelect.innerHTML += `<option value="${p._id}">${p.name} (Base: ₹${p.basePrice})</option>`;
-            });
-
-            const teamSelect = document.getElementById('teamSelect');
-            teamSelect.innerHTML = '<option value="">Select a Team...</option>';
-            window.allTeams.filter(t => !t.game || t.game === currentGame).forEach(t => {
-                teamSelect.innerHTML += `<option value="${t._id}">${t.name} (Purse: ₹${t.purseRemaining})</option>`;
-            });
-        }
-
-        // --- NEW MULTIPLE TEAM GENERATION LOGIC ---
         function generateTeamInputs() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const container = document.getElementById('teamInputsContainer');
             container.innerHTML = ''; 
-            
             for(let i=1; i<=num; i++) {
                 container.innerHTML += `
-                    <div class="team-input-box">
+                    <div class="dynamic-box">
                         <h4>Team ${i}</h4>
                         <input type="text" id="tName_${i}" placeholder="Enter Team Name">
                         <label style="font-size: 13px; margin-top: 10px;">Upload Team Logo</label>
@@ -244,15 +364,11 @@
             }
         }
 
-        // --- NEW BULK UPLOAD LOGIC ---
         async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const game = document.getElementById('selectedGame').value;
-            const budget = document.getElementById('setupBudget').value; // Pulls budget from your setup rules!
-            
+            const budget = document.getElementById('setupBudget').value; 
             if(num === 0) return alert("Please enter the number of teams to add.");
-
-            // Change button text while saving
             const btn = document.getElementById('addTeamBtn');
             btn.innerText = "Uploading Teams Please Wait...";
             btn.disabled = true;
@@ -260,13 +376,7 @@
             for(let i=1; i<=num; i++) {
                 const name = document.getElementById('tName_'+i).value;
                 const logoInput = document.getElementById('tLogo_'+i);
-                
-                if(!name) {
-                    alert('Please enter a name for Team ' + i);
-                    btn.innerText = "Add All Teams";
-                    btn.disabled = false;
-                    return;
-                }
+                if(!name) { alert('Enter a name for Team '+i); btn.innerText = "Add All Teams"; btn.disabled = false; return; }
 
                 let logoDataUrl = "";
                 if (logoInput.files && logoInput.files[0]) {
@@ -276,31 +386,19 @@
                         reader.readAsDataURL(logoInput.files[0]);
                     });
                 }
-
-                // Send each team to your database
-                await fetch('/api/franchises', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, logoUrl: logoDataUrl, budget, game, tournamentId: 'KBL2026' })
-                });
+                await fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, logoUrl: logoDataUrl, budget, game, tournamentId: 'KBL2026' }) });
             }
-
-            alert(num + " teams added successfully to " + game + "!");
-            
-            // Clear inputs
+            alert(num + " teams added successfully!");
             document.getElementById('numOfTeams').value = '';
             document.getElementById('teamInputsContainer').innerHTML = '';
-            
-            // Reset button
-            btn.innerText = "Add All Teams";
-            btn.disabled = false;
-            
+            btn.innerText = "Add All Teams"; btn.disabled = false;
             loadDashboard(); 
         }
 
         async function addPlayer() {
             const name = document.getElementById('playerName').value;
             const basePrice = document.getElementById('playerBasePrice').value;
+            const category = document.getElementById('playerCategoryManual').value;
             const game = document.getElementById('selectedGame').value;
             
             if(!name || !basePrice) return alert("Enter player name and base price!");
@@ -308,22 +406,27 @@
             await fetch('/api/players/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, basePrice, game, tournamentId: 'KBL2026' })
+                body: JSON.stringify({ name, basePrice, category, game, tournamentId: 'KBL2026' })
             });
             
-            alert(name + " added to the " + game + " player pool!");
+            alert(name + " added to the pool!");
             document.getElementById('playerName').value = '';
             document.getElementById('playerBasePrice').value = '';
             loadDashboard();
+        }
+
+        function applyBidIncrease() {
+            let currentBid = Number(document.getElementById('winningBid').value);
+            if (currentBid === 0) currentBid = Number(document.getElementById('setupMinBid').value); 
+            else currentBid += currentBidIncrease;
+            document.getElementById('winningBid').value = currentBid;
         }
 
         function sellPlayer() {
             const playerId = document.getElementById('playerSelect').value;
             const teamId = document.getElementById('teamSelect').value;
             const soldPrice = document.getElementById('winningBid').value;
-            
             if(!playerId || !teamId || !soldPrice) return alert("Select player, team, and bid price!");
-            
             socket.emit('adminSellPlayer', { playerId, teamId, soldPrice: Number(soldPrice), tournamentId: 'KBL2026' });
             document.getElementById('winningBid').value = '';
             setTimeout(loadDashboard, 500);
