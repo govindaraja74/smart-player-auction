@@ -373,7 +373,7 @@ app.post('/api/players/register', async (req, res) => {
 // Edit a Franchise
 app.put('/api/franchises/:id', async (req, res) => {
     try {
-        await Team.findByIdAndUpdate(req.params.id, req.body);
+        await Franchise.findByIdAndUpdate(req.params.id, req.body); // Changed Team to Franchise
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -383,7 +383,7 @@ app.put('/api/franchises/:id', async (req, res) => {
 // Delete a Franchise
 app.delete('/api/franchises/:id', async (req, res) => {
     try {
-        await Team.findByIdAndDelete(req.params.id);
+        await Franchise.findByIdAndDelete(req.params.id); // Changed Team to Franchise
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
