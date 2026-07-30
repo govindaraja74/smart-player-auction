@@ -353,11 +353,14 @@ app.post('/api/teams', async (req, res) => {
     await team.save();
     res.json({ success: true });
 });
-// Create New Player
-app.post('/api/players', async (req, res) => {
+
+// Save Smart Player Form Config & Categories
+app.post('/api/players/register', async (req, res) => {
     const player = new Player({ 
         tournamentId: req.body.tournamentId || 'KBL2026', 
         name: req.body.name, 
+        category: req.body.category, 
+        game: req.body.game,
         basePrice: req.body.basePrice,
         status: 'pending'
     });
