@@ -370,6 +370,24 @@ app.post('/api/players/register', async (req, res) => {
     await player.save();
     res.json({ success: true });
 });
+// Add a new Franchise
+app.post('/api/franchises', async (req, res) => {
+    try {
+        const newFranchise = new Franchise({
+            tournamentId: req.body.tournamentId || 'KBL2026',
+            name: req.body.name,
+            logoUrl: req.body.logoUrl,
+            game: req.body.game,
+            budget: req.body.budget,
+            purseRemaining: req.body.purseRemaining
+        });
+        await newFranchise.save();
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Save Error:", err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
 // Edit a Franchise
 app.put('/api/franchises/:id', async (req, res) => {
     try {
