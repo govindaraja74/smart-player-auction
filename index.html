@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Players Auction - KBL 2026</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #0d1b2a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background-color: #1b263b; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 450px; }
+        select, button { width: 100%; padding: 14px; margin: 15px 0; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
+        select { background-color: #ffffff; color: #000000; font-weight: bold; }
+        button { background-color: #28a745; color: white; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #218838; }
+        .btn-admin { background-color: #0284c7; margin-top: 10px; }
+        .btn-admin:hover { background-color: #0369a1; }
+        h1 { margin-top: 0; color: #f8fafc; }
+        p { color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Smart Players Auction</h1>
+        <p>Select your sport to enter the tournament portal</p>
+
+        <!-- Game Selector Dropdown -->
+        <select id="gameSelector">
+            <option value="Badminton">Badminton</option>
+            <option value="Table Tennis">Table Tennis</option>
+            <option value="Volleyball">Volleyball</option>
+            <option value="Cricket Tennis">Cricket Tennis</option>
+        </select>
+
+        <button onclick="enterAuction()">Proceed to Auction / Register</button>
+        <button class="btn-admin" onclick="window.location.href='/admin'">Organizer Control Room</button>
+    </div>
+
+    <script>
+        function enterAuction() {
+            const selectedGame = document.getElementById('gameSelector').value;
+            // Saves the chosen game and moves to live view or registration
+            localStorage.setItem('selectedGame', selectedGame);
+            alert("Selected Game: " + selectedGame + "! Redirecting to registration & live stats...");
+            window.location.href = '/admin'; // Takes you straight to admin control room for now
+        }
+    </script>
+</body>
+</html>
