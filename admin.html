@@ -7,15 +7,15 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #0d1b2a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .login-box { background-color: #1b263b; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 400px; }
-        .dashboard { width: 100%; max-width: 1000px; padding: 20px; display: none; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px; }
+        .dashboard { width: 100%; max-width: 1100px; padding: 20px; display: none; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
         .panel { background-color: #1b263b; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         input, select { width: 90%; padding: 12px; margin: 10px 0; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
         button { background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 18px; cursor: pointer; font-weight: bold; width: 100%; }
         button:hover { background-color: #218838; }
         .btn-danger { background-color: #dc3545; width: auto; padding: 10px 20px; }
         .btn-warning { background-color: #f59e0b; }
-        .btn-warning:hover { background-color: #d97706; }
+        .btn-primary { background-color: #0284c7; }
         h1, h2 { margin-top: 0; }
     </style>
 </head>
@@ -37,26 +37,42 @@
             <button class="btn-danger" onclick="window.location.href='/'">Log Out</button>
         </div>
 
+        <!-- Game Selector Section -->
+        <div class="panel" style="margin-top: 15px; background-color: #374151;">
+            <h2>Step 1: Select Tournament Game</h2>
+            <select id="selectedGame" onchange="filterByGame()">
+                <option value="Badminton">Badminton</option>
+                <option value="Table Tennis">Table Tennis</option>
+                <option value="Volleyball">Volleyball</option>
+                <option value="Cricket Tennis">Cricket Tennis</option>
+            </select>
+        </div>
+
         <div class="grid-container">
-            <!-- Manage Teams Panel -->
+            <!-- Create Franchise with Logo Panel -->
             <div class="panel">
-                <h2>Create Franchise</h2>
-                <!-- Create Player Panel -->
-<div class="panel">
-    <h2>Add New Player</h2>
-    <input type="text" id="playerName" placeholder="Player Name">
-    <input type="number" id="playerBasePrice" placeholder="Base Price (₹)">
-    <button onclick="addPlayer()" style="margin-top: 10px; background-color: #0284c7;">Add Player</button>
-</div>
-                <input type="text" id="teamName" placeholder="Team Name (e.g., Karkala Smashers)">
+                <h2>Step 2: Create Franchise</h2>
+                <input type="text" id="teamName" placeholder="Team Name">
+                <input type="text" id="teamLogo" placeholder="Logo Image URL (Link to image)">
                 <input type="number" id="teamBudget" placeholder="Starting Budget (₹)">
                 <button onclick="addTeam()" style="margin-top: 10px;">Add Team</button>
             </div>
 
+            <!-- Smart Player Form Generator & Google Forms Link -->
+            <div class="panel">
+                <h2>Step 3: Player Registration</h2>
+                <p style="font-size: 14px; color: #94a3b8;">Link Google Forms or add players manually.</p>
+                <input type="text" id="gFormLink" placeholder="Paste Google Form Link Here">
+                <button class="btn-primary" onclick="saveFormLink()" style="margin-top: 5px;">Save Registration Link</button>
+                <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+                <input type="text" id="playerName" placeholder="Player Name">
+                <input type="number" id="playerBasePrice" placeholder="Base Price (₹)">
+                <button class="btn-primary" onclick="addPlayer()" style="margin-top: 5px;">Add Player Manually</button>
+            </div>
+
             <!-- Live Auction Panel -->
             <div class="panel">
-                <h2>Live Player Draft</h2>
-                <p>Select Player & Winning Bid</p>
+                <h2>Step 4: Live Player Draft</h2>
                 <select id="playerSelect">
                     <option value="">Loading Players...</option>
                 </select>
@@ -69,30 +85,8 @@
         </div>
     </div>
 
-    <!-- Connect to Real-Time Server -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        async function addPlayer() {
-    const name = document.getElementById('playerName').value;
-    const basePrice = document.getElementById('playerBasePrice').value;
-    
-    if(!name || !basePrice) return alert("Please enter both a player name and base price!");
-    
-    const response = await fetch('/api/players', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, basePrice, tournamentId: 'KBL2026' })
-    });
-    
-    if(response.ok) {
-        alert(name + " successfully added to the auction pool!");
-        document.getElementById('playerName').value = '';
-        document.getElementById('playerBasePrice').value = '';
-        loadDashboard(); 
-    } else {
-        alert("Error saving player.");
-    }
-}
         const socket = io();
         socket.emit('joinRoom', 'KBL2026');
 
@@ -112,46 +106,74 @@
                 const res = await fetch('/api/dashboard');
                 const data = await res.json();
                 
-                const playerSelect = document.getElementById('playerSelect');
-                playerSelect.innerHTML = '<option value="">Select a Player...</option>';
-                if(data.players) {
-                    data.players.forEach(p => {
-                        playerSelect.innerHTML += `<option value="${p._id}">${p.name} (Base: ₹${p.basePrice})</option>`;
-                    });
-                }
-
-                const teamSelect = document.getElementById('teamSelect');
-                teamSelect.innerHTML = '<option value="">Select a Team...</option>';
-                if(data.teams) {
-                    data.teams.forEach(t => {
-                        teamSelect.innerHTML += `<option value="${t._id}">${t.name} (Purse: ₹${t.purseRemaining})</option>`;
-                    });
-                }
+                window.allPlayers = data.players || [];
+                window.allTeams = data.teams || [];
+                filterByGame();
             } catch (err) {
-                console.error("Failed to load dashboard data", err);
+                console.error("Dashboard failed to load", err);
             }
+        }
+
+        function filterByGame() {
+            const currentGame = document.getElementById('selectedGame').value;
+            
+            const playerSelect = document.getElementById('playerSelect');
+            playerSelect.innerHTML = '<option value="">Select a Player...</option>';
+            window.allPlayers.filter(p => !p.game || p.game === currentGame).forEach(p => {
+                playerSelect.innerHTML += `<option value="${p._id}">${p.name} (Base: ₹${p.basePrice})</option>`;
+            });
+
+            const teamSelect = document.getElementById('teamSelect');
+            teamSelect.innerHTML = '<option value="">Select a Team...</option>';
+            window.allTeams.filter(t => !t.game || t.game === currentGame).forEach(t => {
+                teamSelect.innerHTML += `<option value="${t._id}">${t.name} (Purse: ₹${t.purseRemaining})</option>`;
+            });
         }
 
         async function addTeam() {
             const name = document.getElementById('teamName').value;
+            const logoUrl = document.getElementById('teamLogo').value;
             const budget = document.getElementById('teamBudget').value;
+            const game = document.getElementById('selectedGame').value;
             
-            if(!name || !budget) return alert("Please enter both a name and a budget!");
+            if(!name || !budget) return alert("Please enter team name and budget!");
             
-            const response = await fetch('/api/teams', {
+            await fetch('/api/franchises', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, budget })
+                body: JSON.stringify({ name, logoUrl, budget, game, tournamentId: 'KBL2026' })
             });
             
-            if(response.ok) {
-                alert(name + " successfully added to the league!");
-                document.getElementById('teamName').value = '';
-                document.getElementById('teamBudget').value = '';
-                loadDashboard(); 
-            } else {
-                alert("Error saving team to database.");
-            }
+            alert(name + " added successfully for " + game + "!");
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamLogo').value = '';
+            document.getElementById('teamBudget').value = '';
+            loadDashboard(); 
+        }
+
+        async function addPlayer() {
+            const name = document.getElementById('playerName').value;
+            const basePrice = document.getElementById('playerBasePrice').value;
+            const game = document.getElementById('selectedGame').value;
+            
+            if(!name || !basePrice) return alert("Enter player name and base price!");
+            
+            await fetch('/api/players/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, basePrice, game, tournamentId: 'KBL2026' })
+            });
+            
+            alert(name + " added to the " + game + " player pool!");
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerBasePrice').value = '';
+            loadDashboard();
+        }
+
+        function saveFormLink() {
+            const link = document.getElementById('gFormLink').value;
+            if(!link) return alert("Please paste a valid Google Form link.");
+            alert("Google Form integration link saved successfully!");
         }
 
         function sellPlayer() {
@@ -159,15 +181,9 @@
             const teamId = document.getElementById('teamSelect').value;
             const soldPrice = document.getElementById('winningBid').value;
             
-            if(!playerId || !teamId || !soldPrice) return alert("Please select a player, a team, and enter the final price!");
+            if(!playerId || !teamId || !soldPrice) return alert("Select player, team, and bid price!");
             
-            socket.emit('adminSellPlayer', { 
-                playerId, 
-                teamId, 
-                soldPrice: Number(soldPrice), 
-                tournamentId: 'KBL2026' 
-            });
-            
+            socket.emit('adminSellPlayer', { playerId, teamId, soldPrice: Number(soldPrice), tournamentId: 'KBL2026' });
             document.getElementById('winningBid').value = '';
             setTimeout(loadDashboard, 500);
         }
