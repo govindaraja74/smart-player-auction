@@ -63,6 +63,9 @@ const FranchiseSchema = new mongoose.Schema({
     ownerId: { type: String }, 
     name: { type: String, required: true },
     purseRemaining: { type: Number, required: true },
+    logoUrl: { type: String },
+    game: { type: String },
+    budget: { type: Number },
     loginPin: { type: String },
     roster: [{ name: String, category: String, price: Number }]
 });
