@@ -376,7 +376,28 @@
         }
 
         async function addPlayer() {
-            await fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('playerName').value, basePrice: document.getElementById('playerBasePrice').value, category: document.getElementById('playerCategoryManual').value, game: document.getElementById('selectedGame').value }) });
+            const nameInput = document.getElementById('playerName');
+            const priceInput = document.getElementById('playerBasePrice');
+            const catInput = document.getElementById('playerCategoryManual');
+            
+            if(!nameInput.value || !priceInput.value) return alert("Please enter a player name and base price.");
+
+            await fetch('/api/players/register', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ 
+                    name: nameInput.value, 
+                    basePrice: priceInput.value, 
+                    category: catInput.value, 
+                    game: document.getElementById('selectedGame').value 
+                }) 
+            });
+            
+            // This clears the boxes instantly!
+            nameInput.value = '';
+            priceInput.value = '';
+            catInput.value = '';
+            
             loadDashboard();
         }
 
