@@ -142,6 +142,26 @@
     <script>
         const socket = io();
         socket.emit('joinRoom', 'KBL2026');
+        function loadSavedMemory() {
+            const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
+            if(savedSetup.season) document.getElementById('setupSeason').value = savedSetup.season;
+            if(savedSetup.date) document.getElementById('setupDate').value = savedSetup.date;
+            if(savedSetup.budget) document.getElementById('setupBudget').value = savedSetup.budget;
+            if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
+            if(savedSetup.bidInc) document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
+            if(savedSetup.maxPlayers) document.getElementById('setupMaxPlayers').value = savedSetup.maxPlayers;
+            
+            const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            if(savedCats.length > 0) {
+                document.getElementById('numOfCategories').value = savedCats.length;
+                generateCategoryInputs();
+                savedCats.forEach((cat, i) => {
+                    document.getElementById('catName_'+(i+1)).value = cat;
+                });
+                setTimeout(saveCategories, 500); 
+            }
+        }
         let currentBidIncrease = 0;
         window.currentCategories = [];
 
@@ -154,14 +174,27 @@
             }
         }
 
-        function submitSetup(event) {
+       function submitSetup(event) {
             event.preventDefault(); 
+            
+            // 1. Save to browser memory instantly!
+            localStorage.setItem('auctionSetup', JSON.stringify({
+                name: document.getElementById('setupName').value,
+                season: document.getElementById('setupSeason').value,
+                date: document.getElementById('setupDate').value,
+                budget: document.getElementById('setupBudget').value,
+                minBid: document.getElementById('setupMinBid').value,
+                bidInc: document.getElementById('setupBidIncrease').value,
+                maxPlayers: document.getElementById('setupMaxPlayers').value
+            }));
+
+            // 2. Setup the Control Room
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
             document.getElementById('quickBidBtn').innerText = `+ ₹${currentBidIncrease}`;
             document.getElementById('displayTournamentName').innerText = `${document.getElementById('setupName').value} Control Room`;
 
             const logoInput = document.getElementById('setupLogo');
-            if (logoInput.files[0]) {
+            if (logoInput.files && logoInput.files[0]) {
                 document.getElementById('displayTournamentLogo').src = URL.createObjectURL(logoInput.files[0]);
                 document.getElementById('displayTournamentLogo').style.display = 'block'; 
             }
@@ -196,16 +229,21 @@
             }
         }
 
-        async function saveCategories() {
+       async function saveCategories() {
             const num = parseInt(document.getElementById('numOfCategories').value) || 0;
             window.currentCategories = [];
+            let memArray = [];
             
             for(let i=1; i<=num; i++) {
                 const name = document.getElementById('catName_'+i).value;
-                if(name) {
-                    window.currentCategories.push({ name: name });
+                if(name) { 
+                    window.currentCategories.push({ name: name }); 
+                    memArray.push(name); 
                 }
             }
+            
+            // Save categories to browser memory!
+            localStorage.setItem('auctionCats', JSON.stringify(memArray)); 
             
             const manualDropdown = document.getElementById('playerCategoryManual');
             const filterDropdown = document.getElementById('draftCategoryFilter');
@@ -216,7 +254,6 @@
                 manualDropdown.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
                 filterDropdown.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
             });
-            alert("Categories Saved!");
         }
 
         function renderTeamsList() {
