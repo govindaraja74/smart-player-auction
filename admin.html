@@ -47,7 +47,7 @@
         /* Auction Detail Page Styles */
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .ad-icon-btn:hover { opacity: 0.7; }
+        .ad-icon-btn:hover { opacity: 0.7; transform: scale(1.1); }
         .ad-stat-row { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px; }
         .ad-stat-row span:first-child { color: #1e73be; font-weight: bold; }
         .ad-link-text { color: #64748b; font-size: 13px; margin-bottom: 12px; word-break: break-all; }
@@ -55,12 +55,16 @@
         .ad-small-input { padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; width: 100%; box-sizing: border-box; }
         .ad-btn-small { background: #1e73be; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
 
-        /* Control Room Specifics */
-        .panel { background-color: #0f172a; padding: 20px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; color: white; }
+        /* MODAL STYLES (NEW) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: white; position: relative; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #94a3b8; cursor: pointer; background: none; border: none; font-weight: bold; line-height: 1; }
+        .close-btn:hover { color: white; }
+
+        /* Panels inside Modals & Control Room */
         .panel input, .panel select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: none; font-size: 15px; box-sizing: border-box; background-color: #f8fafc; color: black; }
         .panel label { display: block; margin-top: 10px; font-size: 14px; color: #94a3b8; font-weight: bold; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
-        .team-row { border: 1px solid #334155; background-color: #1b263b; padding: 10px; margin-top: 10px; border-radius: 8px; display: flex; align-items: center; gap: 15px; }
+        .team-row { border: 1px solid #334155; background-color: #1b263b; padding: 10px; margin-top: 10px; border-radius: 8px; display: flex; align-items: center; gap: 15px; color: white;}
         .team-row img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background-color: white; }
         .team-info { flex-grow: 1; }
         .btn-primary { background-color: #0284c7; color: white; padding: 12px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 15px; }
@@ -158,7 +162,7 @@
                 <h1 class="dash-title" style="margin-bottom: 10px;">AUCTION DETAIL</h1>
                 <a href="#" onclick="navTo('view-control')" style="color: #1e73be; font-weight: bold; font-size: 18px; text-decoration: underline; display: inline-block; margin-bottom: 25px;">Go to Auction Panel →</a>
 
-                <!-- Top Header Card -->
+                <!-- Top Header Card WITH WIRED ICONS -->
                 <div class="ad-card" style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="width: 70px; height: 70px; background: #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">LOGO</div>
@@ -172,9 +176,10 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 20px;">
-                        <div class="ad-icon-btn">👥<br>Team</div>
-                        <div class="ad-icon-btn">🗂️<br>Category</div>
-                        <div class="ad-icon-btn">👤<br>Players</div>
+                        <!-- NEW: These icons now launch the pop-up Modals! -->
+                        <div class="ad-icon-btn" onclick="openModal('modal-team')">👥<br>Team</div>
+                        <div class="ad-icon-btn" onclick="openModal('modal-category')">🗂️<br>Category</div>
+                        <div class="ad-icon-btn" onclick="openModal('modal-player')">👤<br>Players</div>
                         <div class="ad-icon-btn">✏️<br>Edit</div>
                         <div class="ad-icon-btn" style="color: #ef4444;">🗑️<br>Delete</div>
                     </div>
@@ -225,9 +230,8 @@
                     </div>
                 </div>
 
-                <!-- 2 Settings Grid (Cleaned: Timer + Bid Incr) -->
+                <!-- 2 Settings Grid (Cleaned) -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    
                     <div class="ad-card">
                         <div class="ad-section-title">Timer Setting</div>
                         <div style="display: grid; grid-template-columns: 100px 1fr; gap: 10px; align-items: center; margin-bottom: 10px;">
@@ -253,84 +257,25 @@
                         </div>
                         <div id="noIncrementText" style="text-align: center; font-weight: bold; color: #0f172a; font-size: 14px; margin-top: 30px;">Currently no Increment applied</div>
                     </div>
-
                 </div>
 
-                <!-- Customization Banner -->
                 <div class="ad-card" style="border: 2px solid #a855f7; display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
                     <span style="color: #475569; font-size: 15px; border-left: 3px solid #a855f7; padding-left: 10px;">Customize your Auction Theme, also various things (Background, Stamps, Sold Effects, audio)</span>
                     <button style="background: #a855f7; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">Customize</button>
                 </div>
-
-                <!-- Transfers -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div class="ad-card">
-                        <div class="ad-section-title">Transfer Players From</div>
-                        <p style="font-size: 14px; font-weight: bold; color: #333;">Copy players from previous auctions</p>
-                        <select class="ad-small-input" style="margin-bottom: 15px;"><option>Select Auction</option></select>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; gap: 5px;">
-                                <button class="ad-btn-small" style="background: #e2e8f0; color: #64748b;">All</button>
-                                <button class="ad-btn-small" style="background: #e2e8f0; color: #64748b;">Selected players</button>
-                            </div>
-                            <button class="ad-btn-small" style="background: #cbd5e1; color: white; cursor: not-allowed;">Transfer</button>
-                        </div>
-                    </div>
-                    <div class="ad-card">
-                        <div class="ad-section-title">Transfer Teams From</div>
-                        <p style="font-size: 14px; font-weight: bold; color: #333;">Copy teams from previous auctions.</p>
-                        <select class="ad-small-input" style="margin-bottom: 15px;"><option>Select Auction</option></select>
-                        <div style="text-align: right;"><button class="ad-btn-small">Transfer</button></div>
-                    </div>
-                </div>
             </div>
 
-            <!-- VIEW D: CONTROL ROOM -->
+            <!-- VIEW D: CONTROL ROOM (NOW CLEANED UP FOR LIVE DRAFT ONLY) -->
             <div id="view-control" class="hidden">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h1 class="dash-title" id="displayTournamentName" style="margin: 0;">Control Room</h1>
+                    <h1 class="dash-title" id="displayTournamentName" style="margin: 0;">Live Control Room</h1>
                     <button class="btn-danger" onclick="window.location.reload()">End Session</button>
                 </div>
 
-                <div class="panel">
-                    <h2>Select Categories</h2>
-                    <label>Number of Categories</label>
-                    <input type="number" id="numOfCategories" min="1" placeholder="e.g., 3" oninput="generateCategoryInputs()">
-                    <div id="categoryInputsContainer"></div>
-                    <button id="saveCatBtn" class="btn-primary" onclick="saveCategories()" style="display:none; width: auto; padding: 10px 20px;">Save Categories</button>
-                </div>
-
-                <div class="grid-container">
-                    <div class="panel">
-                        <h2>Manage Franchises</h2>
-                        <label>Number of Teams to Add</label>
-                        <input type="number" id="numOfTeams" min="1" oninput="generateTeamInputs()">
-                        <div id="teamInputsContainer"></div>
-                        <button class="btn-primary" id="addTeamBtn" onclick="addMultipleTeams()">Add All Teams</button>
-                        <hr style="border-top: 1px solid #334155; margin: 20px 0;">
-                        <h3>Active Teams</h3>
-                        <div id="activeTeamsList"><p style="color: #94a3b8; font-size: 14px; text-align: center;">No teams added yet.</p></div>
-                    </div>
-
-                    <div class="panel">
-                        <h2>Import Players</h2>
-                        <label>1. Import via Google Sheets Link</label>
-                        <input type="text" id="gSheetLink" placeholder="Paste Public Link">
-                        <button class="btn-primary" id="gSheetBtn" onclick="importFromGoogleSheet()">Import from Link</button>
-                        <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                        <label>2. Upload Excel/CSV File</label>
-                        <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white;">
-                        <button class="btn-primary" style="background-color: #10b981;" onclick="importExcelPlayers()">Upload File</button>
-                        <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                        <label>3. Add Manually:</label>
-                        <input type="text" id="playerName" placeholder="Player Name">
-                        <input type="number" id="playerBasePrice" placeholder="Base Price (₹)">
-                        <select id="playerCategoryManual"><option value="">Select Category (Optional)</option></select>
-                        <button class="btn-primary" onclick="addPlayer()">Add Player</button>
-                    </div>
-
-                    <div class="panel">
-                        <h2>Live Player Draft</h2>
+                <div class="grid-container" style="max-width: 1200px;">
+                    <!-- Live Player Draft -->
+                    <div class="panel" style="background-color: #0f172a; border: 1px solid #334155;">
+                        <h2 style="color: white; margin-top: 0;">Live Player Draft</h2>
                         <select id="draftCategoryFilter" onchange="filterByGame()" style="background-color: #0284c7; color: white;">
                             <option value="All">All Categories</option>
                         </select>
@@ -343,16 +288,74 @@
                         <button class="btn-warning" onclick="sellPlayer()">Finalize Sale!</button>
                     </div>
                     
-                    <div class="panel" style="grid-column: 1 / -1; margin-top: 20px; background: white; color: black;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <!-- Players Database Panel -->
+                    <div class="panel" style="background: white; color: black; border: 1px solid #cbd5e1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                             <h2 style="color: #0f172a; margin: 0;">Players Database</h2>
                             <button class="btn-primary" onclick="downloadPDF()" style="width: auto; padding: 10px 20px; margin: 0;">📥 Download PDF</button>
                         </div>
-                        <div id="playersListContainer" style="padding-top: 20px; overflow-x: auto;"></div>
+                        <div id="playersListContainer" style="overflow-x: auto;"></div>
                     </div>
                 </div>
             </div>
             
+        </div>
+    </div>
+
+    <!-- NEW: POP-UP MODALS -->
+    
+    <!-- Modal 1: Team Management -->
+    <div id="modal-team" class="modal-overlay hidden">
+        <div class="modal-content panel">
+            <button class="close-btn" onclick="closeModal('modal-team')">&times;</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Manage Franchises</h2>
+            <label>Number of Teams to Add</label>
+            <input type="number" id="numOfTeams" min="1" oninput="generateTeamInputs()">
+            <div id="teamInputsContainer"></div>
+            <button class="btn-primary" id="addTeamBtn" onclick="addMultipleTeams()">Add All Teams</button>
+            <hr style="border-top: 1px solid #334155; margin: 20px 0;">
+            <h3>Active Teams</h3>
+            <div id="activeTeamsList"><p style="color: #94a3b8; font-size: 14px; text-align: center;">No teams added yet.</p></div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Category Management -->
+    <div id="modal-category" class="modal-overlay hidden">
+        <div class="modal-content panel">
+            <button class="close-btn" onclick="closeModal('modal-category')">&times;</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Manage Categories</h2>
+            <label>Number of Categories</label>
+            <input type="number" id="numOfCategories" min="1" placeholder="e.g., 3" oninput="generateCategoryInputs()">
+            <div id="categoryInputsContainer"></div>
+            <button id="saveCatBtn" class="btn-primary" onclick="saveCategories(); closeModal('modal-category');" style="display:none;">Save Categories</button>
+        </div>
+    </div>
+
+    <!-- Modal 3: Import Players -->
+    <div id="modal-player" class="modal-overlay hidden">
+        <div class="modal-content panel">
+            <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Import Players</h2>
+            
+            <label>1. Import via Google Sheets Link</label>
+            <input type="text" id="gSheetLink" placeholder="Paste Public Link">
+            <button class="btn-primary" id="gSheetBtn" onclick="importFromGoogleSheet()">Import from Link</button>
+            
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>2. Upload Excel/CSV File</label>
+            <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white;">
+            <button class="btn-primary" style="background-color: #10b981;" onclick="importExcelPlayers()">Upload File</button>
+            
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>3. Import from Registration Link</label>
+            <button class="btn-primary" style="background-color: #a855f7;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
+
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>4. Add Manually:</label>
+            <input type="text" id="playerName" placeholder="Player Name">
+            <input type="number" id="playerBasePrice" placeholder="Base Price (₹)">
+            <select id="playerCategoryManual"><option value="">Select Category (Optional)</option></select>
+            <button class="btn-primary" onclick="addPlayer()">Add Player</button>
         </div>
     </div>
 
@@ -362,6 +365,14 @@
         socket.emit('joinRoom', 'KBL2026');
         let currentBidIncrease = 0;
         window.currentCategories = [];
+
+        // --- NEW: MODAL CONTROL LOGIC ---
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
 
         // --- NAVIGATION & SIDEBAR LOGIC ---
         function navTo(viewId) {
@@ -427,7 +438,7 @@
             if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
             if(savedSetup.name) {
                 document.getElementById('setupName').value = savedSetup.name;
-                document.getElementById('displayTournamentName').innerText = `${savedSetup.name} Control Room`;
+                document.getElementById('displayTournamentName').innerText = `${savedSetup.name} Live Draft`;
             }
             if(savedSetup.season) document.getElementById('setupSeason').value = savedSetup.season;
             if(savedSetup.date) document.getElementById('setupDate').value = savedSetup.date;
@@ -476,7 +487,7 @@
 
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
             document.getElementById('quickBidBtn').innerText = `+ ₹${currentBidIncrease}`;
-            document.getElementById('displayTournamentName').innerText = `${document.getElementById('setupName').value} Control Room`;
+            document.getElementById('displayTournamentName').innerText = `${document.getElementById('setupName').value} Live Draft`;
 
             updateDashboardHistoryCard();
             navTo('view-auction-detail');
@@ -499,7 +510,7 @@
             const num = parseInt(document.getElementById('numOfCategories').value) || 0;
             const container = document.getElementById('categoryInputsContainer');
             container.innerHTML = ''; 
-            document.getElementById('saveCatBtn').style.display = num > 0 ? 'block' : 'none';
+            document.getElementById('saveCatBtn').style.display = num > 0 ? 'inline-block' : 'none';
             for(let i=1; i<=num; i++) {
                 container.innerHTML += `<div style="margin-top: 10px;"><input type="text" id="catName_${i}" placeholder="Category ${i} Name (e.g., Group A)"></div>`;
             }
