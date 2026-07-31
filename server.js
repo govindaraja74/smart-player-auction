@@ -55,7 +55,7 @@ const PlayerSchema = new mongoose.Schema({
     status: { type: String, default: 'pending' },
     soldToTeamId: { type: String, default: null },
     soldPrice: { type: Number, default: 0 }
-});
+}, { strict: false });
 const Player = mongoose.model('Player', PlayerSchema);
 
 const FranchiseSchema = new mongoose.Schema({
