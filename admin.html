@@ -426,6 +426,15 @@
             socket.emit('adminSellPlayer', { playerId: document.getElementById('playerSelect').value, teamId: document.getElementById('teamSelect').value, soldPrice: Number(document.getElementById('winningBid').value), tournamentId: 'KBL2026' });
             setTimeout(loadDashboard, 500);
         }
+        function sellPlayer() {
+            socket.emit('adminSellPlayer', { playerId: document.getElementById('playerSelect').value, teamId: document.getElementById('teamSelect').value, soldPrice: Number(document.getElementById('winningBid').value), tournamentId: 'KBL2026' });
+            setTimeout(loadDashboard, 500);
+        }
+        
+        // Force memory to load instantly
+        setTimeout(loadSavedMemory, 500);
+
     </script>
 </body>
 </html>
+   
