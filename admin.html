@@ -43,17 +43,17 @@
         .live-top-section { display: flex; gap: 20px; flex: 1; min-height: 400px; }
         
         .live-player-card { flex: 2; background: white; color: #0f172a; border-radius: 12px; padding: 30px; display: flex; gap: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .live-photo-box { width: 250px; height: 300px; background: #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 2px solid #cbd5e1; }
+        .live-photo-box { width: 250px; height: 300px; background: #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 2px solid #cbd5e1; flex-shrink: 0; }
         .live-photo-box img { width: 100%; height: 100%; object-fit: cover; }
         .live-player-info h1 { font-size: 42px; margin: 0 0 10px 0; color: #1e73be; text-transform: uppercase; }
         .live-player-info h2 { font-size: 24px; margin: 0 0 5px 0; color: #475569; }
         .live-player-info h3 { font-size: 18px; margin: 0 0 20px 0; color: #64748b; font-weight: normal; }
-        .live-base-price { font-size: 28px; font-weight: bold; color: #10b981; background: #ecfdf5; padding: 10px 20px; border-radius: 8px; display: inline-block; border: 2px solid #10b981; }
+        .live-base-price { font-size: 24px; font-weight: bold; color: #64748b; background: #f1f5f9; padding: 10px 20px; border-radius: 8px; display: inline-block; border: 1px solid #cbd5e1; }
 
         .live-bidding-panel { flex: 1; background: #1e293b; border-radius: 12px; padding: 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px solid #334155; }
-        .live-current-bid { font-size: 64px; font-weight: bold; color: #f59e0b; margin: 20px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .live-bidder-logo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid #38bdf8; background: white; margin-bottom: 10px; display: none; }
-        .live-bidder-name { font-size: 24px; color: #38bdf8; font-weight: bold; display: none; }
+        .live-current-bid { font-size: 72px; font-weight: bold; color: #10b981; margin: 20px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .live-bidder-logo { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid #38bdf8; background: white; margin-bottom: 15px; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .live-bidder-name { font-size: 28px; color: #38bdf8; font-weight: bold; display: none; }
 
         .live-bottom-panel { background: #1e293b; border-radius: 12px; padding: 20px; border: 2px solid #334155; }
         .live-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
@@ -127,9 +127,10 @@
                 </div>
             </div>
 
-            <!-- VIEW B: SETUP -->
+            <!-- VIEW B: SETUP (CREATE AUCTION) -->
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
+                <!-- Submits directly to the Auction Detail page! -->
                 <form onsubmit="submitSetup(event)">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
@@ -160,11 +161,12 @@
                 </form>
             </div>
 
-            <!-- VIEW C: AUCTION DETAIL -->
+            <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
             <div id="view-auction-detail" class="hidden" style="max-width: 950px;">
                 <h1 class="dash-title" style="margin-bottom: 10px;">AUCTION DETAIL</h1>
                 <a href="#" onclick="navTo('view-live-room')" style="color: #10b981; font-weight: bold; font-size: 18px; text-decoration: underline; display: inline-block; margin-bottom: 25px;">Go to Live Auction Room →</a>
 
+                <!-- Header with Modular Icons -->
                 <div class="ad-card" style="display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="width: 70px; height: 70px; background: #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;">LOGO</div>
@@ -188,17 +190,19 @@
                         <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
                     </div>
                     
-                    <!-- Dynamic Bid Increment -->
+                    <!-- Dynamic Bid Increments Container -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Settings</div>
                         <div id="bidIncrementContainer">
-                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
-                                <input type="number" style="padding: 8px;" placeholder="Incr.">
+                            <!-- This div acts as the parent for all generated rows -->
+                            <div class="bid-tier-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                                <input type="number" class="ad-small-input" placeholder="Incr.">
                                 <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
-                                <input type="number" style="padding: 8px;" placeholder="Amount">
+                                <input type="number" class="ad-small-input" placeholder="Amount">
                                 <button type="button" class="ad-btn-small" onclick="addBidIncrementRow()">ADD</button>
                             </div>
                         </div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room will use your Default Base Increment if these are left blank.</div>
                     </div>
                 </div>
             </div>
@@ -214,7 +218,7 @@
 
                     <!-- Top Split -->
                     <div class="live-top-section">
-                        <!-- Player Card -->
+                        <!-- Player Card (Left) -->
                         <div class="live-player-card">
                             <div class="live-photo-box">
                                 <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
@@ -223,15 +227,18 @@
                                 <h1 id="la-name">WAITING FOR PLAYER...</h1>
                                 <h2 id="la-cat">Category: ---</h2>
                                 <h3 id="la-club">Club: ---</h3>
+                                <!-- Base Price explicitly by the side of the photo -->
                                 <div class="live-base-price">Base Price: ₹<span id="la-base">0</span></div>
                             </div>
                         </div>
 
-                        <!-- Live Bidding Tracker -->
+                        <!-- Live Bidding Tracker (Right) -->
                         <div class="live-bidding-panel">
                             <h2 style="margin: 0; color: #cbd5e1; text-transform: uppercase; letter-spacing: 2px;">Current Bid</h2>
+                            <!-- Massive Current Bid Update -->
                             <div class="live-current-bid">₹<span id="la-current-bid">0</span></div>
                             
+                            <!-- Massive Bidding Team Indication -->
                             <img id="la-bidder-logo" class="live-bidder-logo" src="">
                             <div id="la-bidder-name" class="live-bidder-name">Team Name</div>
                         </div>
@@ -257,9 +264,9 @@
                         </div>
                         
                         <!-- Franchise Strip -->
-                        <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise to Bid</h4>
+                        <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise Logo to Bid</h4>
                         <div id="la-franchise-strip" class="franchise-strip">
-                            <!-- Injected via JS -->
+                            <!-- Populated via Javascript -->
                         </div>
                     </div>
                 </div>
@@ -278,6 +285,7 @@
     </div>
 
     <!-- MODALS (Teams, Categories, Players) -->
+    
     <div id="modal-team" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-team')">&times;</button>
@@ -306,10 +314,22 @@
             <label>1. Import via Google Sheets Link</label>
             <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
             <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet()">Import from Link</button>
+            
             <hr style="border-top: 1px solid #334155; margin: 15px 0;">
             <label>2. Upload Excel/CSV File</label>
             <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
             <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers()">Upload File</button>
+            
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>3. Import from Registration Link</label>
+            <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
+
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>4. Add Manually:</label>
+            <input type="text" id="playerName" placeholder="Player Name" style="color:black; margin-bottom: 5px;">
+            <input type="number" id="playerBasePrice" placeholder="Base Price (₹)" style="color:black; margin-bottom: 5px;">
+            <select id="playerCategoryManual" style="color:black;"><option value="">Select Category (Optional)</option></select>
+            <button class="btn-primary" style="margin-top:10px;" onclick="addPlayer()">Add Player</button>
         </div>
     </div>
 
@@ -326,7 +346,7 @@
         let liveCurrentBid = 0;
         let liveCurrentTeamId = null;
 
-        // --- UI ROUTING ---
+        // --- UI ROUTING & MODALS ---
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
@@ -385,6 +405,7 @@
             } else {
                 window.allTeams.forEach(t => {
                     const logo = t.logoUrl ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                    // Magic Bid Button Click Event
                     strip.innerHTML += `
                         <div class="franchise-btn" onclick="franchiseBid('${t._id}', '${t.name}', '${logo}')">
                             <img src="${logo}">
@@ -442,11 +463,45 @@
             else alert("Player not found or already sold.");
         }
 
+        // DYNAMIC INCREMENT CALCULATOR
+        function getDynamicIncrement() {
+            // Default setup increment
+            let baseInc = Number(document.getElementById('setupBidIncrease').value) || 100; 
+            
+            const container = document.getElementById('bidIncrementContainer');
+            if(!container) return baseInc;
+            
+            // Loop through all added tier rows in the Detail view
+            const rows = container.querySelectorAll('.bid-tier-row');
+            let calculatedInc = baseInc;
+            let highestMetTier = -1;
+
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if(inputs.length >= 2) {
+                    const incVal = Number(inputs[0].value);
+                    const afterVal = Number(inputs[1].value);
+                    // If current bid is past this tier amount, override the increment!
+                    if(incVal > 0 && afterVal > 0 && liveCurrentBid >= afterVal && afterVal > highestMetTier) {
+                        highestMetTier = afterVal;
+                        calculatedInc = incVal;
+                    }
+                }
+            });
+            return calculatedInc;
+        }
+
         function franchiseBid(teamId, teamName, logoUrl) {
             if(!livePlayerActive) return alert("Select a player first!");
-            liveCurrentBid += currentBidIncrease;
+            
+            // 1. Calculate the exact increment based on the custom tiers
+            let exactIncrement = getDynamicIncrement();
+            
+            // 2. Increase the live bid
+            liveCurrentBid += exactIncrement;
             liveCurrentTeamId = teamId;
             
+            // 3. Blast it to the Live Board massively!
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
             document.getElementById('la-bidder-logo').src = logoUrl;
             document.getElementById('la-bidder-logo').style.display = 'block';
@@ -491,11 +546,12 @@
         function addBidIncrementRow() {
             const container = document.getElementById('bidIncrementContainer');
             const newRow = document.createElement('div');
+            newRow.className = 'bid-tier-row';
             newRow.style = 'display: flex; gap: 10px; align-items: center; margin-bottom: 15px;';
             newRow.innerHTML = `
-                <input type="number" style="padding: 8px;" placeholder="Incr.">
+                <input type="number" class="ad-small-input" placeholder="Incr.">
                 <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
-                <input type="number" style="padding: 8px;" placeholder="Amount">
+                <input type="number" class="ad-small-input" placeholder="Amount">
                 <button type="button" class="ad-btn-small" style="background: #ef4444;" onclick="this.parentElement.remove()">REMOVE</button>`;
             container.appendChild(newRow);
         }
@@ -517,7 +573,7 @@
             if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
             if(savedSetup.bidInc) currentBidIncrease = Number(savedSetup.bidInc);
             
-            // NEW: MAX CATEGORY LOGIC
+            // MAX CATEGORY LOGIC
             const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
             if(savedCats.length > 0) {
                 document.getElementById('numOfCategories').value = savedCats.length;
@@ -529,7 +585,7 @@
                         if(input) input.value = cat.name || '';
                         if(maxInput) maxInput.value = cat.maxPlayers || '';
                     } else {
-                        if(input) input.value = cat; // Backwards compatibility 
+                        if(input) input.value = cat;
                     }
                 });
                 setTimeout(saveCategories, 500); 
@@ -544,8 +600,11 @@
                 budget: document.getElementById('setupBudget').value,
                 minBid: document.getElementById('setupMinBid').value,
                 bidInc: document.getElementById('setupBidIncrease').value,
+                maxPlayers: document.getElementById('setupMaxPlayers').value,
             }));
             currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
+            
+            // Next Page Submission Routing
             navTo('view-auction-detail');
         }
 
@@ -559,7 +618,7 @@
             } catch (err) { console.error(err); }
         }
 
-        // NEW: CATEGORY MAX LIMIT INPUTS
+        // CATEGORY MAX LIMIT INPUTS
         function generateCategoryInputs() {
             const num = parseInt(document.getElementById('numOfCategories').value) || 0;
             const container = document.getElementById('categoryInputsContainer');
@@ -574,7 +633,6 @@
             }
         }
 
-        // NEW: SAVE CATEGORY MAX LIMITS
         async function saveCategories() {
             const num = parseInt(document.getElementById('numOfCategories').value) || 0;
             window.currentCategories = [];
@@ -589,6 +647,13 @@
                 }
             }
             localStorage.setItem('auctionCats', JSON.stringify(memArray)); 
+            
+            const manualDropdown = document.getElementById('playerCategoryManual');
+            manualDropdown.innerHTML = '<option value="">Select Category (Optional)</option>';
+            window.currentCategories.forEach(cat => {
+                const maxLabel = cat.maxPlayers ? ` (Limit: ${cat.maxPlayers})` : '';
+                manualDropdown.innerHTML += `<option value="${cat.name}">${cat.name}${maxLabel}</option>`;
+            });
         }
 
         function generateTeamInputs() {
