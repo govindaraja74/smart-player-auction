@@ -185,8 +185,9 @@
                 <!-- Settings Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="ad-card">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance</span> <span id="adBalance">0</span></div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Base Bid</span> <span id="adBaseBid">0.00</span></div>
+                        <!-- Updated Labels requested by User -->
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance per Team</span> <span id="adBalance">0</span></div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0.00</span></div>
                         <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
                     </div>
                     
@@ -205,6 +206,23 @@
                         <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room will use your Default Base Increment if these are left blank.</div>
                     </div>
                 </div>
+
+                <!-- NEW: Teams and Categories Display Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div class="ad-card">
+                        <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Teams Added</div>
+                        <div id="ad-teams-list" style="color: #333; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                            <span style="color: #94a3b8;">No teams added yet.</span>
+                        </div>
+                    </div>
+                    <div class="ad-card">
+                        <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Categories</div>
+                        <div id="ad-categories-list" style="color: #333; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                            <span style="color: #94a3b8;">No categories added yet.</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- VIEW D: LIVE AUCTION ROOM -->
@@ -368,7 +386,11 @@
             
             if(viewId === 'view-dashboard') document.getElementById('nav-dashboard').classList.add('active');
             if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
-            if(viewId === 'view-auction-detail') { document.getElementById('nav-detail').classList.add('active'); populateAuctionDetails(); }
+            if(viewId === 'view-auction-detail') { 
+                document.getElementById('nav-detail').classList.add('active'); 
+                populateAuctionDetails(); 
+                loadDashboard(); // ensures team cards fetch
+            }
             if(viewId === 'view-control') { document.getElementById('nav-control').classList.add('active'); loadDashboard(); }
             
             if(viewId === 'view-live-room') {
@@ -619,7 +641,34 @@
                 window.allPlayers = data.players || [];
                 window.allTeams = data.teams || [];
                 renderPlayersDatabase(); 
+                renderAuctionDetailLists(); // Refreshes Teams & Categories cards
             } catch (err) { console.error(err); }
+        }
+
+        // --- NEW: RENDER TEAMS AND CATEGORIES TO DETAIL CARDS ---
+        function renderAuctionDetailLists() {
+            const teamContainer = document.getElementById('ad-teams-list');
+            if (teamContainer) {
+                if(window.allTeams && window.allTeams.length > 0) {
+                    teamContainer.innerHTML = window.allTeams.map(t => `<div style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;"><img src="${t.logoUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"> <strong style="color:#0f172a;">${t.name}</strong></div>`).join('');
+                } else {
+                    teamContainer.innerHTML = '<span style="color: #94a3b8;">No teams added yet.</span>';
+                }
+            }
+
+            const catContainer = document.getElementById('ad-categories-list');
+            if (catContainer) {
+                const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+                if(savedCats && savedCats.length > 0) {
+                    catContainer.innerHTML = savedCats.map(c => {
+                        const name = typeof c === 'object' ? c.name : c;
+                        const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px;">(Max: ${c.maxPlayers})</span>` : '';
+                        return `<div style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color:#0f172a;"><strong>❖ ${name}</strong>${max}</div>`;
+                    }).join('');
+                } else {
+                    catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
+                }
+            }
         }
 
         // CATEGORY MAX LIMIT INPUTS
@@ -658,6 +707,7 @@
                 const maxLabel = cat.maxPlayers ? ` (Limit: ${cat.maxPlayers})` : '';
                 manualDropdown.innerHTML += `<option value="${cat.name}">${cat.name}${maxLabel}</option>`;
             });
+            renderAuctionDetailLists(); // Ensure cards update instantly
         }
 
         function generateTeamInputs() {
