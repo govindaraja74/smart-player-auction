@@ -446,18 +446,14 @@
 
         // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
-            if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) return team.logoUrl;
-            const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
-            const letter = nameToUse.charAt(0).toUpperCase() || 'T';
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
-            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-        }
-
-        function getActiveTeams() {
-            const localTeams = safeGetStorage('auctionTeams', []);
-            if (localTeams && localTeams.length > 0) return localTeams;
-            return window.allTeams || [];
-        }
+    if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.startsWith('data:image')) {
+        return team.logoUrl;
+    }
+    const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
+    const letter = nameToUse.charAt(0).toUpperCase() || 'T';
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
 
         // --- IMAGE COMPRESSOR ---
         async function compressImage(file, maxSize = 120) {
@@ -827,47 +823,52 @@
         }
 
         function applyLiveLogoSize() {
-            const size = localStorage.getItem('liveLogoSize') || '150';
-            const logoEl = document.getElementById('la-bidder-logo');
-            if(logoEl) {
-                logoEl.style.width = size + 'px';
-                logoEl.style.height = size + 'px';
-            }
-            const disp = document.getElementById('liveLogoSizeDisp');
-            if(disp) disp.innerText = size + 'px';
-            const slider = document.getElementById('liveLogoResizer');
-            if(slider) slider.value = size;
+    const size = localStorage.getItem('liveLogoSize') || '150';
+    const logoEl = document.getElementById('la-bidder-logo');
+    if(logoEl) {
+        logoEl.style.width = size + 'px';
+        logoEl.style.height = size + 'px';
+        if (liveCurrentTeamId) {
+            logoEl.style.display = 'inline-block';
         }
+    }
+    const disp = document.getElementById('liveLogoSizeDisp');
+    if(disp) disp.innerText = size + 'px';
+    const slider = document.getElementById('liveLogoResizer');
+    if(slider) slider.value = size;
+}
 
         // --- LIVE AUCTION ROOM ---
         async function initLiveAuctionRoom() {
-            await loadDashboard(); 
-            const strip = document.getElementById('la-franchise-strip');
-            strip.innerHTML = '';
-            
-            try {
-                const activeTeams = getActiveTeams();
-                if(activeTeams.length === 0) {
-                    strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
-                } else {
-                    activeTeams.forEach((t, index) => {
-                        const logo = getTeamLogo(t, 'Team ' + (index + 1));
-                        const safeName = t.name ? String(t.name).substring(0, 10) : ('Team ' + (index + 1));
-                        strip.innerHTML += `
-                            <div class="franchise-btn" onclick="franchiseBidByIndex(${index})">
-                                <img src="${logo}">
-                                <span style="font-size: 14px; font-weight: bold;">${safeName}</span>
-                            </div>`;
-                    });
-                }
-            } catch(e) {
-                strip.innerHTML = '<span style="color:#ef4444;">Error loading teams.</span>';
-            }
-            
-            resetLiveBoard();
-            applyLiveLogoSize();
+    await loadDashboard(); 
+    const strip = document.getElementById('la-franchise-strip');
+    if (!strip) return;
+    strip.innerHTML = '';
+    
+    try {
+        const activeTeams = getActiveTeams();
+        if(activeTeams.length === 0) {
+            strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
+        } else {
+            activeTeams.forEach((t, index) => {
+                const logo = getTeamLogo(t, 'Team ' + (index + 1));
+                const safeName = t.name ? String(t.name).substring(0, 10) : ('Team ' + (index + 1));
+                strip.innerHTML += `
+                    <div class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px;">
+                        <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
+                        <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block;">${safeName}</span>
+                    </div>`;
+            });
         }
-
+    } catch(e) {
+        console.error("Error drawing live room teams:", e);
+        strip.innerHTML = '<span style="color:#ef4444;">Error loading teams.</span>';
+    }
+    
+    resetLiveBoard();
+    applyLiveLogoSize();
+}
+        
         function resetLiveBoard() {
             livePlayerActive = null;
             liveCurrentBid = 0;
@@ -959,29 +960,38 @@
         }
 
         function franchiseBidByIndex(index) {
-            if(!livePlayerActive) return alert("Select a player first!");
-            const activeTeams = getActiveTeams();
-            const team = activeTeams[index];
-            if(!team) return;
+    if(!livePlayerActive) return alert("Select a player first!");
+    const activeTeams = getActiveTeams();
+    const team = activeTeams[index];
+    if(!team) return;
 
-            if (isFirstBid) {
-                isFirstBid = false;
-            } else {
-                let exactIncrement = getDynamicIncrement();
-                liveCurrentBid += exactIncrement;
-            }
-            
-            liveCurrentTeamId = team._id;
-            const logoUrl = getTeamLogo(team, 'Team ' + (index + 1));
-            const safeTeamName = team.name ? String(team.name) : ('Team ' + (index + 1));
-            
-            document.getElementById('la-current-bid').innerText = liveCurrentBid;
-            document.getElementById('la-bidder-logo').src = logoUrl;
-            document.getElementById('la-bidder-logo').style.display = 'block';
-            document.getElementById('la-bidder-name').innerText = safeTeamName;
-            document.getElementById('la-bidder-name').style.display = 'block';
-            applyLiveLogoSize();
-        }
+    if (isFirstBid) {
+        isFirstBid = false;
+    } else {
+        let exactIncrement = getDynamicIncrement();
+        liveCurrentBid += exactIncrement;
+    }
+    
+    liveCurrentTeamId = team._id;
+    const logoUrl = getTeamLogo(team, 'Team ' + (index + 1));
+    const safeTeamName = team.name ? String(team.name) : ('Team ' + (index + 1));
+    
+    document.getElementById('la-current-bid').innerText = liveCurrentBid;
+    
+    const bigLogo = document.getElementById('la-bidder-logo');
+    if (bigLogo) {
+        bigLogo.src = logoUrl;
+        bigLogo.style.display = 'inline-block';
+    }
+    
+    const bigName = document.getElementById('la-bidder-name');
+    if (bigName) {
+        bigName.innerText = safeTeamName;
+        bigName.style.display = 'block';
+    }
+    
+    applyLiveLogoSize();
+}
 
         function applyManualBid() {
             if(!livePlayerActive) return alert("Select a player first!");
