@@ -52,7 +52,7 @@
 
         .live-bidding-panel { flex: 1; background: #1e293b; border-radius: 12px; padding: 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px solid #334155; }
         .live-current-bid { font-size: 72px; font-weight: bold; color: #10b981; margin: 20px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .live-bidder-logo { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid #38bdf8; background: white; margin-bottom: 15px; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .live-bidder-logo { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid #38bdf8; background: white; margin-bottom: 15px; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: width 0.3s, height 0.3s; }
         .live-bidder-name { font-size: 28px; color: #38bdf8; font-weight: bold; display: none; }
 
         .live-bottom-panel { background: #1e293b; border-radius: 12px; padding: 20px; border: 2px solid #334155; }
@@ -66,7 +66,7 @@
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
-        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
+        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
         
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -160,11 +160,11 @@
             </div>
 
             <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
-            <div id="view-auction-detail" class="hidden" style="max-width: 950px;">
+            <div id="view-auction-detail" class="hidden" style="max-width: 1050px;">
                 <h1 class="dash-title" style="margin-bottom: 10px;">AUCTION DETAIL</h1>
                 <a href="#" onclick="navTo('view-live-room')" style="color: #10b981; font-weight: bold; font-size: 18px; text-decoration: underline; display: inline-block; margin-bottom: 25px;">Go to Live Auction Room →</a>
 
-                <!-- Header with Icons & Always Visible Roster Counter -->
+                <!-- Header with Modular Icons -->
                 <div class="ad-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <div style="width: 70px; height: 70px; background: #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;">LOGO</div>
@@ -173,18 +173,16 @@
                             <div style="color: #64748b; font-size: 14px; margin-top: 8px;">A-Code: <span id="adCode">KBL-2026</span></div>
                         </div>
                     </div>
-                    
-                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 20px;">
                         <div class="ad-icon-btn" onclick="openModal('modal-team')">👥<br>Add Team</div>
                         <div class="ad-icon-btn" onclick="openModal('modal-category')">🗂️<br>Add Category</div>
                         <div class="ad-icon-btn" onclick="openPlayerModal()">👤<br>Add Players</div>
-                        <!-- ALWAYS VISIBLE ROSTER COUNTER BUTTON -->
-                        <button id="adPlayerCounterBtn" class="btn-success" onclick="openPlayerModal()" style="padding: 10px 15px; font-size: 14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
                     </div>
                 </div>
 
-                <!-- Settings Grid -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <!-- 3-Column Settings Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <!-- Column 1: Financials -->
                     <div class="ad-card">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance per Team</span> <span id="adBalance">0</span></div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0.00</span></div>
@@ -192,9 +190,9 @@
                         <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
                     </div>
                     
-                    <!-- Dynamic Bid Increments Container -->
+                    <!-- Column 2: Dynamic Bid Increments Container -->
                     <div class="ad-card">
-                        <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Settings</div>
+                        <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Tiers</div>
                         <div id="bidIncrementContainer">
                             <div class="bid-tier-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
                                 <input type="number" class="ad-small-input" placeholder="Incr.">
@@ -203,7 +201,20 @@
                                 <button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>
                             </div>
                         </div>
-                        <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room will use your Default Base Increment if these are left blank.</div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room defaults to your standard Base Increment if these are left blank.</div>
+                    </div>
+
+                    <!-- Column 3: Live Control & Roster -->
+                    <div class="ad-card">
+                        <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Live Control & Roster</div>
+                        
+                        <!-- Roster Counter Cum List Button -->
+                        <button id="adPlayerCounterBtn" class="btn-success" onclick="openPlayerModal()" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
+                        
+                        <!-- Live Room Logo Resizer -->
+                        <div style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 5px;">Live Auction Team Logo Size:</div>
+                        <input type="range" id="liveLogoResizer" min="50" max="350" value="150" style="width: 100%; cursor: pointer;" oninput="changeLiveLogoSize(this.value)">
+                        <div style="text-align: center; font-size: 12px; color: #94a3b8; margin-top: 5px;" id="liveLogoSizeDisp">150px</div>
                     </div>
                 </div>
 
@@ -337,7 +348,6 @@
         </div>
     </div>
 
-    <!-- UPGRADED PLAYERS MODAL -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
@@ -378,7 +388,6 @@
                     <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
                     <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
                     <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
-                    
                     <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
                     
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
@@ -439,10 +448,16 @@
             }
         }
 
+        // --- BULLETPROOF LOGIN & RE-LOGIN PERSISTENCE ---
         function checkPassword() {
             if (document.getElementById('adminPassword').value === "MasterUnlock2026") {
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
+                
+                // Immediately force local data load to prevent vanishing lists on refresh
+                window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+                window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                
                 loadDashboard();
                 populateAuctionDetails();
             } else {
@@ -494,8 +509,27 @@
             if (counterBtn) {
                 const count = (window.allPlayers && window.allPlayers.length) ? window.allPlayers.length : 0;
                 counterBtn.innerText = `${count} Players Added (View Roster)`;
-                counterBtn.style.display = 'inline-block';
             }
+        }
+
+        // --- LOGO RESIZER CONTROLS ---
+        function changeLiveLogoSize(val) {
+            document.getElementById('liveLogoSizeDisp').innerText = val + 'px';
+            localStorage.setItem('liveLogoSize', val);
+            applyLiveLogoSize();
+        }
+
+        function applyLiveLogoSize() {
+            const size = localStorage.getItem('liveLogoSize') || '150';
+            const logoEl = document.getElementById('la-bidder-logo');
+            if(logoEl) {
+                logoEl.style.width = size + 'px';
+                logoEl.style.height = size + 'px';
+            }
+            const disp = document.getElementById('liveLogoSizeDisp');
+            if(disp) disp.innerText = size + 'px';
+            const slider = document.getElementById('liveLogoResizer');
+            if(slider) slider.value = size;
         }
 
         // --- LIVE AUCTION ROOM LOGIC ---
@@ -511,7 +545,7 @@
                 strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
             } else {
                 activeTeams.forEach((t, index) => {
-                    const logo = (t.logoUrl && t.logoUrl.length > 10) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                    const logo = (t.logoUrl && t.logoUrl.startsWith('data:image')) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
                     strip.innerHTML += `
                         <div class="franchise-btn" onclick="franchiseBidByIndex(${index})">
                             <img src="${logo}">
@@ -520,6 +554,7 @@
                 });
             }
             resetLiveBoard();
+            applyLiveLogoSize();
         }
 
         function resetLiveBoard() {
@@ -539,6 +574,7 @@
             document.getElementById('la-bidder-name').style.display = 'none';
             document.getElementById('la-search-input').value = '';
             document.getElementById('la-manual-bid').value = '';
+            applyLiveLogoSize();
         }
 
         function pushPlayerToScreen(p) {
@@ -574,7 +610,9 @@
         }
 
         function getDynamicIncrement() {
-            let baseInc = Number(document.getElementById('setupBidIncrease').value) || 100; 
+            const setup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            let baseInc = Number(setup.bidInc) || 100; 
+            
             const container = document.getElementById('bidIncrementContainer');
             if(!container) return baseInc;
             
@@ -612,13 +650,14 @@
             }
             
             liveCurrentTeamId = team._id;
-            const logoUrl = (team.logoUrl && team.logoUrl.length > 10) ? team.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            const logoUrl = (team.logoUrl && team.logoUrl.startsWith('data:image')) ? team.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
             document.getElementById('la-bidder-logo').src = logoUrl;
             document.getElementById('la-bidder-logo').style.display = 'block';
             document.getElementById('la-bidder-name').innerText = team.name;
             document.getElementById('la-bidder-name').style.display = 'block';
+            applyLiveLogoSize();
         }
 
         function applyManualBid() {
@@ -699,11 +738,17 @@
             document.getElementById('adBidInc').innerText = data.bidInc || '0.00';
             document.getElementById('adPlayers').innerText = `${data.maxPlayers || '0'} /Team`;
             
+            applyLiveLogoSize();
             updatePlayerCounterBtn();
             renderAuctionLibrary(); 
         }
 
         function loadSavedMemory() {
+            window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+            window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            updatePlayerCounterBtn();
+            applyLiveLogoSize();
+
             const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
             if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
             if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
@@ -1006,7 +1051,6 @@
             }
         }
 
-        // --- BULLETPROOF BATCH PROCESSING FOR PLAYERS ---
         async function bulkAddPlayers(playersArray, game) {
             let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
@@ -1205,7 +1249,7 @@
             html2pdf().set({ margin: 0.5, filename: 'Auction_List.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
         }
 
-        // --- TRIGGER MEMORY ON PAGE LOAD ---
+        // --- INITIALIZATION ---
         setTimeout(loadSavedMemory, 500);
     </script>
 </body>
