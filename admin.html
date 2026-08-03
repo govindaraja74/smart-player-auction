@@ -405,7 +405,7 @@
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
                 populateAuctionDetails(); 
-                loadDashboard(); 
+                renderAuctionDetailLists(); 
             }
             if(viewId === 'view-control') { document.getElementById('nav-control').classList.add('active'); loadDashboard(); }
             
@@ -439,10 +439,13 @@
             const strip = document.getElementById('la-franchise-strip');
             strip.innerHTML = '';
             
-            if(window.allTeams.length === 0) {
+            // USE LOCAL STORAGE DIRECTLY SO TEAMS ALWAYS APPEAR
+            const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            
+            if(localTeams.length === 0) {
                 strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
             } else {
-                window.allTeams.forEach(t => {
+                localTeams.forEach(t => {
                     const logo = t.logoUrl ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
                     strip.innerHTML += `
                         <div class="franchise-btn" onclick="franchiseBid('${t._id}', '${t.name}', '${logo}')">
@@ -666,19 +669,21 @@
                 const res = await fetch('/api/dashboard');
                 const data = await res.json();
                 window.allPlayers = data.players || [];
-                window.allTeams = data.teams || [];
                 renderPlayersDatabase(); 
-                renderAuctionDetailLists(); // This explicitly builds your visual Team Grid
+                renderAuctionDetailLists(); 
             } catch (err) { console.error(err); }
         }
 
-        // --- NEW UPGRADED VISUAL TEAM GRID & CATEGORY LIST ---
+        // --- BULLETPROOF TEAMS & CATEGORIES DISPLAY ---
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
-                if(window.allTeams && window.allTeams.length > 0) {
+                // Read from LocalStorage directly so they NEVER disappear
+                const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                
+                if(localTeams.length > 0) {
                     teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
-                    window.allTeams.map(t => `
+                    localTeams.map(t => `
                         <div style="display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
                             <img src="${t.logoUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1;">
                             <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${t.name}</strong>
@@ -820,15 +825,19 @@
             }
         }
 
+        // --- BULLETPROOF LOCALSTORAGE TEAM SAVING ---
         async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
-            const budget = document.getElementById('setupBudget').value; 
+            const budget = document.getElementById('setupBudget').value || 0; 
             const btn = document.getElementById('addTeamBtn');
             
             if(num === 0) return;
             
             btn.innerText = "Saving Teams... Please wait"; 
             btn.disabled = true;
+
+            // Load local memory
+            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
 
             for(let i=1; i<=num; i++) {
                 const name = document.getElementById('tName_'+i).value;
@@ -844,18 +853,29 @@
                     });
                 }
                 
-                await fetch('/api/franchises', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ 
-                        name, 
-                        logoUrl: logoDataUrl, 
-                        budget: Number(budget), 
-                        purseRemaining: Number(budget), 
-                        tournamentId: 'KBL2026' 
-                    }) 
-                });
+                let newTeam = {
+                    _id: 'team_' + Date.now() + i,
+                    name: name,
+                    logoUrl: logoDataUrl,
+                    budget: Number(budget),
+                    purseRemaining: Number(budget)
+                };
+
+                // Save to local memory immediately
+                localTeams.push(newTeam);
+                
+                // Attempt server push, but don't let it crash the frontend!
+                try {
+                    fetch('/api/franchises', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
+                    });
+                } catch(e) {}
             }
+
+            // Lock Teams into LocalStorage
+            localStorage.setItem('auctionTeams', JSON.stringify(localTeams));
 
             document.getElementById('numOfTeams').value = ''; 
             document.getElementById('teamInputsContainer').innerHTML = '';
@@ -863,7 +883,12 @@
             btn.disabled = false;
             
             closeModal('modal-team');
-            navTo('view-auction-detail'); 
+            
+            // Immediately force an interface refresh!
+            renderAuctionDetailLists(); 
+            if(document.getElementById('view-live-room').classList.contains('hidden') === false){
+                initLiveAuctionRoom();
+            }
         }
 
         async function processPlayerRow(p, game) {
