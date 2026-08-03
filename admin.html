@@ -702,44 +702,84 @@
             }
         }
 
+        // --- ENHANCED SALE FINALIZE WITH DUAL ID/NAME LOOKUP ---
         function finalizeSale(resultType) {
             if(!livePlayerActive) return alert("No player on screen!");
+
+            let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             
+            // Dual lookup by _id OR case-insensitive Name
+            let pIndex = localPlayers.findIndex(p => 
+                (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
+                (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
+            );
+
             if(resultType === 'sold') {
                 if(!liveCurrentTeamId) return alert("A franchise must bid to sell!");
                 
-                let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
-                let pIndex = localPlayers.findIndex(p => p._id === livePlayerActive._id);
-                
                 const activeTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-                let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId) || window.allTeams.find(t => t._id === liveCurrentTeamId);
-                
+                let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId) || (window.allTeams || []).find(t => t._id === liveCurrentTeamId);
+
+                const winningName = winningTeam ? (winningTeam.name || 'Team') : 'Team';
+                const winningLogo = winningTeam ? getTeamLogo(winningTeam) : '';
+
+                // Update livePlayerActive object
+                livePlayerActive.status = 'sold';
+                livePlayerActive.soldPrice = liveCurrentBid;
+                livePlayerActive.teamId = liveCurrentTeamId;
+                livePlayerActive.teamName = winningName;
+                livePlayerActive.teamLogo = winningLogo;
+
                 if(pIndex > -1) {
-                    localPlayers[pIndex].status = 'sold';
-                    localPlayers[pIndex].soldPrice = liveCurrentBid;
-                    localPlayers[pIndex].teamId = liveCurrentTeamId;
-                    localPlayers[pIndex].teamName = winningTeam ? winningTeam.name : '';
-                    localPlayers[pIndex].teamLogo = winningTeam ? getTeamLogo(winningTeam) : '';
-                    localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
+                    localPlayers[pIndex] = { ...localPlayers[pIndex], ...livePlayerActive };
+                } else {
+                    localPlayers.push(livePlayerActive);
                 }
+
+                // Sync window.allPlayers array directly
+                let globalIndex = window.allPlayers.findIndex(p => 
+                    (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
+                    (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
+                );
+                if(globalIndex > -1) {
+                    window.allPlayers[globalIndex] = { ...window.allPlayers[globalIndex], ...livePlayerActive };
+                } else {
+                    window.allPlayers.push(livePlayerActive);
+                }
+
+                localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
 
                 socket.emit('adminSellPlayer', { 
                     playerId: livePlayerActive._id, teamId: liveCurrentTeamId, 
                     soldPrice: liveCurrentBid, tournamentId: 'KBL2026' 
                 });
-                alert(`SOLD to ${document.getElementById('la-bidder-name').innerText} for ₹${liveCurrentBid}!`);
+
+                alert(`SOLD to ${winningName} for ₹${liveCurrentBid}!`);
+
             } else if(resultType === 'unsold') {
-                let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
-                let pIndex = localPlayers.findIndex(p => p._id === livePlayerActive._id);
+                livePlayerActive.status = 'unsold';
+
                 if(pIndex > -1) {
                     localPlayers[pIndex].status = 'unsold';
-                    localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
+                } else {
+                    localPlayers.push(livePlayerActive);
                 }
+
+                let globalIndex = window.allPlayers.findIndex(p => 
+                    (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
+                    (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
+                );
+                if(globalIndex > -1) {
+                    window.allPlayers[globalIndex].status = 'unsold';
+                }
+
+                localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
 
                 socket.emit('adminSellPlayer', { 
                     playerId: livePlayerActive._id, teamId: null, 
                     soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold'
                 });
+
                 alert(`${livePlayerActive.name} remains UNSOLD.`);
             }
             
@@ -791,7 +831,7 @@
             
             let changed = false;
             window.allPlayers.forEach(p => {
-                if(!p.status || (p.status === 'unsold' && !p.soldPrice)) { p.status = 'available'; changed = true; }
+                if(!p.status) { p.status = 'available'; changed = true; }
             });
             if(changed) localStorage.setItem('auctionPlayers', JSON.stringify(window.allPlayers));
 
@@ -879,19 +919,18 @@
                 const serverPlayers = Array.isArray(data.players) ? data.players : [];
                 const localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 let playerMap = new Map();
-                serverPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name, p); });
-                localPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name, p); });
+                serverPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
+                localPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
                 window.allPlayers = Array.from(playerMap.values());
 
                 const serverTeams = Array.isArray(data.teams) ? data.teams : [];
                 const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
                 let teamMap = new Map();
                 
-                // Preserve local logos when merging server teams
-                localTeams.forEach(t => { if(t && t.name) teamMap.set(t.name.toLowerCase(), t); });
+                localTeams.forEach(t => { if(t && t.name) teamMap.set(t.name.trim().toLowerCase(), t); });
                 serverTeams.forEach(st => {
                     if(st && st.name) {
-                        const key = st.name.toLowerCase();
+                        const key = st.name.trim().toLowerCase();
                         const existing = teamMap.get(key);
                         if(existing) {
                             teamMap.set(key, { ...st, logoUrl: (st.logoUrl && st.logoUrl.length > 10) ? st.logoUrl : existing.logoUrl });
