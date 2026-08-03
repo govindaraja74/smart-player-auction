@@ -207,23 +207,23 @@
                     </div>
                 </div>
 
-                <!-- Teams and Categories Display Grid -->
+                <!-- Teams and Categories Display Grid (UPGRADED UI) -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Teams Added</div>
-                        <div id="ad-teams-list" style="color: #333; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                        <div id="ad-teams-list" style="color: #333; font-size: 14px; max-height: 250px; overflow-y: auto;">
                             <span style="color: #94a3b8;">No teams added yet.</span>
                         </div>
                     </div>
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Categories</div>
-                        <div id="ad-categories-list" style="color: #333; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                        <div id="ad-categories-list" style="color: #333; font-size: 14px; max-height: 250px; overflow-y: auto;">
                             <span style="color: #94a3b8;">No categories added yet.</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- NEW: AUCTION LIBRARY (COMPLETED & INCOMPLETE) -->
+                <!-- AUCTION LIBRARY (COMPLETED & INCOMPLETE) -->
                 <div class="ad-card" style="margin-top: 30px; border-top: 4px solid #1e73be; background: #ffffff;">
                     <h2 style="color: #0f172a; margin-top: 0;">My Auctions Library</h2>
                     <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Load or manage your completed and incomplete auctions below.</p>
@@ -601,7 +601,7 @@
             document.getElementById('adBaseBid').innerText = data.minBid || '0.00';
             document.getElementById('adPlayers').innerText = `${data.maxPlayers || '0'} /Team`;
             
-            renderAuctionLibrary(); // Hydrate the library cards!
+            renderAuctionLibrary(); 
         }
 
         function loadSavedMemory() {
@@ -649,7 +649,6 @@
             localStorage.setItem('auctionSetup', JSON.stringify(newAuction));
             currentBidIncrease = Number(newAuction.bidInc);
             
-            // Save to Library History
             let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
             let existingIndex = history.findIndex(a => a.name === newAuction.name);
             if(existingIndex >= 0) {
@@ -669,15 +668,22 @@
                 window.allPlayers = data.players || [];
                 window.allTeams = data.teams || [];
                 renderPlayersDatabase(); 
-                renderAuctionDetailLists(); 
+                renderAuctionDetailLists(); // This explicitly builds your visual Team Grid
             } catch (err) { console.error(err); }
         }
 
+        // --- NEW UPGRADED VISUAL TEAM GRID & CATEGORY LIST ---
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
                 if(window.allTeams && window.allTeams.length > 0) {
-                    teamContainer.innerHTML = window.allTeams.map(t => `<div style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;"><img src="${t.logoUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"> <strong style="color:#0f172a;">${t.name}</strong></div>`).join('');
+                    teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
+                    window.allTeams.map(t => `
+                        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <img src="${t.logoUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1;">
+                            <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${t.name}</strong>
+                        </div>
+                    `).join('') + `</div>`;
                 } else {
                     teamContainer.innerHTML = '<span style="color: #94a3b8;">No teams added yet.</span>';
                 }
@@ -689,8 +695,8 @@
                 if(savedCats && savedCats.length > 0) {
                     catContainer.innerHTML = savedCats.map(c => {
                         const name = typeof c === 'object' ? c.name : c;
-                        const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px;">(Max: ${c.maxPlayers})</span>` : '';
-                        return `<div style="padding: 8px 0; border-bottom: 1px solid #e2e8f0; color:#0f172a;"><strong>❖ ${name}</strong>${max}</div>`;
+                        const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px; font-weight:normal;">(Max Limit: ${c.maxPlayers})</span>` : '';
+                        return `<div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px;"><strong>❖ ${name}</strong>${max}</div>`;
                     }).join('');
                 } else {
                     catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
@@ -698,7 +704,7 @@
             }
         }
 
-        // --- NEW: AUCTION LIBRARY CONTROLS ---
+        // --- AUCTION LIBRARY CONTROLS ---
         function renderAuctionLibrary() {
             let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
             const incContainer = document.getElementById('incomplete-auctions-list');
