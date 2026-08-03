@@ -78,6 +78,10 @@
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: white; position: relative; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #94a3b8; cursor: pointer; background: none; border: none; font-weight: bold; line-height: 1; }
         .close-btn:hover { color: white; }
+        
+        /* Utility */
+        .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 5px 8px; transition: 0.2s; }
+        .edit-del-btn:hover { background: #e2e8f0; }
     </style>
 </head>
 <body onload="setTimeout(loadSavedMemory, 500)">
@@ -166,7 +170,7 @@
                 <h1 class="dash-title" style="margin-bottom: 10px;">AUCTION DETAIL</h1>
                 <a href="#" onclick="navTo('view-live-room')" style="color: #10b981; font-weight: bold; font-size: 18px; text-decoration: underline; display: inline-block; margin-bottom: 25px;">Go to Live Auction Room →</a>
 
-                <!-- Header with Modular Icons -->
+                <!-- Header -->
                 <div class="ad-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <img id="adLogoImage" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1;">
@@ -182,9 +186,9 @@
                     </div>
                 </div>
 
-                <!-- 3-Column Settings Grid -->
+                <!-- 3-Column Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <!-- Column 1: Financials -->
+                    <!-- Financials -->
                     <div class="ad-card">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance per Team</span> <span id="adBalance">0</span></div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0.00</span></div>
@@ -192,7 +196,7 @@
                         <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
                     </div>
                     
-                    <!-- Column 2: Dynamic Bid Increments Container -->
+                    <!-- Bid Increments -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Tiers</div>
                         <div id="bidIncrementContainer">
@@ -206,7 +210,7 @@
                         <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room defaults to your standard Base Increment if these are left blank.</div>
                     </div>
 
-                    <!-- Column 3: Live Control & Roster -->
+                    <!-- Live Control & Roster -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Live Control & Roster</div>
                         
@@ -218,7 +222,7 @@
                     </div>
                 </div>
 
-                <!-- Teams and Categories Display Grid -->
+                <!-- Teams and Categories -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Teams Added</div>
@@ -233,23 +237,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- AUCTION LIBRARY -->
-                <div class="ad-card" style="margin-top: 30px; border-top: 4px solid #1e73be; background: #ffffff;">
-                    <h2 style="color: #0f172a; margin-top: 0;">My Auctions Library</h2>
-                    <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Load or manage your completed and incomplete auctions below.</p>
-                    
-                    <div style="margin-bottom: 25px;">
-                        <div style="font-size: 15px; font-weight: bold; color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 8px; margin-bottom: 15px;">Active / Incomplete Auctions</div>
-                        <div id="incomplete-auctions-list"></div>
-                    </div>
-
-                    <div>
-                        <div style="font-size: 15px; font-weight: bold; color: #64748b; border-bottom: 2px solid #64748b; padding-bottom: 8px; margin-bottom: 15px;">Completed Auctions</div>
-                        <div id="completed-auctions-list"></div>
-                    </div>
-                </div>
-
             </div>
 
             <!-- VIEW D: LIVE AUCTION ROOM -->
@@ -261,9 +248,7 @@
                         <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
                     </div>
 
-                    <!-- Top Split -->
                     <div class="live-top-section">
-                        <!-- Player Card (Left) -->
                         <div class="live-player-card">
                             <div class="live-photo-box">
                                 <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
@@ -276,7 +261,6 @@
                             </div>
                         </div>
 
-                        <!-- Live Bidding Tracker (Right) -->
                         <div class="live-bidding-panel">
                             <h2 style="margin: 0; color: #cbd5e1; text-transform: uppercase; letter-spacing: 2px;">Current Bid</h2>
                             <div class="live-current-bid">₹<span id="la-current-bid">0</span></div>
@@ -286,9 +270,7 @@
                         </div>
                     </div>
 
-                    <!-- Bottom Controls & Franchises -->
                     <div class="live-bottom-panel">
-                        <!-- Controls -->
                         <div class="live-controls">
                             <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
@@ -305,11 +287,8 @@
                             <button class="btn-danger" style="font-size: 18px; padding: 12px 30px;" onclick="finalizeSale('unsold')">UNSOLD</button>
                         </div>
                         
-                        <!-- Franchise Strip -->
                         <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise Logo to Bid</h4>
-                        <div id="la-franchise-strip" class="franchise-strip">
-                            <!-- Populated via Javascript safely -->
-                        </div>
+                        <div id="la-franchise-strip" class="franchise-strip"></div>
                     </div>
                 </div>
             </div>
@@ -337,7 +316,7 @@
         </div>
     </div>
 
-    <!-- MODALS -->
+    <!-- MODALS (TEAMS & CATEGORIES) -->
     <div id="modal-team" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-team')">&times;</button>
@@ -346,6 +325,19 @@
             <input type="number" id="numOfTeams" min="1" oninput="generateTeamInputs()" style="color:black;">
             <div id="teamInputsContainer"></div>
             <button class="btn-primary" id="addTeamBtn" onclick="addMultipleTeams()">Add All Teams</button>
+        </div>
+    </div>
+
+    <div id="modal-edit-team" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="close-btn" onclick="closeModal('modal-edit-team')">&times;</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Edit Franchise</h2>
+            <input type="hidden" id="editTeamId">
+            <label>Team Name</label>
+            <input type="text" id="editTeamName" style="color:black; margin-bottom: 15px;">
+            <label>Update Logo (Optional)</label>
+            <input type="file" id="editTeamLogo" accept="image/*" style="background: white; color: black; margin-bottom: 15px;">
+            <button class="btn-success" style="width: 100%;" onclick="saveTeamEdit()">Save Changes</button>
         </div>
     </div>
 
@@ -359,36 +351,58 @@
         </div>
     </div>
 
-    <!-- ADD PLAYERS MODAL -->
+    <!-- MODALS (PLAYERS) -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Import / Add Players</h2>
-            
-            <label>1. Import via Google Sheets Link</label>
-            <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
-            <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
-            
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>2. Upload Excel/CSV File</label>
-            <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
-            <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
-            
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>3. Import from Registration Link</label>
-            <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
+            <div id="player-add-view">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">Import / Add Players</h2>
+                </div>
+                
+                <label>1. Import via Google Sheets Link</label>
+                <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
+                <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
+                
+                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+                <label>2. Upload Excel/CSV File</label>
+                <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
+                <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
+                
+                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+                <label>3. Add Manually:</label>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
+                    <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
+                    <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
+                    <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
+                    <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
+                    <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
+                    <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>4. Add Manually:</label>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
-                <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
-                <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
-                <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
-                <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
+    <!-- EDIT PLAYER MODAL -->
+    <div id="modal-edit-player" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('modal-edit-player')">&times;</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Edit Player</h2>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; color: #333;">
+                <input type="hidden" id="editPlayerId">
+                <label style="font-size:13px; font-weight:bold;">Player Name</label>
+                <input type="text" id="editPlayerName" style="color:black; margin-bottom: 10px;" required>
                 
-                <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
+                <label style="font-size:13px; font-weight:bold;">Category</label>
+                <select id="editPlayerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category</option></select>
                 
-                <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+                <label style="font-size:13px; font-weight:bold;">Base Price</label>
+                <input type="number" id="editPlayerBasePrice" style="color:black; margin-bottom: 10px;" required>
+                
+                <label style="font-size:13px; font-weight:bold;">Update Photo (Optional)</label>
+                <input type="file" id="editPlayerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 15px;">
+                
+                <button class="btn-success" style="width: 100%;" onclick="savePlayerEdit()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -403,13 +417,12 @@
         window.allPlayers = [];
         window.allTeams = [];
         
-        // Live Auction Variables
         let livePlayerActive = null;
         let liveCurrentBid = 0;
         let liveCurrentTeamId = null;
         let isFirstBid = true; 
 
-        // --- SAFE STORAGE SAVER ---
+        // --- SAFE STORAGE ---
         function safeSetStorage(key, data) {
             try {
                 localStorage.setItem(key, JSON.stringify(data));
@@ -424,7 +437,7 @@
             }
         }
 
-        // --- BASE64 COMPLIANT EMBLEM GENERATOR ---
+        // --- LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
             if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) {
                 return team.logoUrl;
@@ -434,18 +447,16 @@
             return 'data:image/svg+xml;base64,' + btoa(svg);
         }
 
-        // --- HELPER TO READ ALL ACTIVE TEAMS ---
         function getActiveTeams() {
             const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
             if (localTeams && localTeams.length > 0) return localTeams;
             return window.allTeams || [];
         }
 
-        // --- ULTRA-FAST FAIL-SAFE COMPRESSOR WITH TIMEOUT ---
-        async function compressImage(file, maxSize = 80) {
+        // --- IMAGE COMPRESSOR ---
+        async function compressImage(file, maxSize = 120) {
             return new Promise((resolve) => {
                 if (!file) return resolve("");
-
                 const timer = setTimeout(() => {
                     const rawReader = new FileReader();
                     rawReader.onload = (e) => resolve(e.target.result || "");
@@ -474,10 +485,8 @@
                             canvas.height = Math.max(1, height);
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            resolve(canvas.toDataURL('image/webp', 0.5)); 
-                        } catch(e) {
-                            resolve(dataUrl); 
-                        }
+                            resolve(canvas.toDataURL('image/webp', 0.6)); 
+                        } catch(e) { resolve(dataUrl); }
                     };
                     img.src = dataUrl;
                 };
@@ -485,7 +494,7 @@
             });
         }
 
-        // --- UI ROUTING & MODALS ---
+        // --- UI NAVIGATION ---
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
@@ -523,7 +532,142 @@
             }
         }
 
-        // --- BULLETPROOF LOGIN ---
+        // --- EDIT/DELETE FUNCTIONS ---
+
+        // Edit/Delete Categories
+        function editCategory(oldName) {
+            const newName = prompt("Enter new category name:", oldName);
+            if(!newName || newName.trim() === "" || newName === oldName) return;
+            
+            let cats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            let index = cats.findIndex(c => (c.name || c) === oldName);
+            if(index > -1) {
+                if(typeof cats[index] === 'object') cats[index].name = newName;
+                else cats[index] = newName;
+                safeSetStorage('auctionCats', cats);
+                updateManualCategoryDropdowns();
+                renderAuctionDetailLists();
+            }
+        }
+
+        function deleteCategory(name) {
+            if(!confirm(`Are you sure you want to delete the category '${name}'?`)) return;
+            let cats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            cats = cats.filter(c => (c.name || c) !== name);
+            safeSetStorage('auctionCats', cats);
+            updateManualCategoryDropdowns();
+            renderAuctionDetailLists();
+        }
+
+        function updateManualCategoryDropdowns() {
+            const cats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            window.currentCategories = cats;
+            const drop1 = document.getElementById('playerCategoryManual');
+            const drop2 = document.getElementById('editPlayerCategoryManual');
+            if(drop1) drop1.innerHTML = '<option value="">Select Category *</option>';
+            if(drop2) drop2.innerHTML = '<option value="">Select Category</option>';
+            
+            cats.forEach(c => {
+                const name = c.name || c;
+                const max = c.maxPlayers ? ` (Limit: ${c.maxPlayers})` : '';
+                if(drop1) drop1.innerHTML += `<option value="${name}">${name}${max}</option>`;
+                if(drop2) drop2.innerHTML += `<option value="${name}">${name}${max}</option>`;
+            });
+        }
+
+        // Edit/Delete Teams
+        function deleteTeam(id) {
+            if(!confirm("Are you sure you want to delete this franchise?")) return;
+            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            localTeams = localTeams.filter(t => t._id !== id);
+            safeSetStorage('auctionTeams', localTeams);
+            window.allTeams = localTeams;
+            renderAuctionDetailLists();
+        }
+
+        function editTeam(id) {
+            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            const t = localTeams.find(t => t._id === id);
+            if(!t) return;
+            
+            document.getElementById('editTeamId').value = t._id;
+            document.getElementById('editTeamName').value = t.name;
+            document.getElementById('editTeamLogo').value = ""; // clear file
+            openModal('modal-edit-team');
+        }
+
+        async function saveTeamEdit() {
+            const id = document.getElementById('editTeamId').value;
+            const newName = document.getElementById('editTeamName').value;
+            const logoInput = document.getElementById('editTeamLogo');
+            
+            if(!newName || newName.trim() === "") return alert("Name is required");
+
+            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            let tIndex = localTeams.findIndex(t => t._id === id);
+            
+            if(tIndex > -1) {
+                localTeams[tIndex].name = newName;
+                if(logoInput.files && logoInput.files[0]) {
+                    localTeams[tIndex].logoUrl = await compressImage(logoInput.files[0], 120);
+                }
+                safeSetStorage('auctionTeams', localTeams);
+                window.allTeams = localTeams;
+                renderAuctionDetailLists();
+                closeModal('modal-edit-team');
+            }
+        }
+
+        // Edit/Delete Players
+        function deletePlayer(id) {
+            if(!confirm("Are you sure you want to permanently delete this player?")) return;
+            window.allPlayers = window.allPlayers.filter(p => p._id !== id);
+            safeSetStorage('auctionPlayers', window.allPlayers);
+            renderPlayersDatabase('all');
+            updatePlayerCounterBtn();
+        }
+
+        function openEditPlayerModal(id) {
+            const p = window.allPlayers.find(p => p._id === id);
+            if(!p) return;
+            
+            updateManualCategoryDropdowns();
+            
+            document.getElementById('editPlayerId').value = p._id;
+            document.getElementById('editPlayerName').value = p.name;
+            document.getElementById('editPlayerBasePrice').value = p.basePrice || 0;
+            document.getElementById('editPlayerCategoryManual').value = p.category || '';
+            document.getElementById('editPlayerPhoto').value = ""; 
+            
+            openModal('modal-edit-player');
+        }
+
+        async function savePlayerEdit() {
+            const id = document.getElementById('editPlayerId').value;
+            const newName = document.getElementById('editPlayerName').value;
+            const newPrice = document.getElementById('editPlayerBasePrice').value;
+            const newCat = document.getElementById('editPlayerCategoryManual').value;
+            const photoInput = document.getElementById('editPlayerPhoto');
+
+            if(!newName || !newPrice) return alert("Name and Price are required.");
+
+            let pIndex = window.allPlayers.findIndex(p => p._id === id);
+            if(pIndex > -1) {
+                window.allPlayers[pIndex].name = newName;
+                window.allPlayers[pIndex].basePrice = newPrice;
+                window.allPlayers[pIndex].category = newCat;
+
+                if(photoInput.files && photoInput.files[0]) {
+                    window.allPlayers[pIndex].photoUrl = await compressImage(photoInput.files[0], 200);
+                }
+                
+                safeSetStorage('auctionPlayers', window.allPlayers);
+                renderPlayersDatabase('all');
+                closeModal('modal-edit-player');
+            }
+        }
+
+        // --- DASHBOARD AND LOGIN ---
         function checkPassword() {
             if (document.getElementById('adminPassword').value === "MasterUnlock2026") {
                 document.getElementById('loginSection').classList.add('hidden');
@@ -535,6 +679,7 @@
                 loadDashboard();
                 populateAuctionDetails();
                 updateDashboardHistoryCard();
+                updateManualCategoryDropdowns();
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
             }
@@ -550,7 +695,6 @@
             }
         }
 
-        // --- COUNTERS ---
         function updatePlayerCounterBtn() {
             const counterBtn = document.getElementById('adPlayerCounterBtn');
             if (counterBtn) {
@@ -559,12 +703,12 @@
             }
         }
 
-        // --- ADD PLAYERS MODAL FLOW ---
         function openPlayerModal() {
+            updateManualCategoryDropdowns();
             openModal('modal-player');
         }
 
-        // --- LOGO RESIZER CONTROLS ---
+        // --- LIVE LOGO RESIZER ---
         function changeLiveLogoSize(val) {
             document.getElementById('liveLogoSizeDisp').innerText = val + 'px';
             localStorage.setItem('liveLogoSize', val);
@@ -584,7 +728,7 @@
             if(slider) slider.value = size;
         }
 
-        // --- BULLETPROOF LIVE AUCTION ROOM LOGIC ---
+        // --- LIVE AUCTION ROOM ---
         async function initLiveAuctionRoom() {
             await loadDashboard(); 
             const strip = document.getElementById('la-franchise-strip');
@@ -592,14 +736,12 @@
             
             try {
                 const activeTeams = getActiveTeams();
-                
                 if(activeTeams.length === 0) {
                     strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
                 } else {
                     activeTeams.forEach((t, index) => {
                         const logo = getTeamLogo(t, 'Team ' + (index + 1));
                         const safeName = t.name ? String(t.name).substring(0, 10) : ('Team ' + (index + 1));
-                        
                         strip.innerHTML += `
                             <div class="franchise-btn" onclick="franchiseBidByIndex(${index})">
                                 <img src="${logo}">
@@ -665,12 +807,10 @@
         function manualSearchPlayer() {
             const term = document.getElementById('la-search-input').value.toLowerCase().trim();
             if(!term) return;
-            
             const found = window.allPlayers.find(p => 
                 (String(p.name).toLowerCase() === term || String(p.serialNumber).toLowerCase() === term) 
                 && p.status !== 'sold'
             );
-            
             if(found) pushPlayerToScreen(found);
             else alert("Player not found or already sold.");
         }
@@ -709,45 +849,8 @@
             return calculatedInc;
         }
 
-        function saveBidIncrements() {
-            const container = document.getElementById('bidIncrementContainer');
-            if (!container) return;
-            const rows = container.querySelectorAll('.bid-tier-row');
-            let tiers = [];
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs.length >= 2) {
-                    const incVal = Number(inputs[0].value);
-                    const afterVal = Number(inputs[1].value);
-                    if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
-                }
-            });
-            safeSetStorage('auctionBidTiers', tiers);
-        }
-
-        function loadBidIncrements() {
-            const tiers = JSON.parse(localStorage.getItem('auctionBidTiers') || '[]');
-            const container = document.getElementById('bidIncrementContainer');
-            if (!container || tiers.length === 0) return;
-            
-            container.innerHTML = '';
-            tiers.forEach((tier, index) => {
-                const newRow = document.createElement('div');
-                newRow.className = 'bid-tier-row';
-                newRow.style = 'display: flex; gap: 10px; align-items: center; margin-bottom: 15px;';
-                const isLast = (index === tiers.length - 1);
-                newRow.innerHTML = `
-                    <input type="number" class="ad-small-input" placeholder="Incr." value="${tier.incVal}" onchange="saveBidIncrements()">
-                    <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
-                    <input type="number" class="ad-small-input" placeholder="Amount" value="${tier.afterVal}" onchange="saveBidIncrements()">
-                    <button type="button" class="ad-btn-small" style="background: ${isLast ? '#1e73be' : '#ef4444'};" onclick="${isLast ? 'addBidIncrementRow(this)' : 'this.parentElement.remove(); saveBidIncrements();'}">${isLast ? 'ADD' : 'REMOVE'}</button>`;
-                container.appendChild(newRow);
-            });
-        }
-
         function franchiseBidByIndex(index) {
             if(!livePlayerActive) return alert("Select a player first!");
-            
             const activeTeams = getActiveTeams();
             const team = activeTeams[index];
             if(!team) return;
@@ -784,12 +887,10 @@
             }
         }
 
-        // --- ENHANCED SALE FINALIZE WITH AUTO-ADVANCE NEXT PLAYER ---
         function finalizeSale(resultType) {
             if(!livePlayerActive) return alert("No player on screen!");
 
             let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
-            
             let pIndex = localPlayers.findIndex(p => 
                 (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
                 (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
@@ -810,61 +911,38 @@
                 livePlayerActive.teamName = winningName;
                 livePlayerActive.teamLogo = winningLogo;
 
-                if(pIndex > -1) {
-                    localPlayers[pIndex] = { ...localPlayers[pIndex], ...livePlayerActive };
-                } else {
-                    localPlayers.push(livePlayerActive);
-                }
+                if(pIndex > -1) { localPlayers[pIndex] = { ...localPlayers[pIndex], ...livePlayerActive }; } 
+                else { localPlayers.push(livePlayerActive); }
 
                 let globalIndex = window.allPlayers.findIndex(p => 
                     (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
                     (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
                 );
-                if(globalIndex > -1) {
-                    window.allPlayers[globalIndex] = { ...window.allPlayers[globalIndex], ...livePlayerActive };
-                } else {
-                    window.allPlayers.push(livePlayerActive);
-                }
+                if(globalIndex > -1) { window.allPlayers[globalIndex] = { ...window.allPlayers[globalIndex], ...livePlayerActive }; } 
+                else { window.allPlayers.push(livePlayerActive); }
 
                 safeSetStorage('auctionPlayers', localPlayers);
-
-                socket.emit('adminSellPlayer', { 
-                    playerId: livePlayerActive._id, teamId: liveCurrentTeamId, 
-                    soldPrice: liveCurrentBid, tournamentId: 'KBL2026' 
-                });
-
-                alert(`SOLD to ${winningName} for ₹${liveCurrentBid}!`);
+                socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: 'KBL2026' });
 
             } else if(resultType === 'unsold') {
                 livePlayerActive.status = 'unsold';
 
-                if(pIndex > -1) {
-                    localPlayers[pIndex].status = 'unsold';
-                } else {
-                    localPlayers.push(livePlayerActive);
-                }
+                if(pIndex > -1) { localPlayers[pIndex].status = 'unsold'; } 
+                else { localPlayers.push(livePlayerActive); }
 
                 let globalIndex = window.allPlayers.findIndex(p => 
                     (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
                     (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
                 );
-                if(globalIndex > -1) {
-                    window.allPlayers[globalIndex].status = 'unsold';
-                }
+                if(globalIndex > -1) { window.allPlayers[globalIndex].status = 'unsold'; }
 
                 safeSetStorage('auctionPlayers', localPlayers);
-
-                socket.emit('adminSellPlayer', { 
-                    playerId: livePlayerActive._id, teamId: null, 
-                    soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold'
-                });
-
-                alert(`${livePlayerActive.name} remains UNSOLD.`);
+                socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold' });
             }
             
+            // Auto Advance
             setTimeout(async () => { 
                 await loadDashboard(); 
-                
                 const availablePlayers = window.allPlayers.filter(p => p.status === 'available');
                 if(availablePlayers.length > 0) {
                     const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
@@ -876,14 +954,13 @@
             }, 500);
         }
 
-        // --- DYNAMIC INCREMENT ADD BUTTON LOGIC ---
+        // --- BID INCREMENTS ---
         function addBidIncrementRow(btnElement) {
             if (btnElement) {
                 btnElement.innerText = "REMOVE";
                 btnElement.style.background = "#ef4444";
                 btnElement.onclick = function() { this.parentElement.remove(); saveBidIncrements(); };
             }
-            
             const container = document.getElementById('bidIncrementContainer');
             const newRow = document.createElement('div');
             newRow.className = 'bid-tier-row';
@@ -897,7 +974,43 @@
             saveBidIncrements();
         }
 
-        // --- DATA AND MEMORY LOGIC ---
+        function saveBidIncrements() {
+            const container = document.getElementById('bidIncrementContainer');
+            if (!container) return;
+            const rows = container.querySelectorAll('.bid-tier-row');
+            let tiers = [];
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length >= 2) {
+                    const incVal = Number(inputs[0].value);
+                    const afterVal = Number(inputs[1].value);
+                    if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
+                }
+            });
+            safeSetStorage('auctionBidTiers', tiers);
+        }
+
+        function loadBidIncrements() {
+            const tiers = JSON.parse(localStorage.getItem('auctionBidTiers') || '[]');
+            const container = document.getElementById('bidIncrementContainer');
+            if (!container || tiers.length === 0) return;
+            
+            container.innerHTML = '';
+            tiers.forEach((tier, index) => {
+                const newRow = document.createElement('div');
+                newRow.className = 'bid-tier-row';
+                newRow.style = 'display: flex; gap: 10px; align-items: center; margin-bottom: 15px;';
+                const isLast = (index === tiers.length - 1);
+                newRow.innerHTML = `
+                    <input type="number" class="ad-small-input" placeholder="Incr." value="${tier.incVal}" onchange="saveBidIncrements()">
+                    <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
+                    <input type="number" class="ad-small-input" placeholder="Amount" value="${tier.afterVal}" onchange="saveBidIncrements()">
+                    <button type="button" class="ad-btn-small" style="background: ${isLast ? '#1e73be' : '#ef4444'};" onclick="${isLast ? 'addBidIncrementRow(this)' : 'this.parentElement.remove(); saveBidIncrements();'}">${isLast ? 'ADD' : 'REMOVE'}</button>`;
+                container.appendChild(newRow);
+            });
+        }
+
+        // --- DASHBOARD AND DATA ---
         function populateAuctionDetails() {
             const data = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
             document.getElementById('adName').innerText = data.name || 'No Name Set';
@@ -907,9 +1020,7 @@
             document.getElementById('adPlayers').innerText = `${data.maxPlayers || '0'} /Team`;
             
             const logoEl = document.getElementById('adLogoImage');
-            if (logoEl) {
-                logoEl.src = getTeamLogo(data, data.name || 'Auction');
-            }
+            if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
 
             applyLiveLogoSize();
             updatePlayerCounterBtn();
@@ -931,6 +1042,7 @@
             applyLiveLogoSize();
             loadBidIncrements();
             updateDashboardHistoryCard();
+            updateManualCategoryDropdowns();
 
             const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
             if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
@@ -941,28 +1053,10 @@
                 document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
                 currentBidIncrease = Number(savedSetup.bidInc);
             }
-            
-            const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
-            if(savedCats.length > 0) {
-                document.getElementById('numOfCategories').value = savedCats.length;
-                generateCategoryInputs();
-                savedCats.forEach((cat, i) => {
-                    const input = document.getElementById('catName_'+(i+1));
-                    const maxInput = document.getElementById('catMax_'+(i+1));
-                    if(typeof cat === 'object') {
-                        if(input) input.value = cat.name || '';
-                        if(maxInput) maxInput.value = cat.maxPlayers || '';
-                    } else {
-                        if(input) input.value = cat;
-                    }
-                });
-                setTimeout(saveCategories, 500); 
-            }
         }
 
         async function submitSetup(event) {
             event.preventDefault(); 
-            
             let auctionLogoUrl = "";
             const logoInput = document.getElementById('setupLogo');
             if (logoInput && logoInput.files && logoInput.files[0]) {
@@ -988,11 +1082,8 @@
             
             let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
             let existingIndex = history.findIndex(a => a.name === newAuction.name);
-            if(existingIndex >= 0) {
-                history[existingIndex] = newAuction;
-            } else {
-                history.push(newAuction);
-            }
+            if(existingIndex >= 0) history[existingIndex] = newAuction;
+            else history.push(newAuction);
             safeSetStorage('auctionHistory', history);
 
             navTo('view-auction-detail');
@@ -1007,7 +1098,7 @@
                         const resData = await res.json();
                         if (resData) data = resData;
                     }
-                } catch(e) { console.log("Backend offline, using local data."); }
+                } catch(e) {}
                 
                 const serverPlayers = Array.isArray(data.players) ? data.players : [];
                 const localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
@@ -1033,30 +1124,29 @@
                     }
                 });
                 window.allTeams = Array.from(teamMap.values());
-                
-                // PERSIST ALL TEAMS BACK TO LOCALSTORAGE
                 safeSetStorage('auctionTeams', window.allTeams);
                 
                 renderAuctionDetailLists(); 
                 updatePlayerCounterBtn();
                 updateDashboardHistoryCard();
-
             } catch (err) { console.error(err); }
         }
 
-        // --- TEAMS & CATEGORIES DISPLAY ---
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
                 const activeTeams = getActiveTeams();
-                
                 if(activeTeams && activeTeams.length > 0) {
                     teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
                     activeTeams.map((t, i) => {
                         const safeName = t.name ? String(t.name) : 'Unnamed';
                         const logo = getTeamLogo(t, 'Team ' + (i + 1));
                         return `
-                        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 25px 10px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="position: absolute; top: 4px; right: 4px; display: flex; gap: 4px;">
+                                <button class="edit-del-btn" onclick="editTeam('${t._id}')">✏️</button>
+                                <button class="edit-del-btn" style="color:red;" onclick="deleteTeam('${t._id}')">🗑️</button>
+                            </div>
                             <img src="${logo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1;">
                             <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${safeName}</strong>
                         </div>`;
@@ -1073,187 +1163,18 @@
                     catContainer.innerHTML = savedCats.map(c => {
                         const name = typeof c === 'object' ? c.name : c;
                         const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px; font-weight:normal;">(Max Limit: ${c.maxPlayers})</span>` : '';
-                        return `<div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px;"><strong>❖ ${name}</strong>${max}</div>`;
+                        return `
+                        <div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
+                            <div><strong>❖ ${name}</strong>${max}</div>
+                            <div>
+                                <button class="edit-del-btn" onclick="editCategory('${name}')">✏️ Edit</button>
+                                <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${name}')">🗑️ Delete</button>
+                            </div>
+                        </div>`;
                     }).join('');
                 } else {
                     catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
                 }
-            }
-        }
-
-        // --- AUCTION LIBRARY CONTROLS ---
-        function renderAuctionLibrary() {
-            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
-            const incContainer = document.getElementById('incomplete-auctions-list');
-            const compContainer = document.getElementById('completed-auctions-list');
-
-            if(!incContainer || !compContainer) return;
-            incContainer.innerHTML = ''; compContainer.innerHTML = '';
-            let hasInc = false, hasComp = false;
-
-            history.forEach((auc, index) => {
-                let cardHtml = `
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div>
-                            <strong style="color: #0f172a; font-size: 16px;">${auc.name}</strong>
-                            <div style="color: #64748b; font-size: 12px; margin-top: 5px;">Date: ${auc.date || 'N/A'} | Budget: ₹${auc.budget || 0}</div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            ${auc.status !== 'completed' ? `<button class="ad-btn-small" style="background:#10b981;" onclick="markAuctionComplete(${index})">Mark Complete</button>` : ''}
-                            <button class="ad-btn-small" onclick="loadHistoricalAuction(${index})">Load Auction</button>
-                            <button class="ad-btn-small" style="background:#ef4444;" onclick="deleteHistoricalAuction(${index})">Delete</button>
-                        </div>
-                    </div>`;
-                    
-                if(auc.status === 'completed') {
-                    compContainer.innerHTML += cardHtml; hasComp = true;
-                } else {
-                    incContainer.innerHTML += cardHtml; hasInc = true;
-                }
-            });
-
-            if(!hasInc) incContainer.innerHTML = '<p style="color: #94a3b8; font-size: 14px;">No incomplete auctions.</p>';
-            if(!hasComp) compContainer.innerHTML = '<p style="color: #94a3b8; font-size: 14px;">No completed auctions.</p>';
-        }
-
-        function loadHistoricalAuction(index) {
-            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
-            if(history[index]) {
-                localStorage.setItem('auctionSetup', JSON.stringify(history[index]));
-                populateAuctionDetails();
-                loadDashboard(); 
-                alert("Auction Loaded Successfully!");
-            }
-        }
-
-        function markAuctionComplete(index) {
-            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
-            if(history[index]) {
-                history[index].status = 'completed';
-                safeSetStorage('auctionHistory', history);
-
-                let current = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
-                if(current.id === history[index].id) {
-                    current.status = 'completed';
-                    safeSetStorage('auctionSetup', current);
-                }
-                renderAuctionLibrary();
-            }
-        }
-
-        function deleteHistoricalAuction(index) {
-            if(!confirm("Are you sure you want to delete this auction?")) return;
-            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
-            history.splice(index, 1);
-            safeSetStorage('auctionHistory', history);
-            renderAuctionLibrary();
-        }
-
-        // --- CATEGORY & TEAM SAVING LOGIC ---
-        function generateCategoryInputs() {
-            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
-            const container = document.getElementById('categoryInputsContainer');
-            container.innerHTML = ''; 
-            document.getElementById('saveCatBtn').style.display = num > 0 ? 'inline-block' : 'none';
-            for(let i=1; i<=num; i++) {
-                container.innerHTML += `
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input type="text" id="catName_${i}" placeholder="Category ${i} Name" style="flex: 2; color:black;">
-                        <input type="number" id="catMax_${i}" placeholder="Max / Team" style="flex: 1; color:black;">
-                    </div>`;
-            }
-        }
-
-        async function saveCategories() {
-            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
-            window.currentCategories = [];
-            let memArray = [];
-            for(let i=1; i<=num; i++) {
-                const input = document.getElementById('catName_'+i);
-                const maxInput = document.getElementById('catMax_'+i);
-                if(input && input.value) { 
-                    const catData = { name: input.value, maxPlayers: maxInput ? maxInput.value : '' };
-                    window.currentCategories.push(catData); 
-                    memArray.push(catData); 
-                }
-            }
-            safeSetStorage('auctionCats', memArray); 
-            
-            const manualDropdown = document.getElementById('playerCategoryManual');
-            manualDropdown.innerHTML = '<option value="">Select Category *</option>';
-            window.currentCategories.forEach(cat => {
-                const maxLabel = cat.maxPlayers ? ` (Limit: ${cat.maxPlayers})` : '';
-                manualDropdown.innerHTML += `<option value="${cat.name}">${cat.name}${maxLabel}</option>`;
-            });
-            renderAuctionDetailLists(); 
-        }
-
-        function generateTeamInputs() {
-            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
-            const container = document.getElementById('teamInputsContainer');
-            container.innerHTML = ''; 
-            for(let i=1; i<=num; i++) {
-                container.innerHTML += `<div style="background:#1e293b; padding:15px; margin-top:15px; border-radius:8px;"><h4 style="margin-top:0;">Team ${i}</h4><input type="text" id="tName_${i}" placeholder="Enter Team Name" style="color:black;"><input type="file" id="tLogo_${i}" accept="image/*" style="margin-top:10px; background:white; color:black;"></div>`;
-            }
-        }
-
-        async function addMultipleTeams() {
-            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
-            const budget = document.getElementById('setupBudget').value || 0; 
-            const btn = document.getElementById('addTeamBtn');
-            
-            if(num === 0) return;
-            
-            btn.innerText = "Saving Teams... Please wait"; 
-            btn.disabled = true;
-
-            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-
-            for(let i=1; i<=num; i++) {
-                const nameInput = document.getElementById('tName_'+i);
-                const logoInput = document.getElementById('tLogo_'+i);
-                if(!nameInput || !nameInput.value.trim()) continue;
-                
-                let logoDataUrl = "";
-                if (logoInput && logoInput.files && logoInput.files[0]) {
-                    logoDataUrl = await compressImage(logoInput.files[0], 80);
-                }
-                
-                if (!logoDataUrl) {
-                    logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
-                }
-                
-                let newTeam = {
-                    _id: 'team_' + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000),
-                    name: String(nameInput.value).trim(),
-                    logoUrl: logoDataUrl,
-                    budget: Number(budget),
-                    purseRemaining: Number(budget)
-                };
-
-                localTeams.push(newTeam);
-                
-                try {
-                    fetch('/api/franchises', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
-                    }).catch(e => {});
-                } catch(e) {}
-            }
-
-            safeSetStorage('auctionTeams', localTeams);
-            window.allTeams = localTeams;
-
-            document.getElementById('numOfTeams').value = ''; 
-            document.getElementById('teamInputsContainer').innerHTML = '';
-            btn.innerText = "Add All Teams"; 
-            btn.disabled = false;
-            
-            closeModal('modal-team');
-            renderAuctionDetailLists(); 
-            if(document.getElementById('view-live-room').classList.contains('hidden') === false){
-                initLiveAuctionRoom();
             }
         }
 
@@ -1265,7 +1186,6 @@
             for (let p of playersArray) {
                 const pName = p.Name || p.name || p.Player || p['Player Name'];
                 const pPrice = p.BasePrice || p.baseprice || p.Price || p['Base Price'] || setupBase;
-                
                 const pSlNo = p['Sl No'] || p['Sl.No'] || p['SL NO'] || p['Serial Number'] || p['S.No'] || p['#'] || p.slNo || p.SlNo || (window.allPlayers.length + addedCount + 1);
                 
                 if (pName) {
@@ -1284,15 +1204,9 @@
                     localPlayers.push(newPlayer);
                     window.allPlayers.push(newPlayer);
                     addedCount++;
-
-                    fetch('/api/players/register', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify(newPlayer) 
-                    }).catch(e => {});
+                    fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlayer) }).catch(e => {});
                 }
             }
-
             safeSetStorage('auctionPlayers', localPlayers);
             return addedCount;
         }
@@ -1330,7 +1244,6 @@
             let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             localPlayers.push(newPlayer);
             window.allPlayers.push(newPlayer);
-            
             safeSetStorage('auctionPlayers', localPlayers);
 
             updatePlayerCounterBtn();
@@ -1340,15 +1253,9 @@
             document.getElementById('playerCategoryManual').value = '';
             document.getElementById('playerPhoto').value = '';
 
-            try {
-                await fetch('/api/players/register', { 
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(newPlayer) 
-                });
-            } catch(e) {}
+            try { fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlayer) }); } catch(e) {}
             
-            closeModal('modal-player');
+            alert('Player Added!');
         }
 
         async function importExcelPlayers(btn) {
@@ -1356,29 +1263,20 @@
             const game = document.getElementById('setupSportsType').value;
             if (!file) return alert("Please select a file first.");
 
-            if(btn) {
-                btn.innerText = "Importing... Please wait";
-                btn.disabled = true;
-            }
+            if(btn) { btn.innerText = "Importing... Please wait"; btn.disabled = true; }
 
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
                     const playersArray = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                    
                     const count = await bulkAddPlayers(playersArray, game);
-                    
                     alert(`${count} Players imported successfully!`);
                     closeModal('modal-player');
                     updatePlayerCounterBtn();
-                } catch(err) {
-                    alert("Error: Invalid file format.");
-                } finally {
-                    if(btn) {
-                        btn.innerText = "Upload File";
-                        btn.disabled = false;
-                    }
+                } catch(err) { alert("Error: Invalid file format."); } 
+                finally {
+                    if(btn) { btn.innerText = "Upload File"; btn.disabled = false; }
                     document.getElementById('excelFile').value = '';
                 }
             };
@@ -1390,10 +1288,7 @@
             const game = document.getElementById('setupSportsType').value;
             if (!link.includes('spreadsheets/d/')) return alert("Invalid Google Sheets link.");
             
-            if(btn) {
-                btn.innerText = "Importing... Please wait";
-                btn.disabled = true;
-            }
+            if(btn) { btn.innerText = "Importing... Please wait"; btn.disabled = true; }
 
             try {
                 const sheetId = link.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)[1];
@@ -1401,24 +1296,17 @@
                 const text = await response.text();
                 const workbook = XLSX.read(text, {type: 'string'});
                 const playersArray = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                
                 const count = await bulkAddPlayers(playersArray, game);
-                
                 alert(`${count} Players imported successfully!`);
                 closeModal('modal-player');
                 updatePlayerCounterBtn();
-            } catch (err) { 
-                alert("Error importing: " + err.message); 
-            } finally {
-                if(btn) {
-                    btn.innerText = "Import from Link";
-                    btn.disabled = false;
-                }
+            } catch (err) { alert("Error importing: " + err.message); } 
+            finally {
+                if(btn) { btn.innerText = "Import from Link"; btn.disabled = false; }
                 document.getElementById('gSheetLink').value = '';
             }
         }
 
-        // --- UPGRADED PLAYERS ROSTER GRID ---
         function renderPlayersDatabase(filter = 'all') {
             const container = document.getElementById('playersListContainer');
             if(window.allPlayers.length === 0) {
@@ -1458,7 +1346,11 @@
 
                 html += `
                 <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
-                    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
+                    <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10;">
+                        <button class="edit-del-btn" onclick="openEditPlayerModal('${p._id}')">✏️</button>
+                        <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${p._id}')">🗑️</button>
+                    </div>
+                    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px; margin-top: 15px;">
                         <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
                         ${teamLogoOverlay}
                     </div>
