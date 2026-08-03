@@ -84,7 +84,7 @@
         .edit-del-btn:hover { background: #e2e8f0; }
     </style>
 </head>
-<body onload="setTimeout(loadSavedMemory, 500)">
+<body onload="setTimeout(safeInit, 500)">
 
     <!-- Login Screen -->
     <div class="box" id="loginSection">
@@ -323,13 +323,14 @@
 
     <!-- MODALS SECTION -->
     <div id="modal-team" class="modal-overlay hidden">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 400px;">
             <button class="close-btn" onclick="closeModal('modal-team')">&times;</button>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Manage Franchises</h2>
-            <label>Number of Teams to Add</label>
-            <input type="number" id="numOfTeams" min="1" oninput="generateTeamInputs()" onkeyup="generateTeamInputs()" onchange="generateTeamInputs()" style="color:black;">
-            <div id="teamInputsContainer"></div>
-            <button class="btn-primary" id="addTeamBtn" onclick="addMultipleTeams()" style="margin-top: 15px;">Add All Teams</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Add Franchise</h2>
+            <label style="font-size:13px; font-weight:bold;">Team Name *</label>
+            <input type="text" id="newTeamName" style="color:black; margin-bottom: 15px; width: 100%;" required>
+            <label style="font-size:13px; font-weight:bold;">Team Logo (Optional)</label>
+            <input type="file" id="newTeamLogo" accept="image/*" style="background: white; color: black; margin-bottom: 15px; width: 100%;">
+            <button class="btn-primary" style="width: 100%; padding: 12px;" id="saveNewTeamBtn" onclick="addNewTeam()">Save Team</button>
         </div>
     </div>
 
@@ -338,24 +339,27 @@
             <button class="close-btn" onclick="closeModal('modal-edit-team')">&times;</button>
             <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Edit Franchise</h2>
             <input type="hidden" id="editTeamId">
-            <label>Team Name</label>
+            <label style="font-size:13px; font-weight:bold;">Team Name</label>
             <input type="text" id="editTeamName" style="color:black; margin-bottom: 15px; width: 100%;">
-            <label>Update Logo (Optional)</label>
+            <label style="font-size:13px; font-weight:bold;">Update Logo (Optional)</label>
             <input type="file" id="editTeamLogo" accept="image/*" style="background: white; color: black; margin-bottom: 15px; width: 100%;">
             <button class="btn-success" style="width: 100%; padding: 12px;" onclick="saveTeamEdit()">Save Changes</button>
         </div>
     </div>
 
     <div id="modal-category" class="modal-overlay hidden">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 400px;">
             <button class="close-btn" onclick="closeModal('modal-category')">&times;</button>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Manage Categories</h2>
-            <input type="number" id="numOfCategories" min="1" placeholder="Number of Categories" oninput="generateCategoryInputs()" onkeyup="generateCategoryInputs()" onchange="generateCategoryInputs()" style="color:black; margin-bottom:10px;">
-            <div id="categoryInputsContainer"></div>
-            <button id="saveCatBtn" class="btn-primary" onclick="saveCategories(); closeModal('modal-category');" style="display:none; margin-top:15px;">Save Categories</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Add Category</h2>
+            <label style="font-size:13px; font-weight:bold;">Category Name *</label>
+            <input type="text" id="newCatName" style="color:black; margin-bottom: 15px; width: 100%;" required>
+            <label style="font-size:13px; font-weight:bold;">Max Players per Team (Optional)</label>
+            <input type="number" id="newCatMax" style="color:black; margin-bottom: 15px; width: 100%;">
+            <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="addNewCategory()">Save Category</button>
         </div>
     </div>
 
+    <!-- ADD PLAYERS MODAL -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
@@ -389,6 +393,7 @@
         </div>
     </div>
 
+    <!-- EDIT PLAYER MODAL -->
     <div id="modal-edit-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-edit-player')">&times;</button>
@@ -426,8 +431,13 @@
 
         // --- SAFE STORAGE UTILS ---
         function safeGetStorage(key, defaultVal) {
-            try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
-            catch(e) { return defaultVal; }
+            try { 
+                const item = localStorage.getItem(key);
+                if (item === null || item === undefined) return defaultVal;
+                return JSON.parse(item); 
+            } catch(e) { 
+                return defaultVal; 
+            }
         }
 
         function safeSetStorage(key, data) {
@@ -445,7 +455,7 @@
             if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) return team.logoUrl;
             const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
             const letter = nameToUse.charAt(0).toUpperCase() || 'T';
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#1e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
@@ -531,7 +541,29 @@
             }
         }
 
-        // --- EDIT/DELETE FUNCTIONS ---
+        // --- ADD / EDIT / DELETE FUNCTIONS ---
+
+        // Category Management
+        function addNewCategory() {
+            const name = document.getElementById('newCatName').value;
+            const max = document.getElementById('newCatMax').value;
+            if(!name || name.trim() === '') return alert('Category Name is required!');
+            
+            let cats = safeGetStorage('auctionCats', []);
+            if(cats.find(c => (c.name || c).toLowerCase() === name.trim().toLowerCase())) {
+                return alert('Category already exists!');
+            }
+            
+            cats.push({ name: name.trim(), maxPlayers: max });
+            safeSetStorage('auctionCats', cats);
+            updateManualCategoryDropdowns();
+            try { renderAuctionDetailLists(); } catch(e){}
+            
+            document.getElementById('newCatName').value = '';
+            document.getElementById('newCatMax').value = '';
+            closeModal('modal-category');
+        }
+
         function editCategory(oldName) {
             const newName = prompt("Enter new category name:", oldName);
             if(!newName || newName.trim() === "" || newName === oldName) return;
@@ -568,6 +600,50 @@
                 if(drop1) drop1.innerHTML += `<option value="${name}">${name}${max}</option>`;
                 if(drop2) drop2.innerHTML += `<option value="${name}">${name}${max}</option>`;
             });
+        }
+
+        // Team Management
+        async function addNewTeam() {
+            const nameInput = document.getElementById('newTeamName').value;
+            const logoInput = document.getElementById('newTeamLogo');
+            const btn = document.getElementById('saveNewTeamBtn');
+            
+            if(!nameInput || nameInput.trim() === '') return alert('Team Name is required!');
+            
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            let localTeams = safeGetStorage('auctionTeams', []);
+            const budget = document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0;
+            
+            let logoDataUrl = "";
+            if (logoInput && logoInput.files && logoInput.files[0]) {
+                logoDataUrl = await compressImage(logoInput.files[0], 120);
+            }
+            
+            let newTeam = {
+                _id: 'team_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                name: String(nameInput).trim(),
+                logoUrl: logoDataUrl,
+                budget: Number(budget),
+                purseRemaining: Number(budget)
+            };
+
+            localTeams.push(newTeam);
+            safeSetStorage('auctionTeams', localTeams);
+            window.allTeams = localTeams;
+
+            try {
+                fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) }).catch(e => {});
+            } catch(e) {}
+
+            document.getElementById('newTeamName').value = '';
+            document.getElementById('newTeamLogo').value = '';
+            btn.innerText = "Save Team";
+            btn.disabled = false;
+            
+            closeModal('modal-team');
+            try { renderAuctionDetailLists(); } catch(e){}
         }
 
         function deleteTeam(id) {
@@ -610,6 +686,7 @@
             }
         }
 
+        // Player Management
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             window.allPlayers = window.allPlayers.filter(p => p._id !== id);
@@ -941,32 +1018,6 @@
         }
 
         // --- BID INCREMENTS ---
-        function generateTeamInputs() {
-            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
-            const container = document.getElementById('teamInputsContainer');
-            if(!container) return;
-            container.innerHTML = ''; 
-            for(let i=1; i<=num; i++) {
-                container.innerHTML += `<div style="background:#1e293b; padding:15px; margin-top:15px; border-radius:8px;"><h4 style="margin-top:0;">Team ${i}</h4><input type="text" id="tName_${i}" placeholder="Enter Team Name" style="color:black;"><input type="file" id="tLogo_${i}" accept="image/*" style="margin-top:10px; background:white; color:black;"></div>`;
-            }
-        }
-
-        function generateCategoryInputs() {
-            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
-            const container = document.getElementById('categoryInputsContainer');
-            if(!container) return;
-            container.innerHTML = ''; 
-            const btn = document.getElementById('saveCatBtn');
-            if(btn) btn.style.display = num > 0 ? 'inline-block' : 'none';
-            for(let i=1; i<=num; i++) {
-                container.innerHTML += `
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <input type="text" id="catName_${i}" placeholder="Category ${i} Name" style="flex: 2; color:black;">
-                        <input type="number" id="catMax_${i}" placeholder="Max / Team" style="flex: 1; color:black;">
-                    </div>`;
-            }
-        }
-
         function addBidIncrementRow(btnElement) {
             if (btnElement) {
                 btnElement.innerText = "REMOVE";
@@ -1194,63 +1245,6 @@
                     catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
                 }
             }
-        }
-
-        async function addMultipleTeams() {
-            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
-            const budget = document.getElementById('setupBudget').value || 0; 
-            const btn = document.getElementById('addTeamBtn');
-            
-            if(num === 0) return;
-            
-            btn.innerText = "Saving Teams... Please wait"; 
-            btn.disabled = true;
-
-            let localTeams = safeGetStorage('auctionTeams', []);
-
-            for(let i=1; i<=num; i++) {
-                const nameInput = document.getElementById('tName_'+i);
-                const logoInput = document.getElementById('tLogo_'+i);
-                if(!nameInput || !nameInput.value.trim()) continue;
-                
-                let logoDataUrl = "";
-                if (logoInput && logoInput.files && logoInput.files[0]) {
-                    logoDataUrl = await compressImage(logoInput.files[0], 80);
-                }
-                
-                if (!logoDataUrl) {
-                    logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
-                }
-                
-                let newTeam = {
-                    _id: 'team_' + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000),
-                    name: String(nameInput.value).trim(),
-                    logoUrl: logoDataUrl,
-                    budget: Number(budget),
-                    purseRemaining: Number(budget)
-                };
-
-                localTeams.push(newTeam);
-                
-                try {
-                    fetch('/api/franchises', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
-                    }).catch(e => {});
-                } catch(e) {}
-            }
-
-            safeSetStorage('auctionTeams', localTeams);
-            window.allTeams = localTeams;
-
-            document.getElementById('numOfTeams').value = ''; 
-            document.getElementById('teamInputsContainer').innerHTML = '';
-            btn.innerText = "Add All Teams"; 
-            btn.disabled = false;
-            
-            closeModal('modal-team');
-            try { renderAuctionDetailLists(); } catch(e){}
         }
 
         async function bulkAddPlayers(playersArray, game) {
