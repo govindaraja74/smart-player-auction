@@ -7,12 +7,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Base Styles */
         body { font-family: Arial, sans-serif; background-color: #0d1b2a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 0; box-sizing: border-box; }
         .hidden { display: none !important; }
         .box { background-color: #1b263b; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; max-width: 400px; margin: auto; }
-        
-        /* Universal App Layout */
         .app-container { display: flex; width: 100%; min-height: 100vh; background: #f8fafc; color: #333; }
         .dash-sidebar { width: 280px; background: #1e73be; color: white; display: flex; flex-direction: column; padding-top: 30px; flex-shrink: 0; z-index: 10;}
         .sidebar-item { padding: 18px 30px; font-size: 18px; cursor: pointer; transition: 0.2s; border-left: 5px solid transparent; }
@@ -20,8 +17,6 @@
         .sidebar-item.active { background: #155a96; font-weight: bold; border-left: 5px solid #fff; }
         .dash-main { flex: 1; padding: 40px; overflow-y: auto; height: 100vh; box-sizing: border-box; }
         .dash-title { color: #1e73be; font-size: 32px; font-weight: bold; margin-top: 0; margin-bottom: 30px; text-transform: uppercase; }
-        
-        /* Dashboard Cards */
         .dash-cards { display: flex; gap: 25px; flex-wrap: wrap; margin-bottom: 40px; }
         .dash-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; width: 220px; display: flex; align-items: center; justify-content: center; gap: 15px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; text-align: center; }
         .dash-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); border-color: #1e73be; }
@@ -30,18 +25,13 @@
         .dash-section-bar { background: #1e73be; color: white; padding: 12px 20px; border-radius: 6px; font-weight: bold; font-size: 18px; margin-bottom: 20px; text-align: center; }
         .auction-history-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; width: 250px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
         .auction-history-card:hover { border-color: #1e73be; }
-
-        /* Forms & Inputs */
         input, select { width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; box-sizing: border-box; }
         button { cursor: pointer; font-weight: bold; border: none; border-radius: 4px; }
         .btn-primary { background: #0284c7; color: white; padding: 10px 15px; }
         .btn-success { background: #10b981; color: white; padding: 10px 15px; }
         .btn-danger { background: #ef4444; color: white; padding: 10px 15px; }
-
-        /* LIVE AUCTION ROOM STYLES */
         .live-room { background: #0f172a; min-height: 100%; border-radius: 12px; padding: 25px; display: flex; flex-direction: column; gap: 20px; color: white; }
         .live-top-section { display: flex; gap: 20px; flex: 1; min-height: 400px; }
-        
         .live-player-card { flex: 2; background: white; color: #0f172a; border-radius: 12px; padding: 30px; display: flex; gap: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .live-photo-box { width: 250px; height: 300px; background: #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; align-items: center; border: 2px solid #cbd5e1; flex-shrink: 0; }
         .live-photo-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -49,42 +39,33 @@
         .live-player-info h2 { font-size: 24px; margin: 0 0 5px 0; color: #475569; }
         .live-player-info h3 { font-size: 18px; margin: 0 0 20px 0; color: #64748b; font-weight: normal; }
         .live-base-price { font-size: 24px; font-weight: bold; color: #64748b; background: #f1f5f9; padding: 10px 20px; border-radius: 8px; display: inline-block; border: 1px solid #cbd5e1; }
-
         .live-bidding-panel { flex: 1; background: #1e293b; border-radius: 12px; padding: 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 2px solid #334155; }
         .live-current-bid { font-size: 72px; font-weight: bold; color: #10b981; margin: 20px 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         .live-bidder-logo { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 5px solid #38bdf8; background: white; margin-bottom: 15px; display: none; box-shadow: 0 10px 20px rgba(0,0,0,0.5); transition: width 0.3s, height 0.3s; }
         .live-bidder-name { font-size: 28px; color: #38bdf8; font-weight: bold; display: none; }
-
         .live-bottom-panel { background: #1e293b; border-radius: 12px; padding: 20px; border: 2px solid #334155; }
         .live-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
         .franchise-strip { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
         .franchise-btn { background: #334155; border: 2px solid #475569; border-radius: 8px; padding: 10px; min-width: 100px; text-align: center; cursor: pointer; transition: 0.2s; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .franchise-btn:hover { background: #475569; border-color: #38bdf8; transform: translateY(-3px); }
         .franchise-btn img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 1px solid #cbd5e1; }
-
-        /* Setup/Detail Classes */
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
         .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
-        
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
         .ad-icon-btn:hover { opacity: 0.7; transform: scale(1.1); }
         .ad-btn-small { background: #1e73be; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-
-        /* MODALS */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: white; position: relative; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #94a3b8; cursor: pointer; background: none; border: none; font-weight: bold; line-height: 1; }
         .close-btn:hover { color: white; }
-        
-        /* Utility */
         .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 6px 10px; transition: 0.2s; }
         .edit-del-btn:hover { background: #e2e8f0; }
     </style>
 </head>
-<body onload="setTimeout(loadSavedMemory, 500)">
+<body onload="setTimeout(safeInit, 500)">
 
     <!-- Login Screen -->
     <div class="box" id="loginSection">
@@ -136,9 +117,7 @@
                 <form onsubmit="submitSetup(event)">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
-                        <div style="grid-column: 2 / span 3;">
-                            <div class="ca-logo-box"><input type="file" id="setupLogo" accept="image/*" style="width: 100%;"></div>
-                        </div>
+                        <div style="grid-column: 2 / span 3;"><div class="ca-logo-box"><input type="file" id="setupLogo" accept="image/*" style="width: 100%;"></div></div>
                         <div class="ca-label">Sports Type*</div>
                         <div><select id="setupSportsType" class="ca-input"><option>Cricket</option><option>Badminton</option><option>Table Tennis</option><option>Volleyball</option></select></div>
                         <div class="ca-label" style="text-align: right; padding-right: 10px;">Season</div>
@@ -207,15 +186,13 @@
                                 <button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>
                             </div>
                         </div>
-                        <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room defaults to your standard Base Increment if these are left blank.</div>
+                        <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room defaults to standard Base Increment if blank.</div>
                     </div>
 
-                    <!-- Live Control & Roster -->
+                    <!-- Live Control -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Live Control & Roster</div>
-                        
                         <button id="adPlayerCounterBtn" class="btn-success" onclick="navTo('view-control')" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
-                        
                         <div style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 5px;">Live Auction Team Logo Size:</div>
                         <input type="range" id="liveLogoResizer" min="50" max="350" value="150" style="width: 100%; cursor: pointer;" oninput="changeLiveLogoSize(this.value)">
                         <div style="text-align: center; font-size: 12px; color: #94a3b8; margin-top: 5px;" id="liveLogoSizeDisp">150px</div>
@@ -242,18 +219,15 @@
                 <div class="ad-card" style="margin-top: 30px; border-top: 4px solid #1e73be; background: #ffffff;">
                     <h2 style="color: #0f172a; margin-top: 0;">My Auctions Library</h2>
                     <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Load or manage your completed and incomplete auctions below.</p>
-                    
                     <div style="margin-bottom: 25px;">
                         <div style="font-size: 15px; font-weight: bold; color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 8px; margin-bottom: 15px;">Active / Incomplete Auctions</div>
                         <div id="incomplete-auctions-list"></div>
                     </div>
-
                     <div>
                         <div style="font-size: 15px; font-weight: bold; color: #64748b; border-bottom: 2px solid #64748b; padding-bottom: 8px; margin-bottom: 15px;">Completed Auctions</div>
                         <div id="completed-auctions-list"></div>
                     </div>
                 </div>
-
             </div>
 
             <!-- VIEW D: LIVE AUCTION ROOM -->
@@ -265,9 +239,7 @@
                         <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
                     </div>
 
-                    <!-- Top Split -->
                     <div class="live-top-section">
-                        <!-- Player Card (Left) -->
                         <div class="live-player-card">
                             <div class="live-photo-box">
                                 <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
@@ -280,34 +252,26 @@
                             </div>
                         </div>
 
-                        <!-- Live Bidding Tracker (Right) -->
                         <div class="live-bidding-panel">
                             <h2 style="margin: 0; color: #cbd5e1; text-transform: uppercase; letter-spacing: 2px;">Current Bid</h2>
                             <div class="live-current-bid">₹<span id="la-current-bid">0</span></div>
-                            
                             <img id="la-bidder-logo" class="live-bidder-logo" src="">
                             <div id="la-bidder-name" class="live-bidder-name">Team Name</div>
                         </div>
                     </div>
 
-                    <!-- Bottom Controls & Franchises -->
                     <div class="live-bottom-panel">
                         <div class="live-controls">
                             <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
                             <button class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random Player</button>
-                            
                             <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
-                            
                             <input type="number" id="la-manual-bid" placeholder="Custom Bid ₹" style="width: 150px; padding: 12px; color:black;">
                             <button class="btn-primary" style="background: #3b82f6;" onclick="applyManualBid()">Apply Custom Bid</button>
-                            
                             <div style="flex-grow: 1;"></div>
-                            
                             <button class="btn-success" style="font-size: 18px; padding: 12px 30px;" onclick="finalizeSale('sold')">SOLD!</button>
                             <button class="btn-danger" style="font-size: 18px; padding: 12px 30px;" onclick="finalizeSale('unsold')">UNSOLD</button>
                         </div>
-                        
                         <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise Logo to Bid</h4>
                         <div id="la-franchise-strip" class="franchise-strip"></div>
                     </div>
@@ -323,7 +287,6 @@
                     <button class="btn-primary" style="background: #10b981;" onclick="renderPlayersDatabase('available')">Available</button>
                     <button class="btn-primary" style="background: #3b82f6;" onclick="renderPlayersDatabase('sold')">Sold</button>
                     <button class="btn-primary" style="background: #ef4444;" onclick="renderPlayersDatabase('unsold')">Unsold</button>
-                    
                     <div style="flex-grow: 1;"></div>
                     <button class="btn-danger" style="background: #ef4444; margin-right:10px;" onclick="if(confirm('Are you sure? This will delete all local images to fix memory errors.')) { localStorage.clear(); location.reload(); }">⚠️ Reset Browser Memory</button>
                     <button class="btn-primary" style="background: #a855f7;" onclick="downloadPDF()">📥 Download PDF</button>
@@ -337,7 +300,7 @@
         </div>
     </div>
 
-    <!-- MODALS (TEAMS & CATEGORIES) -->
+    <!-- MODALS -->
     <div id="modal-team" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-team')">&times;</button>
@@ -372,39 +335,31 @@
         </div>
     </div>
 
-    <!-- MODALS (PLAYERS) -->
+    <!-- ADD/EDIT PLAYER MODALS -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
-            <div id="player-add-view">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;">
-                    <h2 style="margin: 0;">Import / Add Players</h2>
-                </div>
-                
-                <label>1. Import via Google Sheets Link</label>
-                <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
-                <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
-                
-                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                <label>2. Upload Excel/CSV File</label>
-                <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
-                <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
-                
-                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                <label>3. Add Manually:</label>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
-                    <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
-                    <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
-                    <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
-                    <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
-                    <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
-                    <button class="btn-primary" onclick="addPlayer()">Add Player</button>
-                </div>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Import / Add Players</h2>
+            <label>1. Import via Google Sheets Link</label>
+            <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
+            <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>2. Upload Excel/CSV File</label>
+            <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
+            <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>3. Add Manually:</label>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
+                <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
+                <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
+                <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
+                <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
+                <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
+                <button class="btn-primary" onclick="addPlayer()">Add Player</button>
             </div>
         </div>
     </div>
 
-    <!-- EDIT PLAYER MODAL -->
     <div id="modal-edit-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-edit-player')">&times;</button>
@@ -413,16 +368,12 @@
                 <input type="hidden" id="editPlayerId">
                 <label style="font-size:13px; font-weight:bold;">Player Name</label>
                 <input type="text" id="editPlayerName" style="color:black; margin-bottom: 10px;" required>
-                
                 <label style="font-size:13px; font-weight:bold;">Category</label>
                 <select id="editPlayerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category</option></select>
-                
                 <label style="font-size:13px; font-weight:bold;">Base Price</label>
                 <input type="number" id="editPlayerBasePrice" style="color:black; margin-bottom: 10px;" required>
-                
                 <label style="font-size:13px; font-weight:bold;">Update Photo (Optional)</label>
                 <input type="file" id="editPlayerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 15px;">
-                
                 <button class="btn-success" style="width: 100%; padding: 12px;" onclick="savePlayerEdit()">Save Changes</button>
             </div>
         </div>
@@ -430,8 +381,9 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
-        socket.emit('joinRoom', 'KBL2026');
+        // SAFE SOCKET INITIALIZATION
+        let socket = { emit: function(){} };
+        try { if(typeof io !== 'undefined') { socket = io(); socket.emit('joinRoom', 'KBL2026'); } } catch(e) { console.log("Running in offline mode"); }
         
         let currentBidIncrease = 0;
         window.currentCategories = [];
@@ -443,36 +395,35 @@
         let liveCurrentTeamId = null;
         let isFirstBid = true; 
 
-        // --- SAFE STORAGE ---
+        // --- INVINCIBLE JSON PARSER ---
+        function safeGetStorage(key, defaultVal) {
+            try { return JSON.parse(localStorage.getItem(key)) || defaultVal; } 
+            catch(e) { console.warn("Storage corrupt for " + key); return defaultVal; }
+        }
+
+        // --- SAFE STORAGE SAVER ---
         function safeSetStorage(key, data) {
-            try {
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (e) {
-                console.warn("Storage quota limit reached, attempting cleanup...", e);
+            try { localStorage.setItem(key, JSON.stringify(data)); } 
+            catch (e) {
+                console.warn("Storage quota limit reached, cleaning up...");
                 try {
                     localStorage.removeItem('auctionHistory');
                     localStorage.setItem(key, JSON.stringify(data));
-                } catch(err) {
-                    alert("Browser storage is full! Please click 'Reset Browser Memory' in Players Roster.");
-                }
+                } catch(err) {}
             }
         }
 
         // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
-            if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) {
-                return team.logoUrl;
-            }
+            if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) return team.logoUrl;
             const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
             const letter = nameToUse.charAt(0).toUpperCase() || 'T';
-            
-            // Using encodeURIComponent is 100x safer than btoa() which crashes on special characters!
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#1e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
         function getActiveTeams() {
-            const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            const localTeams = safeGetStorage('auctionTeams', []);
             if (localTeams && localTeams.length > 0) return localTeams;
             return window.allTeams || [];
         }
@@ -541,29 +492,23 @@
             if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
-                populateAuctionDetails(); 
-                loadDashboard(); 
+                try { populateAuctionDetails(); loadDashboard(); } catch(e){}
             }
             if(viewId === 'view-control') { 
                 document.getElementById('nav-control').classList.add('active'); 
-                loadDashboard(); 
-                renderPlayersDatabase('all'); 
+                try { loadDashboard(); renderPlayersDatabase('all'); } catch(e){}
             }
-            
             if(viewId === 'view-live-room') {
                 document.getElementById('nav-live').classList.add('active');
-                initLiveAuctionRoom();
+                try { initLiveAuctionRoom(); } catch(e){}
             }
         }
 
         // --- EDIT/DELETE FUNCTIONS ---
-
-        // Edit/Delete Categories
         function editCategory(oldName) {
             const newName = prompt("Enter new category name:", oldName);
             if(!newName || newName.trim() === "" || newName === oldName) return;
-            
-            let cats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            let cats = safeGetStorage('auctionCats', []);
             let index = cats.findIndex(c => (c.name || c) === oldName);
             if(index > -1) {
                 if(typeof cats[index] === 'object') cats[index].name = newName;
@@ -576,7 +521,7 @@
 
         function deleteCategory(name) {
             if(!confirm(`Are you sure you want to delete the category '${name}'?`)) return;
-            let cats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            let cats = safeGetStorage('auctionCats', []);
             cats = cats.filter(c => (c.name || c) !== name);
             safeSetStorage('auctionCats', cats);
             updateManualCategoryDropdowns();
@@ -584,13 +529,12 @@
         }
 
         function updateManualCategoryDropdowns() {
-            const cats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            const cats = safeGetStorage('auctionCats', []);
             window.currentCategories = cats;
             const drop1 = document.getElementById('playerCategoryManual');
             const drop2 = document.getElementById('editPlayerCategoryManual');
             if(drop1) drop1.innerHTML = '<option value="">Select Category *</option>';
             if(drop2) drop2.innerHTML = '<option value="">Select Category</option>';
-            
             cats.forEach(c => {
                 const name = c.name || c;
                 const max = c.maxPlayers ? ` (Limit: ${c.maxPlayers})` : '';
@@ -599,10 +543,9 @@
             });
         }
 
-        // Edit/Delete Teams
         function deleteTeam(id) {
             if(!confirm("Are you sure you want to delete this franchise?")) return;
-            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            let localTeams = safeGetStorage('auctionTeams', []);
             localTeams = localTeams.filter(t => t._id !== id);
             safeSetStorage('auctionTeams', localTeams);
             window.allTeams = localTeams;
@@ -610,13 +553,12 @@
         }
 
         function editTeam(id) {
-            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            let localTeams = safeGetStorage('auctionTeams', []);
             const t = localTeams.find(t => t._id === id);
             if(!t) return;
-            
             document.getElementById('editTeamId').value = t._id;
             document.getElementById('editTeamName').value = t.name;
-            document.getElementById('editTeamLogo').value = ""; // clear file
+            document.getElementById('editTeamLogo').value = ""; 
             openModal('modal-edit-team');
         }
 
@@ -624,10 +566,9 @@
             const id = document.getElementById('editTeamId').value;
             const newName = document.getElementById('editTeamName').value;
             const logoInput = document.getElementById('editTeamLogo');
-            
             if(!newName || newName.trim() === "") return alert("Name is required");
 
-            let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            let localTeams = safeGetStorage('auctionTeams', []);
             let tIndex = localTeams.findIndex(t => t._id === id);
             
             if(tIndex > -1) {
@@ -642,7 +583,6 @@
             }
         }
 
-        // Edit/Delete Players
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             window.allPlayers = window.allPlayers.filter(p => p._id !== id);
@@ -654,15 +594,12 @@
         function openEditPlayerModal(id) {
             const p = window.allPlayers.find(p => p._id === id);
             if(!p) return;
-            
             updateManualCategoryDropdowns();
-            
             document.getElementById('editPlayerId').value = p._id;
             document.getElementById('editPlayerName').value = p.name;
             document.getElementById('editPlayerBasePrice').value = p.basePrice || 0;
             document.getElementById('editPlayerCategoryManual').value = p.category || '';
             document.getElementById('editPlayerPhoto').value = ""; 
-            
             openModal('modal-edit-player');
         }
 
@@ -697,20 +634,20 @@
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 
-                window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
-                window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                window.allPlayers = safeGetStorage('auctionPlayers', []);
+                window.allTeams = safeGetStorage('auctionTeams', []);
                 
-                loadDashboard();
-                populateAuctionDetails();
-                updateDashboardHistoryCard();
-                updateManualCategoryDropdowns();
+                try { loadDashboard(); } catch(e){}
+                try { populateAuctionDetails(); } catch(e){}
+                try { updateDashboardHistoryCard(); } catch(e){}
+                try { updateManualCategoryDropdowns(); } catch(e){}
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
             }
         }
 
         function updateDashboardHistoryCard() {
-            const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            const savedSetup = safeGetStorage('auctionSetup', {});
             if(savedSetup.name) {
                 document.getElementById('recentAuctionCard').style.display = 'flex';
                 document.getElementById('histName').innerText = savedSetup.name;
@@ -774,7 +711,6 @@
                     });
                 }
             } catch(e) {
-                console.error("Error drawing live room teams:", e);
                 strip.innerHTML = '<span style="color:#ef4444;">Error loading teams.</span>';
             }
             
@@ -810,7 +746,6 @@
             
             const slNoDisplay = p.serialNumber ? `#${p.serialNumber} - ` : '';
             document.getElementById('la-name').innerText = slNoDisplay + p.name;
-            
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
             document.getElementById('la-base').innerText = p.basePrice;
@@ -840,7 +775,7 @@
         }
 
         function getDynamicIncrement() {
-            const setup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            const setup = safeGetStorage('auctionSetup', {});
             let baseInc = Number(setup.bidInc) || 100; 
             
             const container = document.getElementById('bidIncrementContainer');
@@ -857,7 +792,7 @@
                     }
                 });
             } else {
-                tiers = JSON.parse(localStorage.getItem('auctionBidTiers') || '[]');
+                tiers = safeGetStorage('auctionBidTiers', []);
             }
 
             let calculatedInc = baseInc;
@@ -914,7 +849,7 @@
         function finalizeSale(resultType) {
             if(!livePlayerActive) return alert("No player on screen!");
 
-            let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+            let localPlayers = safeGetStorage('auctionPlayers', []);
             let pIndex = localPlayers.findIndex(p => 
                 (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
                 (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
@@ -946,7 +881,7 @@
                 else { window.allPlayers.push(livePlayerActive); }
 
                 safeSetStorage('auctionPlayers', localPlayers);
-                socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: 'KBL2026' });
+                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: 'KBL2026' }); } catch(e){}
 
             } else if(resultType === 'unsold') {
                 livePlayerActive.status = 'unsold';
@@ -961,7 +896,7 @@
                 if(globalIndex > -1) { window.allPlayers[globalIndex].status = 'unsold'; }
 
                 safeSetStorage('auctionPlayers', localPlayers);
-                socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold' });
+                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold' }); } catch(e){}
             }
             
             // Auto Advance
@@ -1015,7 +950,7 @@
         }
 
         function loadBidIncrements() {
-            const tiers = JSON.parse(localStorage.getItem('auctionBidTiers') || '[]');
+            const tiers = safeGetStorage('auctionBidTiers', []);
             const container = document.getElementById('bidIncrementContainer');
             if (!container || tiers.length === 0) return;
             
@@ -1036,7 +971,7 @@
 
         // --- DASHBOARD AND DATA ---
         function populateAuctionDetails() {
-            const data = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            const data = safeGetStorage('auctionSetup', {});
             document.getElementById('adName').innerText = data.name || 'No Name Set';
             document.getElementById('adBalance').innerText = data.budget || '0';
             document.getElementById('adBaseBid').innerText = data.minBid || '0.00';
@@ -1049,12 +984,16 @@
             applyLiveLogoSize();
             updatePlayerCounterBtn();
             loadBidIncrements();
-            try { renderAuctionLibrary(); } catch(e) {}
+            try { renderAuctionLibrary(); } catch(e){}
+        }
+
+        function safeInit() {
+            try { loadSavedMemory(); } catch(e) {}
         }
 
         function loadSavedMemory() {
-            window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
-            window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            window.allPlayers = safeGetStorage('auctionPlayers', []);
+            window.allTeams = safeGetStorage('auctionTeams', []);
             
             let changed = false;
             window.allPlayers.forEach(p => {
@@ -1068,7 +1007,7 @@
             updateDashboardHistoryCard();
             updateManualCategoryDropdowns();
 
-            const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            const savedSetup = safeGetStorage('auctionSetup', {});
             if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
             if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
             if(savedSetup.budget) document.getElementById('setupBudget').value = savedSetup.budget;
@@ -1104,7 +1043,7 @@
             safeSetStorage('auctionSetup', newAuction);
             currentBidIncrease = Number(newAuction.bidInc);
             
-            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+            let history = safeGetStorage('auctionHistory', []);
             let existingIndex = history.findIndex(a => a.name === newAuction.name);
             if(existingIndex >= 0) history[existingIndex] = newAuction;
             else history.push(newAuction);
@@ -1125,14 +1064,14 @@
                 } catch(e) {}
                 
                 const serverPlayers = Array.isArray(data.players) ? data.players : [];
-                const localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+                const localPlayers = safeGetStorage('auctionPlayers', []);
                 let playerMap = new Map();
                 serverPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
                 localPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
                 window.allPlayers = Array.from(playerMap.values());
 
                 const serverTeams = Array.isArray(data.teams) ? data.teams : [];
-                const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                const localTeams = safeGetStorage('auctionTeams', []);
                 let teamMap = new Map();
                 
                 localTeams.forEach(t => { if(t && t.name) teamMap.set(t.name.trim().toLowerCase(), t); });
@@ -1150,9 +1089,10 @@
                 window.allTeams = Array.from(teamMap.values());
                 safeSetStorage('auctionTeams', window.allTeams);
                 
-                try { renderAuctionDetailLists(); } catch(e) {}
-                try { updatePlayerCounterBtn(); } catch(e) {}
-                try { updateDashboardHistoryCard(); } catch(e) {}
+                try { renderAuctionDetailLists(); } catch(e){}
+                try { updatePlayerCounterBtn(); } catch(e){}
+                try { updateDashboardHistoryCard(); } catch(e){}
+
             } catch (err) { console.error(err); }
         }
 
@@ -1183,7 +1123,7 @@
 
             const catContainer = document.getElementById('ad-categories-list');
             if (catContainer) {
-                const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+                const savedCats = safeGetStorage('auctionCats', []);
                 if(savedCats && savedCats.length > 0) {
                     catContainer.innerHTML = savedCats.map(c => {
                         const name = typeof c === 'object' ? c.name : c;
@@ -1204,7 +1144,7 @@
         }
 
         async function bulkAddPlayers(playersArray, game) {
-            let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+            let localPlayers = safeGetStorage('auctionPlayers', []);
             const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
             let addedCount = 0;
 
@@ -1233,7 +1173,7 @@
                     localPlayers.push(newPlayer);
                     window.allPlayers.push(newPlayer);
                     addedCount++;
-                    fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlayer) }).catch(e => {});
+                    try { fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlayer) }); } catch(e){}
                 }
             }
             safeSetStorage('auctionPlayers', localPlayers);
@@ -1272,7 +1212,7 @@
                 tournamentId: 'KBL2026'
             };
 
-            let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+            let localPlayers = safeGetStorage('auctionPlayers', []);
             localPlayers.push(newPlayer);
             window.allPlayers.push(newPlayer);
             safeSetStorage('auctionPlayers', localPlayers);
@@ -1402,8 +1342,6 @@
             html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
         }
 
-        // --- INITIALIZATION ---
-        setTimeout(loadSavedMemory, 500);
     </script>
 </body>
 </html>
