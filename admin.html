@@ -360,12 +360,12 @@
                 
                 <label>1. Import via Google Sheets Link</label>
                 <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
-                <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet()">Import from Link</button>
+                <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
                 
                 <hr style="border-top: 1px solid #334155; margin: 15px 0;">
                 <label>2. Upload Excel/CSV File</label>
                 <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
-                <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers()">Upload File</button>
+                <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
                 
                 <hr style="border-top: 1px solid #334155; margin: 15px 0;">
                 <label>3. Import from Registration Link</label>
@@ -494,6 +494,7 @@
             if (counterBtn) {
                 const count = (window.allPlayers && window.allPlayers.length) ? window.allPlayers.length : 0;
                 counterBtn.innerText = `${count} Players Added (View Roster)`;
+                counterBtn.style.display = 'inline-block';
             }
         }
 
@@ -1005,6 +1006,44 @@
             }
         }
 
+        // --- BULLETPROOF BATCH PROCESSING FOR PLAYERS ---
+        async function bulkAddPlayers(playersArray, game) {
+            let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+            const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
+            let addedCount = 0;
+
+            for (let p of playersArray) {
+                const pName = p.Name || p.name || p.Player || p['Player Name'];
+                const pPrice = p.BasePrice || p.baseprice || p.Price || p['Base Price'] || setupBase;
+                
+                if (pName) {
+                    let newPlayer = {
+                        _id: 'player_' + Date.now() + '_' + Math.floor(Math.random()*10000),
+                        name: String(pName).trim(),
+                        basePrice: pPrice,
+                        category: p.Category || p.category || '',
+                        club: p.Club || p.club || p.Team || p.team || '',
+                        photoUrl: p.Photo || p.photoUrl || p.Image || '',
+                        status: 'unsold',
+                        game: game,
+                        tournamentId: 'KBL2026'
+                    };
+                    localPlayers.push(newPlayer);
+                    window.allPlayers.push(newPlayer);
+                    addedCount++;
+
+                    fetch('/api/players/register', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify(newPlayer) 
+                    }).catch(e => {});
+                }
+            }
+
+            localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
+            return addedCount;
+        }
+
         async function addPlayer() {
             const nameInput = document.getElementById('playerName').value;
             const priceInput = document.getElementById('playerBasePrice').value;
@@ -1061,51 +1100,73 @@
             renderPlayersDatabase();
         }
 
-        async function processPlayerRow(p, game) {
-            let normalizedPlayer = {
-                ...p, 
-                name: p.Name || p.name || p.Player || p['Player Name'],
-                basePrice: p.BasePrice || p.baseprice || p.Price || p['Base Price'],
-                category: p.Category || p.category || '',
-                club: p.Club || p.club || p.Team || p.team || '',
-                game: game,
-                tournamentId: 'KBL2026'
-            };
-            if (normalizedPlayer.name && normalizedPlayer.basePrice) {
-                await fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(normalizedPlayer) });
-            }
-        }
-
-        async function importExcelPlayers() {
+        async function importExcelPlayers(btn) {
             const file = document.getElementById('excelFile').files[0];
             const game = document.getElementById('setupSportsType').value;
-            if (!file) return;
+            if (!file) return alert("Please select a file first.");
+
+            if(btn) {
+                btn.innerText = "Importing... Please wait";
+                btn.disabled = true;
+            }
+
             const reader = new FileReader();
             reader.onload = async (e) => {
-                const playersArray = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).SheetNames[0]]);
-                for (let p of playersArray) await processPlayerRow(p, game);
-                alert("File imported successfully!");
-                closeModal('modal-player');
-                loadDashboard();
+                try {
+                    const workbook = XLSX.read(new Uint8Array(e.target.result), {type: 'array'});
+                    const playersArray = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    
+                    const count = await bulkAddPlayers(playersArray, game);
+                    
+                    alert(`${count} Players imported successfully!`);
+                    closeModal('modal-player');
+                    updatePlayerCounterBtn();
+                    renderPlayersDatabase();
+                } catch(err) {
+                    alert("Error: Invalid file format.");
+                } finally {
+                    if(btn) {
+                        btn.innerText = "Upload File";
+                        btn.disabled = false;
+                    }
+                    document.getElementById('excelFile').value = '';
+                }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        async function importFromGoogleSheet() { 
+        async function importFromGoogleSheet(btn) { 
             const link = document.getElementById('gSheetLink').value;
             const game = document.getElementById('setupSportsType').value;
             if (!link.includes('spreadsheets/d/')) return alert("Invalid Google Sheets link.");
+            
+            if(btn) {
+                btn.innerText = "Importing... Please wait";
+                btn.disabled = true;
+            }
+
             try {
                 const sheetId = link.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)[1];
                 const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`);
                 const text = await response.text();
                 const workbook = XLSX.read(text, {type: 'string'});
                 const playersArray = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                for (let p of playersArray) await processPlayerRow(p, game);
-                alert("Players imported successfully!");
+                
+                const count = await bulkAddPlayers(playersArray, game);
+                
+                alert(`${count} Players imported successfully!`);
                 closeModal('modal-player');
-                loadDashboard();
-            } catch (err) { alert("Error importing: " + err.message); }
+                updatePlayerCounterBtn();
+                renderPlayersDatabase();
+            } catch (err) { 
+                alert("Error importing: " + err.message); 
+            } finally {
+                if(btn) {
+                    btn.innerText = "Import from Link";
+                    btn.disabled = false;
+                }
+                document.getElementById('gSheetLink').value = '';
+            }
         }
 
         function renderPlayersDatabase() {
