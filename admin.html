@@ -66,7 +66,7 @@
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
-        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
+        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
         
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -118,7 +118,8 @@
 
                 <div class="dash-section-bar" style="max-width: 950px;">Your Active Auction</div>
                 <div class="auction-history-card" onclick="navTo('view-auction-detail')" id="recentAuctionCard" style="display: none;">
-                    <div style="width: 40px; height: 40px; background: #334155; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 10px;">LOGO</div>
+                    <!-- DYNAMIC DASHBOARD LOGO -->
+                    <img id="histLogo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;">
                     <div>
                         <div style="font-weight: bold; color: #334155; font-size: 16px;" id="histName">Auction Name</div>
                         <div style="color: #94a3b8; font-size: 12px;" id="histDate">2026-08-08</div>
@@ -132,7 +133,10 @@
                 <form onsubmit="submitSetup(event)">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
-                        <div style="grid-column: 2 / span 3;"><div class="ca-logo-box"><input type="file" id="setupLogo" accept="image/*" style="width: 100%;"></div></div>
+                        <div style="grid-column: 2 / span 3;">
+                            <!-- Auction Logo Image Input -->
+                            <div class="ca-logo-box"><input type="file" id="setupLogo" accept="image/*" style="width: 100%;"></div>
+                        </div>
                         <div class="ca-label">Sports Type*</div>
                         <div><select id="setupSportsType" class="ca-input"><option>Cricket</option><option>Badminton</option><option>Table Tennis</option><option>Volleyball</option></select></div>
                         <div class="ca-label" style="text-align: right; padding-right: 10px;">Season</div>
@@ -167,7 +171,8 @@
                 <!-- Header with Modular Icons -->
                 <div class="ad-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 20px;">
-                        <div style="width: 70px; height: 70px; background: #333; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center;">LOGO</div>
+                        <!-- DYNAMIC AUCTION DETAIL LOGO -->
+                        <img id="adLogoImage" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1;">
                         <div>
                             <h2 style="margin: 0; color: #1e73be; font-size: 24px;" id="adName">Loading...</h2>
                             <div style="color: #64748b; font-size: 14px; margin-top: 8px;">A-Code: <span id="adCode">KBL-2026</span></div>
@@ -208,10 +213,8 @@
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Live Control & Roster</div>
                         
-                        <!-- Roster Counter Cum List Button -->
                         <button id="adPlayerCounterBtn" class="btn-success" onclick="navTo('view-control')" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
                         
-                        <!-- Live Room Logo Resizer -->
                         <div style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 5px;">Live Auction Team Logo Size:</div>
                         <input type="range" id="liveLogoResizer" min="50" max="350" value="150" style="width: 100%; cursor: pointer;" oninput="changeLiveLogoSize(this.value)">
                         <div style="text-align: center; font-size: 12px; color: #94a3b8; margin-top: 5px;" id="liveLogoSizeDisp">150px</div>
@@ -318,7 +321,6 @@
             <div id="view-control" class="hidden">
                 <h1 class="dash-title">PLAYERS ROSTER</h1>
                 
-                <!-- Filter Buttons -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                     <button class="btn-primary" style="background: #334155;" onclick="renderPlayersDatabase('all')">All Players</button>
                     <button class="btn-primary" style="background: #10b981;" onclick="renderPlayersDatabase('available')">Available</button>
@@ -326,6 +328,7 @@
                     <button class="btn-primary" style="background: #ef4444;" onclick="renderPlayersDatabase('unsold')">Unsold</button>
                     
                     <div style="flex-grow: 1;"></div>
+                    <button class="btn-danger" style="background: #ef4444; margin-right:10px;" onclick="if(confirm('Are you sure? This will delete all local images to fix memory errors.')) { localStorage.clear(); location.reload(); }">⚠️ Reset Browser Memory</button>
                     <button class="btn-primary" style="background: #a855f7;" onclick="downloadPDF()">📥 Download PDF</button>
                 </div>
 
@@ -409,6 +412,35 @@
         let liveCurrentTeamId = null;
         let isFirstBid = true; 
 
+        // --- UPGRADED IMAGE COMPRESSOR (PREVENTS MEMORY CRASH & KEEPS TRANSPARENCY) ---
+        async function compressImage(file, maxSize = 250) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) {
+                            if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+                        } else {
+                            if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Using WEBP guarantees transparency support AND tiny file sizes!
+                        resolve(canvas.toDataURL('image/webp', 0.8)); 
+                    };
+                };
+            });
+        }
+
         // --- UI ROUTING & MODALS ---
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
@@ -453,14 +485,24 @@
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 
-                // Immediately force local data load to prevent vanishing lists on refresh
                 window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
                 
                 loadDashboard();
                 populateAuctionDetails();
+                updateDashboardHistoryCard();
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        function updateDashboardHistoryCard() {
+            const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            if(savedSetup.name) {
+                document.getElementById('recentAuctionCard').style.display = 'flex';
+                document.getElementById('histName').innerText = savedSetup.name;
+                document.getElementById('histDate').innerText = savedSetup.date || 'Active Auction';
+                document.getElementById('histLogo').src = (savedSetup.logoUrl && savedSetup.logoUrl.length > 10) ? savedSetup.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             }
         }
 
@@ -512,9 +554,7 @@
                     strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
                 } else {
                     activeTeams.forEach((t, index) => {
-                        // Safe image fallback
                         const logo = (t.logoUrl && typeof t.logoUrl === 'string' && t.logoUrl.length > 5) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                        // Safe name fallback (prevents .substring crash)
                         const safeName = t.name ? String(t.name).substring(0, 10) : ('Team ' + (index + 1));
                         
                         strip.innerHTML += `
@@ -526,7 +566,7 @@
                 }
             } catch(e) {
                 console.error("Error drawing live room teams:", e);
-                strip.innerHTML = '<span style="color:#ef4444;">Error drawing teams.</span>';
+                strip.innerHTML = '<span style="color:#ef4444;">Error drawing teams. Browser Memory limit may be reached.</span>';
             }
             
             resetLiveBoard();
@@ -659,7 +699,6 @@
                 let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 let pIndex = localPlayers.findIndex(p => p._id === livePlayerActive._id);
                 
-                // Find winning team safely
                 const activeTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
                 let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId) || window.allTeams.find(t => t._id === liveCurrentTeamId);
                 
@@ -724,6 +763,11 @@
             document.getElementById('adBidInc').innerText = data.bidInc || '0.00';
             document.getElementById('adPlayers').innerText = `${data.maxPlayers || '0'} /Team`;
             
+            const logoEl = document.getElementById('adLogoImage');
+            if (logoEl) {
+                logoEl.src = (data.logoUrl && data.logoUrl.length > 10) ? data.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            }
+
             applyLiveLogoSize();
             updatePlayerCounterBtn();
             renderAuctionLibrary(); 
@@ -741,6 +785,7 @@
 
             updatePlayerCounterBtn();
             applyLiveLogoSize();
+            updateDashboardHistoryCard();
 
             const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
             if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
@@ -770,11 +815,18 @@
             }
         }
 
-        function submitSetup(event) {
+        async function submitSetup(event) {
             event.preventDefault(); 
             
+            let auctionLogoUrl = "";
+            const logoInput = document.getElementById('setupLogo');
+            if (logoInput && logoInput.files && logoInput.files[0]) {
+                auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+            }
+
             const newAuction = {
                 id: Date.now().toString(),
+                logoUrl: auctionLogoUrl,
                 sportsType: document.getElementById('setupSportsType').value,
                 name: document.getElementById('setupName').value,
                 budget: document.getElementById('setupBudget').value,
@@ -828,6 +880,7 @@
                 
                 renderAuctionDetailLists(); 
                 updatePlayerCounterBtn();
+                updateDashboardHistoryCard();
 
             } catch (err) { console.error(err); }
         }
@@ -837,7 +890,7 @@
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
                 const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-                const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
+                const activeTeams = localTeams.length > 0 ? localTeams : window.allTeams;
                 
                 if(activeTeams && activeTeams.length > 0) {
                     teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
@@ -1005,11 +1058,7 @@
                 
                 let logoDataUrl = "";
                 if (logoInput && logoInput.files && logoInput.files[0]) {
-                    logoDataUrl = await new Promise(res => { 
-                        const r = new FileReader(); 
-                        r.onload = e => res(e.target.result); 
-                        r.readAsDataURL(logoInput.files[0]); 
-                    });
+                    logoDataUrl = await compressImage(logoInput.files[0], 200);
                 }
                 
                 let newTeam = {
@@ -1031,8 +1080,12 @@
                 } catch(e) {}
             }
 
-            localStorage.setItem('auctionTeams', JSON.stringify(localTeams));
-            window.allTeams = localTeams;
+            try {
+                localStorage.setItem('auctionTeams', JSON.stringify(localTeams));
+                window.allTeams = localTeams;
+            } catch(e) {
+                alert("Browser Memory Full! Please reset memory and try again.");
+            }
 
             document.getElementById('numOfTeams').value = ''; 
             document.getElementById('teamInputsContainer').innerHTML = '';
@@ -1079,7 +1132,11 @@
                 }
             }
 
-            localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
+            try {
+                localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
+            } catch(e) {
+                alert("Browser Memory Full! Excel imported partially.");
+            }
             return addedCount;
         }
 
@@ -1098,11 +1155,7 @@
 
             let photoDataUrl = "";
             if (photoInput && photoInput.files[0]) {
-                photoDataUrl = await new Promise(res => { 
-                    const r = new FileReader(); 
-                    r.onload = e => res(e.target.result); 
-                    r.readAsDataURL(photoInput.files[0]); 
-                });
+                photoDataUrl = await compressImage(photoInput.files[0], 250);
             }
 
             let newPlayer = {
@@ -1118,8 +1171,14 @@
 
             let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             localPlayers.push(newPlayer);
-            localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
-            window.allPlayers.push(newPlayer);
+            
+            try {
+                localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
+                window.allPlayers.push(newPlayer);
+            } catch(e) {
+                alert("Browser Memory Full! Player not saved. Please clear memory.");
+                return;
+            }
 
             updatePlayerCounterBtn();
 
