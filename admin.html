@@ -197,9 +197,9 @@
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Tiers</div>
                         <div id="bidIncrementContainer">
                             <div class="bid-tier-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
-                                <input type="number" class="ad-small-input" placeholder="Incr.">
+                                <input type="number" class="ad-small-input" placeholder="Incr." onchange="saveBidIncrements()">
                                 <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
-                                <input type="number" class="ad-small-input" placeholder="Amount">
+                                <input type="number" class="ad-small-input" placeholder="Amount" onchange="saveBidIncrements()">
                                 <button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>
                             </div>
                         </div>
@@ -290,7 +290,7 @@
                     <div class="live-bottom-panel">
                         <!-- Controls -->
                         <div class="live-controls">
-                            <input type="text" id="la-search-input" placeholder="Player Name" style="width: 200px; padding: 12px; color:black;">
+                            <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
                             <button class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random Player</button>
                             
@@ -642,7 +642,9 @@
             liveCurrentTeamId = null;
             isFirstBid = true; 
             
-            document.getElementById('la-name').innerText = p.name;
+            const slNoDisplay = p.serialNumber ? `#${p.serialNumber} - ` : '';
+            document.getElementById('la-name').innerText = slNoDisplay + p.name;
+            
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
             document.getElementById('la-base').innerText = p.basePrice;
@@ -661,9 +663,14 @@
         }
 
         function manualSearchPlayer() {
-            const term = document.getElementById('la-search-input').value.toLowerCase();
+            const term = document.getElementById('la-search-input').value.toLowerCase().trim();
             if(!term) return;
-            const found = window.allPlayers.find(p => String(p.name).toLowerCase() === term && p.status !== 'sold');
+            
+            const found = window.allPlayers.find(p => 
+                (String(p.name).toLowerCase() === term || String(p.serialNumber).toLowerCase() === term) 
+                && p.status !== 'sold'
+            );
+            
             if(found) pushPlayerToScreen(found);
             else alert("Player not found or already sold.");
         }
@@ -673,24 +680,69 @@
             let baseInc = Number(setup.bidInc) || 100; 
             
             const container = document.getElementById('bidIncrementContainer');
-            if(!container) return baseInc;
-            
-            const rows = container.querySelectorAll('.bid-tier-row');
+            let rows = container ? container.querySelectorAll('.bid-tier-row') : [];
+            let tiers = [];
+
+            if (rows.length > 0) {
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    if (inputs.length >= 2) {
+                        const incVal = Number(inputs[0].value);
+                        const afterVal = Number(inputs[1].value);
+                        if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
+                    }
+                });
+            } else {
+                tiers = JSON.parse(localStorage.getItem('auctionBidTiers') || '[]');
+            }
+
             let calculatedInc = baseInc;
             let highestMetTier = -1;
 
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if(inputs.length >= 2) {
-                    const incVal = Number(inputs[0].value);
-                    const afterVal = Number(inputs[1].value);
-                    if(incVal > 0 && afterVal > 0 && liveCurrentBid >= afterVal && afterVal > highestMetTier) {
-                        highestMetTier = afterVal;
-                        calculatedInc = incVal;
-                    }
+            tiers.forEach(tier => {
+                if (tier.incVal > 0 && tier.afterVal > 0 && liveCurrentBid >= tier.afterVal && tier.afterVal > highestMetTier) {
+                    highestMetTier = tier.afterVal;
+                    calculatedInc = tier.incVal;
                 }
             });
+
             return calculatedInc;
+        }
+
+        function saveBidIncrements() {
+            const container = document.getElementById('bidIncrementContainer');
+            if (!container) return;
+            const rows = container.querySelectorAll('.bid-tier-row');
+            let tiers = [];
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length >= 2) {
+                    const incVal = Number(inputs[0].value);
+                    const afterVal = Number(inputs[1].value);
+                    if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
+                }
+            });
+            safeSetStorage('auctionBidTiers', tiers);
+        }
+
+        function loadBidIncrements() {
+            const tiers = JSON.parse(localStorage.getItem('auctionBidTiers') || '[]');
+            const container = document.getElementById('bidIncrementContainer');
+            if (!container || tiers.length === 0) return;
+            
+            container.innerHTML = '';
+            tiers.forEach((tier, index) => {
+                const newRow = document.createElement('div');
+                newRow.className = 'bid-tier-row';
+                newRow.style = 'display: flex; gap: 10px; align-items: center; margin-bottom: 15px;';
+                const isLast = (index === tiers.length - 1);
+                newRow.innerHTML = `
+                    <input type="number" class="ad-small-input" placeholder="Incr." value="${tier.incVal}" onchange="saveBidIncrements()">
+                    <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
+                    <input type="number" class="ad-small-input" placeholder="Amount" value="${tier.afterVal}" onchange="saveBidIncrements()">
+                    <button type="button" class="ad-btn-small" style="background: ${isLast ? '#1e73be' : '#ef4444'};" onclick="${isLast ? 'addBidIncrementRow(this)' : 'this.parentElement.remove(); saveBidIncrements();'}">${isLast ? 'ADD' : 'REMOVE'}</button>`;
+                container.appendChild(newRow);
+            });
         }
 
         function franchiseBidByIndex(index) {
@@ -810,7 +862,6 @@
                 alert(`${livePlayerActive.name} remains UNSOLD.`);
             }
             
-            // Auto Advance to Next Player instantly!
             setTimeout(async () => { 
                 await loadDashboard(); 
                 
@@ -830,7 +881,7 @@
             if (btnElement) {
                 btnElement.innerText = "REMOVE";
                 btnElement.style.background = "#ef4444";
-                btnElement.onclick = function() { this.parentElement.remove(); };
+                btnElement.onclick = function() { this.parentElement.remove(); saveBidIncrements(); };
             }
             
             const container = document.getElementById('bidIncrementContainer');
@@ -838,11 +889,12 @@
             newRow.className = 'bid-tier-row';
             newRow.style = 'display: flex; gap: 10px; align-items: center; margin-bottom: 15px;';
             newRow.innerHTML = `
-                <input type="number" class="ad-small-input" placeholder="Incr.">
+                <input type="number" class="ad-small-input" placeholder="Incr." onchange="saveBidIncrements()">
                 <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
-                <input type="number" class="ad-small-input" placeholder="Amount">
+                <input type="number" class="ad-small-input" placeholder="Amount" onchange="saveBidIncrements()">
                 <button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>`;
             container.appendChild(newRow);
+            saveBidIncrements();
         }
 
         // --- DATA AND MEMORY LOGIC ---
@@ -861,6 +913,7 @@
 
             applyLiveLogoSize();
             updatePlayerCounterBtn();
+            loadBidIncrements();
             renderAuctionLibrary(); 
         }
 
@@ -876,6 +929,7 @@
 
             updatePlayerCounterBtn();
             applyLiveLogoSize();
+            loadBidIncrements();
             updateDashboardHistoryCard();
 
             const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
@@ -979,6 +1033,9 @@
                     }
                 });
                 window.allTeams = Array.from(teamMap.values());
+                
+                // PERSIST ALL TEAMS BACK TO LOCALSTORAGE
+                safeSetStorage('auctionTeams', window.allTeams);
                 
                 renderAuctionDetailLists(); 
                 updatePlayerCounterBtn();
@@ -1209,9 +1266,12 @@
                 const pName = p.Name || p.name || p.Player || p['Player Name'];
                 const pPrice = p.BasePrice || p.baseprice || p.Price || p['Base Price'] || setupBase;
                 
+                const pSlNo = p['Sl No'] || p['Sl.No'] || p['SL NO'] || p['Serial Number'] || p['S.No'] || p['#'] || p.slNo || p.SlNo || (window.allPlayers.length + addedCount + 1);
+                
                 if (pName) {
                     let newPlayer = {
                         _id: 'player_' + Date.now() + '_' + Math.floor(Math.random()*10000),
+                        serialNumber: pSlNo,
                         name: String(pName).trim(),
                         basePrice: pPrice,
                         category: p.Category || p.category || '',
@@ -1257,6 +1317,7 @@
 
             let newPlayer = {
                 _id: 'player_' + Date.now(),
+                serialNumber: window.allPlayers.length + 1,
                 name: String(nameInput).trim(),
                 basePrice: finalPrice,
                 category: catInput,
@@ -1401,7 +1462,9 @@
                         <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
                         ${teamLogoOverlay}
                     </div>
-                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px;">${safeName}</div>
+                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px;">
+                        <span style="color: #94a3b8; font-size: 14px;">#${p.serialNumber || '-'}</span> ${safeName}
+                    </div>
                     <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice}</div>
                     <div style="width: 100%; margin-top: auto;">${statusBox}</div>
                 </div>`;
