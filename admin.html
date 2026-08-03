@@ -66,7 +66,7 @@
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
-        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
+        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
         
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -99,7 +99,7 @@
             <div class="sidebar-item" id="nav-setup" onclick="navTo('view-setup')">Create Auction</div>
             <div class="sidebar-item" id="nav-detail" onclick="navTo('view-auction-detail')">My Auction</div>
             <div class="sidebar-item" id="nav-live" onclick="navTo('view-live-room')">Live Auction Room</div>
-            <div class="sidebar-item" id="nav-control" onclick="navTo('view-control')">Database Panel</div>
+            <div class="sidebar-item" id="nav-control" onclick="navTo('view-control')">Players Roster</div>
         </div>
         
         <div class="dash-main" style="position: relative;">
@@ -112,7 +112,7 @@
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-auction-detail')"><div><h3>My</h3><p>Auction</p></div></div>
-                    <div class="dash-card" onclick="navTo('view-control')"><div><h3>Database</h3><p>Panel</p></div></div>
+                    <div class="dash-card" onclick="navTo('view-control')"><div><h3>Players</h3><p>Roster</p></div></div>
                     <div class="dash-card" style="background:#10b981; border:none;" onclick="navTo('view-live-room')"><div><h3 style="color:white;">Enter</h3><p style="color:white;">Auction Room</p></div></div>
                 </div>
 
@@ -209,7 +209,7 @@
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Live Control & Roster</div>
                         
                         <!-- Roster Counter Cum List Button -->
-                        <button id="adPlayerCounterBtn" class="btn-success" onclick="openPlayerModal()" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
+                        <button id="adPlayerCounterBtn" class="btn-success" onclick="navTo('view-control')" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
                         
                         <!-- Live Room Logo Resizer -->
                         <div style="font-size: 13px; font-weight: bold; color: #64748b; margin-bottom: 5px;">Live Auction Team Logo Size:</div>
@@ -314,12 +314,23 @@
                 </div>
             </div>
 
-            <!-- VIEW E: DATABASE PANEL -->
+            <!-- VIEW E: DATABASE PANEL (PLAYERS ROSTER) -->
             <div id="view-control" class="hidden">
-                <h1 class="dash-title">DATABASE PANEL</h1>
-                <div style="background: white; padding: 20px; border-radius: 8px;">
-                    <button class="btn-primary" onclick="downloadPDF()" style="width: auto; margin-bottom: 20px;">📥 Download PDF</button>
-                    <div id="playersListContainer" style="overflow-x: auto; color: black;"></div>
+                <h1 class="dash-title">PLAYERS ROSTER</h1>
+                
+                <!-- NEW: Filter Buttons -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button class="btn-primary" style="background: #334155;" onclick="renderPlayersDatabase('all')">All Players</button>
+                    <button class="btn-primary" style="background: #10b981;" onclick="renderPlayersDatabase('available')">Available</button>
+                    <button class="btn-primary" style="background: #3b82f6;" onclick="renderPlayersDatabase('sold')">Sold</button>
+                    <button class="btn-primary" style="background: #ef4444;" onclick="renderPlayersDatabase('unsold')">Unsold</button>
+                    
+                    <div style="flex-grow: 1;"></div>
+                    <button class="btn-primary" style="background: #a855f7;" onclick="downloadPDF()">📥 Download PDF</button>
+                </div>
+
+                <div style="background: white; padding: 20px; border-radius: 8px;" id="pdf-content">
+                    <div id="playersListContainer" style="color: black;"></div>
                 </div>
             </div>
             
@@ -348,52 +359,36 @@
         </div>
     </div>
 
+    <!-- ADD PLAYERS MODAL -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Import / Add Players</h2>
             
-            <!-- LIST VIEW -->
-            <div id="player-list-view">
-                <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Registered Players</h2>
-                <div id="modal-players-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; border-radius: 8px;">
-                    <!-- Populated via Javascript -->
-                </div>
-                <button class="btn-success" style="width: 100%; font-size: 16px; padding: 15px;" onclick="togglePlayerViews('add')">+ ADD NEW PLAYERS</button>
-            </div>
+            <label>1. Import via Google Sheets Link</label>
+            <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
+            <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
+            
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>2. Upload Excel/CSV File</label>
+            <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
+            <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
+            
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>3. Import from Registration Link</label>
+            <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
 
-            <!-- ADD VIEW -->
-            <div id="player-add-view" class="hidden">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;">
-                    <h2 style="margin: 0;">Import Players</h2>
-                    <button class="btn-primary" style="width: auto; margin: 0; padding: 6px 12px; font-size: 13px;" onclick="togglePlayerViews('list')">← Back to List</button>
-                </div>
+            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+            <label>4. Add Manually:</label>
+            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
+                <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
+                <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
+                <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
+                <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
                 
-                <label>1. Import via Google Sheets Link</label>
-                <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
-                <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet(this)">Import from Link</button>
+                <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
                 
-                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                <label>2. Upload Excel/CSV File</label>
-                <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
-                <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
-                
-                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                <label>3. Import from Registration Link</label>
-                <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
-
-                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-                <label>4. Add Manually:</label>
-                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
-                    <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
-                    <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
-                    <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
-                    <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
-                    <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <button class="btn-primary" onclick="addPlayer()">Add Player</button>
-                    </div>
-                </div>
+                <button class="btn-primary" onclick="addPlayer()">Add Player</button>
             </div>
         </div>
     </div>
@@ -440,7 +435,11 @@
                 populateAuctionDetails(); 
                 loadDashboard(); 
             }
-            if(viewId === 'view-control') { document.getElementById('nav-control').classList.add('active'); loadDashboard(); }
+            if(viewId === 'view-control') { 
+                document.getElementById('nav-control').classList.add('active'); 
+                loadDashboard(); 
+                renderPlayersDatabase('all'); 
+            }
             
             if(viewId === 'view-live-room') {
                 document.getElementById('nav-live').classList.add('active');
@@ -448,13 +447,12 @@
             }
         }
 
-        // --- BULLETPROOF LOGIN & RE-LOGIN PERSISTENCE ---
+        // --- BULLETPROOF LOGIN ---
         function checkPassword() {
             if (document.getElementById('adminPassword').value === "MasterUnlock2026") {
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 
-                // Immediately force local data load to prevent vanishing lists on refresh
                 window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
                 
@@ -465,51 +463,18 @@
             }
         }
 
-        // --- PLAYERS MODAL FLOW ---
-        function openPlayerModal() {
-            renderModalPlayerList();
-            togglePlayerViews('list');
-            openModal('modal-player');
-        }
-
-        function togglePlayerViews(view) {
-            if (view === 'add') {
-                document.getElementById('player-list-view').classList.add('hidden');
-                document.getElementById('player-add-view').classList.remove('hidden');
-            } else {
-                document.getElementById('player-list-view').classList.remove('hidden');
-                document.getElementById('player-add-view').classList.add('hidden');
-                renderModalPlayerList();
-            }
-        }
-
-        function renderModalPlayerList() {
-            const container = document.getElementById('modal-players-list');
-            if (window.allPlayers.length === 0) {
-                container.innerHTML = '<p style="color:#94a3b8; text-align:center; padding: 20px 0;">No players added to the roster yet.</p>';
-                return;
-            }
-            let html = '<table style="width:100%; text-align:left; border-collapse:collapse; color:#333; background:white;">';
-            html += '<tr style="background:#cbd5e1;"><th style="padding:10px;">Photo</th><th style="padding:10px;">Name</th><th style="padding:10px;">Category</th><th style="padding:10px;">Base Price</th></tr>';
-            window.allPlayers.forEach(p => {
-                const photoSrc = p.photoUrl ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                html += `<tr style="border-bottom:1px solid #e2e8f0;">
-                    <td style="padding:10px;"><img src="${photoSrc}" style="width:35px; height:35px; border-radius:50%; object-fit:cover; border: 1px solid #cbd5e1;"></td>
-                    <td style="padding:10px; font-weight:bold;">${p.name}</td>
-                    <td style="padding:10px;">${p.category || '-'}</td>
-                    <td style="padding:10px; color:#10b981; font-weight:bold;">₹${p.basePrice}</td>
-                </tr>`;
-            });
-            html += '</table>';
-            container.innerHTML = html;
-        }
-
+        // --- COUNTERS ---
         function updatePlayerCounterBtn() {
             const counterBtn = document.getElementById('adPlayerCounterBtn');
             if (counterBtn) {
                 const count = (window.allPlayers && window.allPlayers.length) ? window.allPlayers.length : 0;
                 counterBtn.innerText = `${count} Players Added (View Roster)`;
             }
+        }
+
+        // --- ADD PLAYERS MODAL FLOW ---
+        function openPlayerModal() {
+            openModal('modal-player');
         }
 
         // --- LOGO RESIZER CONTROLS ---
@@ -595,9 +560,10 @@
         }
 
         function nextRandomPlayer() {
-            const available = window.allPlayers.filter(p => p.status !== 'sold' && p.status !== 'unsold');
-            if(available.length === 0) return alert("No available players left!");
-            const random = available[Math.floor(Math.random() * available.length)];
+            // FIX: Only grab 'available' players!
+            const availablePlayers = window.allPlayers.filter(p => p.status === 'available');
+            if(availablePlayers.length === 0) return alert("No available players left in the roster!");
+            const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
             pushPlayerToScreen(random);
         }
 
@@ -681,8 +647,16 @@
                 
                 let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 let pIndex = localPlayers.findIndex(p => p._id === livePlayerActive._id);
+                
+                // Find winning team logo
+                let winningTeam = window.allTeams.find(t => t._id === liveCurrentTeamId);
+                
                 if(pIndex > -1) {
                     localPlayers[pIndex].status = 'sold';
+                    localPlayers[pIndex].soldPrice = liveCurrentBid;
+                    localPlayers[pIndex].teamId = liveCurrentTeamId;
+                    localPlayers[pIndex].teamName = winningTeam ? winningTeam.name : '';
+                    localPlayers[pIndex].teamLogo = winningTeam ? winningTeam.logoUrl : '';
                     localStorage.setItem('auctionPlayers', JSON.stringify(localPlayers));
                 }
 
@@ -746,6 +720,14 @@
         function loadSavedMemory() {
             window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            
+            // Clean up any old "unsold" defaults to "available"
+            let changed = false;
+            window.allPlayers.forEach(p => {
+                if(!p.status || (p.status === 'unsold' && !p.soldPrice)) { p.status = 'available'; changed = true; }
+            });
+            if(changed) localStorage.setItem('auctionPlayers', JSON.stringify(window.allPlayers));
+
             updatePlayerCounterBtn();
             applyLiveLogoSize();
 
@@ -833,7 +815,6 @@
                 localTeams.forEach(t => { if(t && t.name) teamMap.set(t.name, t); });
                 window.allTeams = Array.from(teamMap.values());
                 
-                renderPlayersDatabase(); 
                 renderAuctionDetailLists(); 
                 updatePlayerCounterBtn();
 
@@ -1068,7 +1049,7 @@
                         category: p.Category || p.category || '',
                         club: p.Club || p.club || p.Team || p.team || '',
                         photoUrl: p.Photo || p.photoUrl || p.Image || '',
-                        status: 'unsold',
+                        status: 'available', // FIX: New players start as 'available'
                         game: game,
                         tournamentId: 'KBL2026'
                     };
@@ -1116,7 +1097,7 @@
                 basePrice: finalPrice,
                 category: catInput,
                 photoUrl: photoDataUrl,
-                status: 'unsold',
+                status: 'available', // FIX: New players start as 'available'
                 game: document.getElementById('setupSportsType').value,
                 tournamentId: 'KBL2026'
             };
@@ -1141,7 +1122,7 @@
                 });
             } catch(e) {}
             
-            renderPlayersDatabase();
+            closeModal('modal-player');
         }
 
         async function importExcelPlayers(btn) {
@@ -1165,7 +1146,6 @@
                     alert(`${count} Players imported successfully!`);
                     closeModal('modal-player');
                     updatePlayerCounterBtn();
-                    renderPlayersDatabase();
                 } catch(err) {
                     alert("Error: Invalid file format.");
                 } finally {
@@ -1201,7 +1181,6 @@
                 alert(`${count} Players imported successfully!`);
                 closeModal('modal-player');
                 updatePlayerCounterBtn();
-                renderPlayersDatabase();
             } catch (err) { 
                 alert("Error importing: " + err.message); 
             } finally {
@@ -1213,40 +1192,62 @@
             }
         }
 
-        function renderPlayersDatabase() {
+        // --- UPGRADED PLAYERS ROSTER GRID ---
+        function renderPlayersDatabase(filter = 'all') {
             const container = document.getElementById('playersListContainer');
-            if(window.allPlayers.length === 0) return container.innerHTML = "<p>No players registered yet.</p>";
+            if(window.allPlayers.length === 0) {
+                container.innerHTML = "<p>No players registered yet.</p>";
+                return;
+            }
 
-            let html = `<div id="pdf-content" style="padding: 20px; font-family: Arial, sans-serif;">
-                        <h2 style="text-align: center; color: #0f172a;">Player Database</h2>`;
-            html += `<table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
-                     <tr style="background: #f1f5f9;">
-                        <th style="border: 1px solid #cbd5e1; padding: 10px; width: 60px;">PHOTO</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px;">NAME</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px;">CATEGORY</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px;">PRICE</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px;">STATUS</th>
-                     </tr>`;
+            let filteredPlayers = window.allPlayers;
+            if (filter !== 'all') {
+                filteredPlayers = window.allPlayers.filter(p => p.status === filter);
+            }
+
+            if(filteredPlayers.length === 0) {
+                container.innerHTML = `<p>No players found in the '${filter}' category.</p>`;
+                return;
+            }
+
+            let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
             
-            window.allPlayers.forEach(p => {
+            filteredPlayers.forEach(p => {
                 const photoSrc = p.photoUrl ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                html += `<tr>
-                    <td style="border: 1px solid #cbd5e1; padding: 10px; text-align:center;">
-                        <img src="${photoSrc}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-                    </td>
-                    <td style="border: 1px solid #cbd5e1; padding: 10px;">${p.name}</td>
-                    <td style="border: 1px solid #cbd5e1; padding: 10px;">${p.category || '-'}</td>
-                    <td style="border: 1px solid #cbd5e1; padding: 10px;">₹${p.basePrice}</td>
-                    <td style="border: 1px solid #cbd5e1; padding: 10px; font-weight:bold; color:${p.status === 'sold' ? '#10b981' : '#64748b'};">${p.status.toUpperCase()}</td>
-                </tr>`;
+                
+                let statusBox = '';
+                let teamLogoOverlay = '';
+
+                if (p.status === 'sold') {
+                    statusBox = `<div style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">SOLD: ₹${p.soldPrice || p.basePrice}</div>`;
+                    if (p.teamLogo) {
+                        teamLogoOverlay = `<img src="${p.teamLogo}" style="position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`;
+                    }
+                } else if (p.status === 'unsold') {
+                    statusBox = `<div style="background: #ef4444; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">UNSOLD</div>`;
+                } else {
+                    statusBox = `<div style="background: #3b82f6; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">AVAILABLE</div>`;
+                }
+
+                html += `
+                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+                    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
+                        <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+                        ${teamLogoOverlay}
+                    </div>
+                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px;">${p.name}</div>
+                    <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice}</div>
+                    <div style="width: 100%; margin-top: auto;">${statusBox}</div>
+                </div>`;
             });
-            html += `</table></div>`;
+            
+            html += `</div>`;
             container.innerHTML = html;
         }
 
         function downloadPDF() {
             const element = document.getElementById('pdf-content');
-            html2pdf().set({ margin: 0.5, filename: 'Auction_List.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
+            html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
         }
 
         // --- INITIALIZATION ---
