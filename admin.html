@@ -323,14 +323,13 @@
 
     <!-- MODALS SECTION -->
     <div id="modal-team" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-team')">&times;</button>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Add Franchise</h2>
-            <label style="font-size:13px; font-weight:bold;">Team Name *</label>
-            <input type="text" id="newTeamName" style="color:black; margin-bottom: 15px; width: 100%;" required>
-            <label style="font-size:13px; font-weight:bold;">Team Logo (Optional)</label>
-            <input type="file" id="newTeamLogo" accept="image/*" style="background: white; color: black; margin-bottom: 15px; width: 100%;">
-            <button class="btn-primary" style="width: 100%; padding: 12px;" id="saveNewTeamBtn" onclick="addNewTeam()">Save Team</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Manage Franchises</h2>
+            <label style="font-size: 13px; font-weight: bold;">Number of Teams to Add</label>
+            <input type="number" id="numOfTeams" min="1" placeholder="e.g. 9" oninput="generateTeamInputs()" onkeyup="generateTeamInputs()" onchange="generateTeamInputs()" style="color:black; margin-bottom: 10px;">
+            <div id="teamInputsContainer"></div>
+            <button class="btn-primary" id="addTeamBtn" onclick="addMultipleTeams()" style="margin-top: 15px; width: 100%;">Add All Teams</button>
         </div>
     </div>
 
@@ -348,14 +347,13 @@
     </div>
 
     <div id="modal-category" class="modal-overlay hidden">
-        <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-category')">&times;</button>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Add Category</h2>
-            <label style="font-size:13px; font-weight:bold;">Category Name *</label>
-            <input type="text" id="newCatName" style="color:black; margin-bottom: 15px; width: 100%;" required>
-            <label style="font-size:13px; font-weight:bold;">Max Players per Team (Optional)</label>
-            <input type="number" id="newCatMax" style="color:black; margin-bottom: 15px; width: 100%;">
-            <button class="btn-primary" style="width: 100%; padding: 12px;" onclick="addNewCategory()">Save Category</button>
+            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Manage Categories</h2>
+            <label style="font-size:13px; font-weight:bold;">Number of Categories to Add</label>
+            <input type="number" id="numOfCategories" min="1" placeholder="e.g. 4" oninput="generateCategoryInputs()" onkeyup="generateCategoryInputs()" onchange="generateCategoryInputs()" style="color:black; margin-bottom:10px;">
+            <div id="categoryInputsContainer"></div>
+            <button id="saveCatBtn" class="btn-primary" onclick="saveCategories()" style="display:none; margin-top:15px; width: 100%;">Save Categories</button>
         </div>
     </div>
 
@@ -375,11 +373,7 @@
             <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers(this)">Upload File</button>
             
             <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>3. Import from Registration Link</label>
-            <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
-
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>4. Add Manually:</label>
+            <label>3. Add Manually:</label>
             <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
                 <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
                 <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
@@ -541,27 +535,63 @@
             }
         }
 
+        // --- INPUT FIELD GENERATORS ---
+        function generateTeamInputs() {
+            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
+            const container = document.getElementById('teamInputsContainer');
+            if(!container) return;
+            container.innerHTML = ''; 
+            for(let i=1; i<=num; i++) {
+                container.innerHTML += `
+                    <div style="background:#1e293b; padding:12px; margin-top:10px; border-radius:8px; border:1px solid #334155;">
+                        <h4 style="margin:0 0 8px 0; color:#38bdf8;">Team ${i}</h4>
+                        <input type="text" id="tName_${i}" placeholder="Enter Team Name *" style="color:black; margin-bottom:8px;" required>
+                        <label style="color:#cbd5e1; font-size:12px;">Team Logo (Optional)</label>
+                        <input type="file" id="tLogo_${i}" accept="image/*" style="margin-top:4px; background:white; color:black;">
+                    </div>`;
+            }
+        }
+
+        function generateCategoryInputs() {
+            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
+            const container = document.getElementById('categoryInputsContainer');
+            if(!container) return;
+            container.innerHTML = ''; 
+            const btn = document.getElementById('saveCatBtn');
+            if(btn) btn.style.display = num > 0 ? 'inline-block' : 'none';
+            for(let i=1; i<=num; i++) {
+                container.innerHTML += `
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <input type="text" id="catName_${i}" placeholder="Category ${i} Name *" style="flex: 2; color:black;" required>
+                        <input type="number" id="catMax_${i}" placeholder="Max / Team" style="flex: 1; color:black;">
+                    </div>`;
+            }
+        }
+
         // --- ADD / EDIT / DELETE FUNCTIONS ---
 
         // Category Management
-        function addNewCategory() {
-            const name = document.getElementById('newCatName').value;
-            const max = document.getElementById('newCatMax').value;
-            if(!name || name.trim() === '') return alert('Category Name is required!');
+        async function saveCategories() {
+            const num = parseInt(document.getElementById('numOfCategories').value) || 0;
+            window.currentCategories = safeGetStorage('auctionCats', []);
             
-            let cats = safeGetStorage('auctionCats', []);
-            if(cats.find(c => (c.name || c).toLowerCase() === name.trim().toLowerCase())) {
-                return alert('Category already exists!');
+            for(let i=1; i<=num; i++) {
+                const input = document.getElementById('catName_'+i);
+                const maxInput = document.getElementById('catMax_'+i);
+                if(input && input.value.trim()) { 
+                    const catData = { name: input.value.trim(), maxPlayers: maxInput ? maxInput.value : '' };
+                    window.currentCategories.push(catData); 
+                }
             }
+            safeSetStorage('auctionCats', window.currentCategories); 
             
-            cats.push({ name: name.trim(), maxPlayers: max });
-            safeSetStorage('auctionCats', cats);
             updateManualCategoryDropdowns();
             try { renderAuctionDetailLists(); } catch(e){}
             
-            document.getElementById('newCatName').value = '';
-            document.getElementById('newCatMax').value = '';
+            document.getElementById('numOfCategories').value = '';
+            document.getElementById('categoryInputsContainer').innerHTML = '';
             closeModal('modal-category');
+            alert("Categories saved successfully!");
         }
 
         function editCategory(oldName) {
@@ -603,47 +633,63 @@
         }
 
         // Team Management
-        async function addNewTeam() {
-            const nameInput = document.getElementById('newTeamName').value;
-            const logoInput = document.getElementById('newTeamLogo');
-            const btn = document.getElementById('saveNewTeamBtn');
+        async function addMultipleTeams() {
+            const num = parseInt(document.getElementById('numOfTeams').value) || 0;
+            const budget = document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0; 
+            const btn = document.getElementById('addTeamBtn');
             
-            if(!nameInput || nameInput.trim() === '') return alert('Team Name is required!');
+            if(num === 0) return alert("Please enter the number of teams to add.");
             
-            btn.innerText = "Saving...";
-            btn.disabled = true;
+            if(btn) { btn.innerText = "Saving Teams... Please wait"; btn.disabled = true; }
 
             let localTeams = safeGetStorage('auctionTeams', []);
-            const budget = document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0;
-            
-            let logoDataUrl = "";
-            if (logoInput && logoInput.files && logoInput.files[0]) {
-                logoDataUrl = await compressImage(logoInput.files[0], 120);
-            }
-            
-            let newTeam = {
-                _id: 'team_' + Date.now() + '_' + Math.floor(Math.random()*1000),
-                name: String(nameInput).trim(),
-                logoUrl: logoDataUrl,
-                budget: Number(budget),
-                purseRemaining: Number(budget)
-            };
 
-            localTeams.push(newTeam);
+            for(let i=1; i<=num; i++) {
+                const nameInput = document.getElementById('tName_'+i);
+                const logoInput = document.getElementById('tLogo_'+i);
+                if(!nameInput || !nameInput.value.trim()) continue;
+                
+                let logoDataUrl = "";
+                if (logoInput && logoInput.files && logoInput.files[0]) {
+                    logoDataUrl = await compressImage(logoInput.files[0], 120);
+                }
+                
+                if (!logoDataUrl) {
+                    logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
+                }
+                
+                let newTeam = {
+                    _id: 'team_' + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000),
+                    name: String(nameInput.value).trim(),
+                    logoUrl: logoDataUrl,
+                    budget: Number(budget),
+                    purseRemaining: Number(budget)
+                };
+
+                localTeams.push(newTeam);
+                
+                try {
+                    fetch('/api/franchises', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
+                    }).catch(e => {});
+                } catch(e) {}
+            }
+
             safeSetStorage('auctionTeams', localTeams);
             window.allTeams = localTeams;
 
-            try {
-                fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) }).catch(e => {});
-            } catch(e) {}
-
-            document.getElementById('newTeamName').value = '';
-            document.getElementById('newTeamLogo').value = '';
-            btn.innerText = "Save Team";
-            btn.disabled = false;
+            document.getElementById('numOfTeams').value = ''; 
+            document.getElementById('teamInputsContainer').innerHTML = '';
+            if(btn) { btn.innerText = "Add All Teams"; btn.disabled = false; }
             
             closeModal('modal-team');
             try { renderAuctionDetailLists(); } catch(e){}
+            if(document.getElementById('view-live-room').classList.contains('hidden') === false){
+                initLiveAuctionRoom();
+            }
+            alert("Teams added successfully!");
         }
 
         function deleteTeam(id) {
