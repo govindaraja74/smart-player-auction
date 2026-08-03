@@ -424,27 +424,34 @@
             }
         }
 
-        // --- SAFE LOGO/EMBLEM GENERATOR ---
+        // --- BASE64 COMPLIANT EMBLEM GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
             if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) {
                 return team.logoUrl;
             }
             const letter = (team && team.name ? String(team.name).trim().charAt(0) : defaultName.charAt(0)).toUpperCase() || 'T';
-            return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#1e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+            return 'data:image/svg+xml;base64,' + btoa(svg);
+        }
+
+        // --- HELPER TO READ ALL ACTIVE TEAMS ---
+        function getActiveTeams() {
+            const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            if (localTeams && localTeams.length > 0) return localTeams;
+            return window.allTeams || [];
         }
 
         // --- ULTRA-FAST FAIL-SAFE COMPRESSOR WITH TIMEOUT ---
-        async function compressImage(file, maxSize = 120) {
+        async function compressImage(file, maxSize = 80) {
             return new Promise((resolve) => {
                 if (!file) return resolve("");
 
-                // 1.5-Second Strict Safety Timeout
                 const timer = setTimeout(() => {
                     const rawReader = new FileReader();
                     rawReader.onload = (e) => resolve(e.target.result || "");
                     rawReader.onerror = () => resolve("");
                     rawReader.readAsDataURL(file);
-                }, 1500);
+                }, 1200);
 
                 const reader = new FileReader();
                 reader.onerror = () => { clearTimeout(timer); resolve(""); };
@@ -456,8 +463,8 @@
                         clearTimeout(timer);
                         try {
                             const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
+                            let width = img.width || maxSize;
+                            let height = img.height || maxSize;
                             if (width > height) {
                                 if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
                             } else {
@@ -467,7 +474,7 @@
                             canvas.height = Math.max(1, height);
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            resolve(canvas.toDataURL('image/webp', 0.7)); 
+                            resolve(canvas.toDataURL('image/webp', 0.5)); 
                         } catch(e) {
                             resolve(dataUrl); 
                         }
@@ -584,8 +591,7 @@
             strip.innerHTML = '';
             
             try {
-                const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-                const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
+                const activeTeams = getActiveTeams();
                 
                 if(activeTeams.length === 0) {
                     strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
@@ -690,8 +696,7 @@
         function franchiseBidByIndex(index) {
             if(!livePlayerActive) return alert("Select a player first!");
             
-            const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-            const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
+            const activeTeams = getActiveTeams();
             const team = activeTeams[index];
             if(!team) return;
 
@@ -727,7 +732,7 @@
             }
         }
 
-        // --- ENHANCED SALE FINALIZE WITH DUAL ID/NAME LOOKUP ---
+        // --- ENHANCED SALE FINALIZE WITH AUTO-ADVANCE NEXT PLAYER ---
         function finalizeSale(resultType) {
             if(!livePlayerActive) return alert("No player on screen!");
 
@@ -741,8 +746,8 @@
             if(resultType === 'sold') {
                 if(!liveCurrentTeamId) return alert("A franchise must bid to sell!");
                 
-                const activeTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-                let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId) || (window.allTeams || []).find(t => t._id === liveCurrentTeamId);
+                const activeTeams = getActiveTeams();
+                let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId);
 
                 const winningName = winningTeam ? (winningTeam.name || 'Team') : 'Team';
                 const winningLogo = winningTeam ? getTeamLogo(winningTeam) : '';
@@ -805,7 +810,19 @@
                 alert(`${livePlayerActive.name} remains UNSOLD.`);
             }
             
-            setTimeout(() => { loadDashboard(); resetLiveBoard(); }, 500);
+            // Auto Advance to Next Player instantly!
+            setTimeout(async () => { 
+                await loadDashboard(); 
+                
+                const availablePlayers = window.allPlayers.filter(p => p.status === 'available');
+                if(availablePlayers.length > 0) {
+                    const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+                    pushPlayerToScreen(random);
+                } else {
+                    resetLiveBoard();
+                    alert("Auction Complete! No more available players left.");
+                }
+            }, 500);
         }
 
         // --- DYNAMIC INCREMENT ADD BUTTON LOGIC ---
@@ -974,8 +991,7 @@
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
-                const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-                const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
+                const activeTeams = getActiveTeams();
                 
                 if(activeTeams && activeTeams.length > 0) {
                     teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
@@ -1143,7 +1159,7 @@
                 
                 let logoDataUrl = "";
                 if (logoInput && logoInput.files && logoInput.files[0]) {
-                    logoDataUrl = await compressImage(logoInput.files[0], 120);
+                    logoDataUrl = await compressImage(logoInput.files[0], 80);
                 }
                 
                 if (!logoDataUrl) {
@@ -1236,7 +1252,7 @@
 
             let photoDataUrl = "";
             if (photoInput && photoInput.files[0]) {
-                photoDataUrl = await compressImage(photoInput.files[0], 200);
+                photoDataUrl = await compressImage(photoInput.files[0], 150);
             }
 
             let newPlayer = {
