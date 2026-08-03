@@ -117,7 +117,7 @@
                     <div class="dash-card" style="background:#10b981; border:none;" onclick="navTo('view-live-room')"><div><h3 style="color:white;">Enter</h3><p style="color:white;">Auction Room</p></div></div>
                 </div>
 
-                <div class="dash-section-bar" style="max-width: 950px;">Your Auctions</div>
+                <div class="dash-section-bar" style="max-width: 950px;">Your Active Auction</div>
                 <div class="auction-history-card" onclick="navTo('view-auction-detail')" id="recentAuctionCard" style="display: none;">
                     <div style="width: 40px; height: 40px; background: #334155; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-size: 10px;">LOGO</div>
                     <div>
@@ -185,7 +185,7 @@
                 <!-- Settings Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="ad-card">
-                        <!-- Updated Labels requested by User -->
+                        <!-- Updated Labels -->
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance per Team</span> <span id="adBalance">0</span></div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0.00</span></div>
                         <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
@@ -207,7 +207,7 @@
                     </div>
                 </div>
 
-                <!-- NEW: Teams and Categories Display Grid -->
+                <!-- Teams and Categories Display Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Teams Added</div>
@@ -220,6 +220,22 @@
                         <div id="ad-categories-list" style="color: #333; font-size: 14px; max-height: 200px; overflow-y: auto;">
                             <span style="color: #94a3b8;">No categories added yet.</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- NEW: AUCTION LIBRARY (COMPLETED & INCOMPLETE) -->
+                <div class="ad-card" style="margin-top: 30px; border-top: 4px solid #1e73be; background: #ffffff;">
+                    <h2 style="color: #0f172a; margin-top: 0;">My Auctions Library</h2>
+                    <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Load or manage your completed and incomplete auctions below.</p>
+                    
+                    <div style="margin-bottom: 25px;">
+                        <div style="font-size: 15px; font-weight: bold; color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 8px; margin-bottom: 15px;">Active / Incomplete Auctions</div>
+                        <div id="incomplete-auctions-list"></div>
+                    </div>
+
+                    <div>
+                        <div style="font-size: 15px; font-weight: bold; color: #64748b; border-bottom: 2px solid #64748b; padding-bottom: 8px; margin-bottom: 15px;">Completed Auctions</div>
+                        <div id="completed-auctions-list"></div>
                     </div>
                 </div>
 
@@ -363,7 +379,7 @@
         let livePlayerActive = null;
         let liveCurrentBid = 0;
         let liveCurrentTeamId = null;
-        let isFirstBid = true; // The perfect bid logic flag
+        let isFirstBid = true; 
 
         // --- UI ROUTING & MODALS ---
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
@@ -389,7 +405,7 @@
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
                 populateAuctionDetails(); 
-                loadDashboard(); // ensures team cards fetch
+                loadDashboard(); 
             }
             if(viewId === 'view-control') { document.getElementById('nav-control').classList.add('active'); loadDashboard(); }
             
@@ -428,7 +444,6 @@
             } else {
                 window.allTeams.forEach(t => {
                     const logo = t.logoUrl ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                    // Magic Bid Button Click Event
                     strip.innerHTML += `
                         <div class="franchise-btn" onclick="franchiseBid('${t._id}', '${t.name}', '${logo}')">
                             <img src="${logo}">
@@ -461,7 +476,7 @@
             livePlayerActive = p;
             liveCurrentBid = Number(p.basePrice);
             liveCurrentTeamId = null;
-            isFirstBid = true; // Reset the flag so the first team gets base price
+            isFirstBid = true; 
             
             document.getElementById('la-name').innerText = p.name;
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
@@ -488,7 +503,6 @@
             else alert("Player not found or already sold.");
         }
 
-        // DYNAMIC INCREMENT CALCULATOR
         function getDynamicIncrement() {
             let baseInc = Number(document.getElementById('setupBidIncrease').value) || 100; 
             const container = document.getElementById('bidIncrementContainer');
@@ -515,12 +529,9 @@
         function franchiseBid(teamId, teamName, logoUrl) {
             if(!livePlayerActive) return alert("Select a player first!");
             
-            // The Perfect Bidding Logic
             if (isFirstBid) {
-                // First click gets the Base Price
                 isFirstBid = false;
             } else {
-                // Subsequent clicks calculate the custom increment tier
                 let exactIncrement = getDynamicIncrement();
                 liveCurrentBid += exactIncrement;
             }
@@ -539,7 +550,7 @@
             const manBid = Number(document.getElementById('la-manual-bid').value);
             if(manBid > liveCurrentBid) {
                 liveCurrentBid = manBid;
-                isFirstBid = false; // Override flag if manually skipping ahead
+                isFirstBid = false; 
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
                 document.getElementById('la-manual-bid').value = '';
             } else {
@@ -589,6 +600,8 @@
             document.getElementById('adBalance').innerText = data.budget || '0';
             document.getElementById('adBaseBid').innerText = data.minBid || '0.00';
             document.getElementById('adPlayers').innerText = `${data.maxPlayers || '0'} /Team`;
+            
+            renderAuctionLibrary(); // Hydrate the library cards!
         }
 
         function loadSavedMemory() {
@@ -599,7 +612,6 @@
             if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
             if(savedSetup.bidInc) currentBidIncrease = Number(savedSetup.bidInc);
             
-            // MAX CATEGORY LOGIC
             const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
             if(savedCats.length > 0) {
                 document.getElementById('numOfCategories').value = savedCats.length;
@@ -620,17 +632,33 @@
 
         function submitSetup(event) {
             event.preventDefault(); 
-            localStorage.setItem('auctionSetup', JSON.stringify({
+            
+            const newAuction = {
+                id: Date.now().toString(),
                 sportsType: document.getElementById('setupSportsType').value,
                 name: document.getElementById('setupName').value,
                 budget: document.getElementById('setupBudget').value,
                 minBid: document.getElementById('setupMinBid').value,
                 bidInc: document.getElementById('setupBidIncrease').value,
                 maxPlayers: document.getElementById('setupMaxPlayers').value,
-            }));
-            currentBidIncrease = Number(document.getElementById('setupBidIncrease').value);
+                date: document.getElementById('setupDate').value,
+                time: document.getElementById('setupTime').value,
+                status: 'incomplete'
+            };
+
+            localStorage.setItem('auctionSetup', JSON.stringify(newAuction));
+            currentBidIncrease = Number(newAuction.bidInc);
             
-            // Next Page Submission Routing
+            // Save to Library History
+            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+            let existingIndex = history.findIndex(a => a.name === newAuction.name);
+            if(existingIndex >= 0) {
+                history[existingIndex] = newAuction;
+            } else {
+                history.push(newAuction);
+            }
+            localStorage.setItem('auctionHistory', JSON.stringify(history));
+
             navTo('view-auction-detail');
         }
 
@@ -641,11 +669,10 @@
                 window.allPlayers = data.players || [];
                 window.allTeams = data.teams || [];
                 renderPlayersDatabase(); 
-                renderAuctionDetailLists(); // Refreshes Teams & Categories cards
+                renderAuctionDetailLists(); 
             } catch (err) { console.error(err); }
         }
 
-        // --- NEW: RENDER TEAMS AND CATEGORIES TO DETAIL CARDS ---
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
@@ -671,7 +698,75 @@
             }
         }
 
-        // CATEGORY MAX LIMIT INPUTS
+        // --- NEW: AUCTION LIBRARY CONTROLS ---
+        function renderAuctionLibrary() {
+            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+            const incContainer = document.getElementById('incomplete-auctions-list');
+            const compContainer = document.getElementById('completed-auctions-list');
+
+            if(!incContainer || !compContainer) return;
+            incContainer.innerHTML = ''; compContainer.innerHTML = '';
+            let hasInc = false, hasComp = false;
+
+            history.forEach((auc, index) => {
+                let cardHtml = `
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <strong style="color: #0f172a; font-size: 16px;">${auc.name}</strong>
+                            <div style="color: #64748b; font-size: 12px; margin-top: 5px;">Date: ${auc.date || 'N/A'} | Budget: ₹${auc.budget || 0}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            ${auc.status !== 'completed' ? `<button class="ad-btn-small" style="background:#10b981;" onclick="markAuctionComplete(${index})">Mark Complete</button>` : ''}
+                            <button class="ad-btn-small" onclick="loadHistoricalAuction(${index})">Load Auction</button>
+                            <button class="ad-btn-small" style="background:#ef4444;" onclick="deleteHistoricalAuction(${index})">Delete</button>
+                        </div>
+                    </div>`;
+                    
+                if(auc.status === 'completed') {
+                    compContainer.innerHTML += cardHtml; hasComp = true;
+                } else {
+                    incContainer.innerHTML += cardHtml; hasInc = true;
+                }
+            });
+
+            if(!hasInc) incContainer.innerHTML = '<p style="color: #94a3b8; font-size: 14px;">No incomplete auctions.</p>';
+            if(!hasComp) compContainer.innerHTML = '<p style="color: #94a3b8; font-size: 14px;">No completed auctions.</p>';
+        }
+
+        function loadHistoricalAuction(index) {
+            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+            if(history[index]) {
+                localStorage.setItem('auctionSetup', JSON.stringify(history[index]));
+                populateAuctionDetails();
+                loadDashboard(); 
+                alert("Auction Loaded Successfully!");
+            }
+        }
+
+        function markAuctionComplete(index) {
+            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+            if(history[index]) {
+                history[index].status = 'completed';
+                localStorage.setItem('auctionHistory', JSON.stringify(history));
+
+                let current = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+                if(current.id === history[index].id) {
+                    current.status = 'completed';
+                    localStorage.setItem('auctionSetup', JSON.stringify(current));
+                }
+                renderAuctionLibrary();
+            }
+        }
+
+        function deleteHistoricalAuction(index) {
+            if(!confirm("Are you sure you want to delete this auction?")) return;
+            let history = JSON.parse(localStorage.getItem('auctionHistory') || '[]');
+            history.splice(index, 1);
+            localStorage.setItem('auctionHistory', JSON.stringify(history));
+            renderAuctionLibrary();
+        }
+
+        // --- CATEGORY & TEAM SAVING LOGIC ---
         function generateCategoryInputs() {
             const num = parseInt(document.getElementById('numOfCategories').value) || 0;
             const container = document.getElementById('categoryInputsContainer');
@@ -707,7 +802,7 @@
                 const maxLabel = cat.maxPlayers ? ` (Limit: ${cat.maxPlayers})` : '';
                 manualDropdown.innerHTML += `<option value="${cat.name}">${cat.name}${maxLabel}</option>`;
             });
-            renderAuctionDetailLists(); // Ensure cards update instantly
+            renderAuctionDetailLists(); 
         }
 
         function generateTeamInputs() {
@@ -722,18 +817,47 @@
         async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const budget = document.getElementById('setupBudget').value; 
+            const btn = document.getElementById('addTeamBtn');
+            
+            if(num === 0) return;
+            
+            btn.innerText = "Saving Teams... Please wait"; 
+            btn.disabled = true;
+
             for(let i=1; i<=num; i++) {
                 const name = document.getElementById('tName_'+i).value;
                 const logoInput = document.getElementById('tLogo_'+i);
                 if(!name) continue;
+                
                 let logoDataUrl = "";
                 if (logoInput && logoInput.files[0]) {
-                    logoDataUrl = await new Promise(res => { const r = new FileReader(); r.onload = e => res(e.target.result); r.readAsDataURL(logoInput.files[0]); });
+                    logoDataUrl = await new Promise(res => { 
+                        const r = new FileReader(); 
+                        r.onload = e => res(e.target.result); 
+                        r.readAsDataURL(logoInput.files[0]); 
+                    });
                 }
-                await fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, logoUrl: logoDataUrl, budget: Number(budget), purseRemaining: Number(budget), tournamentId: 'KBL2026' }) });
+                
+                await fetch('/api/franchises', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ 
+                        name, 
+                        logoUrl: logoDataUrl, 
+                        budget: Number(budget), 
+                        purseRemaining: Number(budget), 
+                        tournamentId: 'KBL2026' 
+                    }) 
+                });
             }
+
+            document.getElementById('numOfTeams').value = ''; 
+            document.getElementById('teamInputsContainer').innerHTML = '';
+            btn.innerText = "Add All Teams"; 
+            btn.disabled = false;
+            
             closeModal('modal-team');
-            loadDashboard(); 
+            navTo('view-auction-detail'); 
         }
 
         async function processPlayerRow(p, game) {
