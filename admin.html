@@ -80,7 +80,7 @@
         .close-btn:hover { color: white; }
         
         /* Utility */
-        .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 5px 8px; transition: 0.2s; }
+        .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 6px 10px; transition: 0.2s; }
         .edit-del-btn:hover { background: #e2e8f0; }
     </style>
 </head>
@@ -253,6 +253,7 @@
                         <div id="completed-auctions-list"></div>
                     </div>
                 </div>
+
             </div>
 
             <!-- VIEW D: LIVE AUCTION ROOM -->
@@ -354,10 +355,10 @@
             <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Edit Franchise</h2>
             <input type="hidden" id="editTeamId">
             <label>Team Name</label>
-            <input type="text" id="editTeamName" style="color:black; margin-bottom: 15px;">
+            <input type="text" id="editTeamName" style="color:black; margin-bottom: 15px; width: 100%;">
             <label>Update Logo (Optional)</label>
-            <input type="file" id="editTeamLogo" accept="image/*" style="background: white; color: black; margin-bottom: 15px;">
-            <button class="btn-success" style="width: 100%;" onclick="saveTeamEdit()">Save Changes</button>
+            <input type="file" id="editTeamLogo" accept="image/*" style="background: white; color: black; margin-bottom: 15px; width: 100%;">
+            <button class="btn-success" style="width: 100%; padding: 12px;" onclick="saveTeamEdit()">Save Changes</button>
         </div>
     </div>
 
@@ -422,7 +423,7 @@
                 <label style="font-size:13px; font-weight:bold;">Update Photo (Optional)</label>
                 <input type="file" id="editPlayerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 15px;">
                 
-                <button class="btn-success" style="width: 100%;" onclick="savePlayerEdit()">Save Changes</button>
+                <button class="btn-success" style="width: 100%; padding: 12px;" onclick="savePlayerEdit()">Save Changes</button>
             </div>
         </div>
     </div>
@@ -457,14 +458,17 @@
             }
         }
 
-        // --- LOGO GENERATOR ---
+        // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
             if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 10) {
                 return team.logoUrl;
             }
-            const letter = (team && team.name ? String(team.name).trim().charAt(0) : defaultName.charAt(0)).toUpperCase() || 'T';
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
-            return 'data:image/svg+xml;base64,' + btoa(svg);
+            const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
+            const letter = nameToUse.charAt(0).toUpperCase() || 'T';
+            
+            // Using encodeURIComponent is 100x safer than btoa() which crashes on special characters!
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#1e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
         function getActiveTeams() {
@@ -554,6 +558,7 @@
 
         // --- EDIT/DELETE FUNCTIONS ---
 
+        // Edit/Delete Categories
         function editCategory(oldName) {
             const newName = prompt("Enter new category name:", oldName);
             if(!newName || newName.trim() === "" || newName === oldName) return;
@@ -565,7 +570,7 @@
                 else cats[index] = newName;
                 safeSetStorage('auctionCats', cats);
                 updateManualCategoryDropdowns();
-                renderAuctionDetailLists();
+                try { renderAuctionDetailLists(); } catch(e) {}
             }
         }
 
@@ -575,7 +580,7 @@
             cats = cats.filter(c => (c.name || c) !== name);
             safeSetStorage('auctionCats', cats);
             updateManualCategoryDropdowns();
-            renderAuctionDetailLists();
+            try { renderAuctionDetailLists(); } catch(e) {}
         }
 
         function updateManualCategoryDropdowns() {
@@ -594,13 +599,14 @@
             });
         }
 
+        // Edit/Delete Teams
         function deleteTeam(id) {
             if(!confirm("Are you sure you want to delete this franchise?")) return;
             let localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
             localTeams = localTeams.filter(t => t._id !== id);
             safeSetStorage('auctionTeams', localTeams);
             window.allTeams = localTeams;
-            renderAuctionDetailLists();
+            try { renderAuctionDetailLists(); } catch(e) {}
         }
 
         function editTeam(id) {
@@ -631,11 +637,12 @@
                 }
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
-                renderAuctionDetailLists();
+                try { renderAuctionDetailLists(); } catch(e) {}
                 closeModal('modal-edit-team');
             }
         }
 
+        // Edit/Delete Players
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             window.allPlayers = window.allPlayers.filter(p => p._id !== id);
@@ -1037,14 +1044,12 @@
             document.getElementById('adPlayers').innerText = `${data.maxPlayers || '0'} /Team`;
             
             const logoEl = document.getElementById('adLogoImage');
-            if (logoEl) {
-                logoEl.src = getTeamLogo(data, data.name || 'Auction');
-            }
+            if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
 
             applyLiveLogoSize();
             updatePlayerCounterBtn();
             loadBidIncrements();
-            renderAuctionLibrary(); 
+            try { renderAuctionLibrary(); } catch(e) {}
         }
 
         function loadSavedMemory() {
@@ -1071,23 +1076,6 @@
             if(savedSetup.bidInc) {
                 document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
                 currentBidIncrease = Number(savedSetup.bidInc);
-            }
-            
-            const savedCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
-            if(savedCats.length > 0) {
-                document.getElementById('numOfCategories').value = savedCats.length;
-                generateCategoryInputs();
-                savedCats.forEach((cat, i) => {
-                    const input = document.getElementById('catName_'+(i+1));
-                    const maxInput = document.getElementById('catMax_'+(i+1));
-                    if(typeof cat === 'object') {
-                        if(input) input.value = cat.name || '';
-                        if(maxInput) maxInput.value = cat.maxPlayers || '';
-                    } else {
-                        if(input) input.value = cat;
-                    }
-                });
-                setTimeout(saveCategories, 500); 
             }
         }
 
@@ -1162,12 +1150,13 @@
                 window.allTeams = Array.from(teamMap.values());
                 safeSetStorage('auctionTeams', window.allTeams);
                 
-                renderAuctionDetailLists(); 
-                updatePlayerCounterBtn();
-                updateDashboardHistoryCard();
+                try { renderAuctionDetailLists(); } catch(e) {}
+                try { updatePlayerCounterBtn(); } catch(e) {}
+                try { updateDashboardHistoryCard(); } catch(e) {}
             } catch (err) { console.error(err); }
         }
 
+        // --- GRID RENDERING ---
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
@@ -1178,8 +1167,8 @@
                         const safeName = t.name ? String(t.name) : 'Unnamed';
                         const logo = getTeamLogo(t, 'Team ' + (i + 1));
                         return `
-                        <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 25px 10px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <div style="position: absolute; top: 4px; right: 4px; display: flex; gap: 4px;">
+                        <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 35px 10px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
                                 <button class="edit-del-btn" onclick="editTeam('${t._id}')">✏️</button>
                                 <button class="edit-del-btn" style="color:red;" onclick="deleteTeam('${t._id}')">🗑️</button>
                             </div>
@@ -1202,9 +1191,9 @@
                         return `
                         <div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
                             <div><strong>❖ ${name}</strong>${max}</div>
-                            <div>
-                                <button class="edit-del-btn" onclick="editCategory('${name}')">✏️ Edit</button>
-                                <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${name}')">🗑️ Delete</button>
+                            <div style="display:flex; gap:5px;">
+                                <button class="edit-del-btn" onclick="editCategory('${name}')">✏️</button>
+                                <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${name}')">🗑️</button>
                             </div>
                         </div>`;
                     }).join('');
@@ -1219,10 +1208,14 @@
             const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
             let addedCount = 0;
 
+            const currentMaxSlNo = window.allPlayers.length > 0 ? Math.max(...window.allPlayers.map(pl => Number(pl.serialNumber) || 0)) : 0;
+
             for (let p of playersArray) {
                 const pName = p.Name || p.name || p.Player || p['Player Name'];
                 const pPrice = p.BasePrice || p.baseprice || p.Price || p['Base Price'] || setupBase;
-                const pSlNo = p['Sl No'] || p['Sl.No'] || p['SL NO'] || p['Serial Number'] || p['S.No'] || p['#'] || p.slNo || p.SlNo || (window.allPlayers.length + addedCount + 1);
+                const explicitSlNo = p['Sl No'] || p['Sl.No'] || p['SL NO'] || p['Serial Number'] || p['S.No'] || p['#'] || p.slNo || p.SlNo;
+                
+                const pSlNo = explicitSlNo ? explicitSlNo : (currentMaxSlNo + addedCount + 1);
                 
                 if (pName) {
                     let newPlayer = {
@@ -1265,9 +1258,11 @@
                 photoDataUrl = await compressImage(photoInput.files[0], 150);
             }
 
+            const currentMaxSlNo = window.allPlayers.length > 0 ? Math.max(...window.allPlayers.map(pl => Number(pl.serialNumber) || 0)) : 0;
+
             let newPlayer = {
                 _id: 'player_' + Date.now(),
-                serialNumber: window.allPlayers.length + 1,
+                serialNumber: currentMaxSlNo + 1,
                 name: String(nameInput).trim(),
                 basePrice: finalPrice,
                 category: catInput,
@@ -1290,7 +1285,6 @@
             document.getElementById('playerPhoto').value = '';
 
             try { fetch('/api/players/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newPlayer) }); } catch(e) {}
-            
             alert('Player Added!');
         }
 
@@ -1381,18 +1375,19 @@
                 }
 
                 html += `
-                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
-                    <div style="position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; z-index: 10;">
-                        <button class="edit-del-btn" onclick="openEditPlayerModal('${p._id}')">✏️</button>
-                        <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${p._id}')">🗑️</button>
+                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">#${p.serialNumber || '-'}</span>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="edit-del-btn" onclick="openEditPlayerModal('${p._id}')">✏️</button>
+                            <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${p._id}')">🗑️</button>
+                        </div>
                     </div>
-                    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px; margin-top: 15px;">
+                    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
                         <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
                         ${teamLogoOverlay}
                     </div>
-                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px;">
-                        <span style="color: #94a3b8; font-size: 14px;">#${p.serialNumber || '-'}</span> ${safeName}
-                    </div>
+                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px; word-break: break-word;">${safeName}</div>
                     <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice}</div>
                     <div style="width: 100%; margin-top: auto;">${statusBox}</div>
                 </div>`;
