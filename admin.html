@@ -308,7 +308,7 @@
                         <!-- Franchise Strip -->
                         <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise Logo to Bid</h4>
                         <div id="la-franchise-strip" class="franchise-strip">
-                            <!-- Populated via Javascript -->
+                            <!-- Populated via Javascript safely -->
                         </div>
                     </div>
                 </div>
@@ -318,7 +318,7 @@
             <div id="view-control" class="hidden">
                 <h1 class="dash-title">PLAYERS ROSTER</h1>
                 
-                <!-- NEW: Filter Buttons -->
+                <!-- Filter Buttons -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
                     <button class="btn-primary" style="background: #334155;" onclick="renderPlayersDatabase('all')">All Players</button>
                     <button class="btn-primary" style="background: #10b981;" onclick="renderPlayersDatabase('available')">Available</button>
@@ -453,6 +453,7 @@
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 
+                // Immediately force local data load to prevent vanishing lists on refresh
                 window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
                 
@@ -497,27 +498,37 @@
             if(slider) slider.value = size;
         }
 
-        // --- LIVE AUCTION ROOM LOGIC ---
+        // --- BULLETPROOF LIVE AUCTION ROOM LOGIC ---
         async function initLiveAuctionRoom() {
             await loadDashboard(); 
             const strip = document.getElementById('la-franchise-strip');
             strip.innerHTML = '';
             
-            const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-            const activeTeams = localTeams.length > 0 ? localTeams : window.allTeams;
-            
-            if(activeTeams.length === 0) {
-                strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
-            } else {
-                activeTeams.forEach((t, index) => {
-                    const logo = (t.logoUrl && t.logoUrl.startsWith('data:image')) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                    strip.innerHTML += `
-                        <div class="franchise-btn" onclick="franchiseBidByIndex(${index})">
-                            <img src="${logo}">
-                            <span style="font-size: 14px; font-weight: bold;">${t.name.substring(0,10)}</span>
-                        </div>`;
-                });
+            try {
+                const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
+                
+                if(activeTeams.length === 0) {
+                    strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
+                } else {
+                    activeTeams.forEach((t, index) => {
+                        // Safe image fallback
+                        const logo = (t.logoUrl && typeof t.logoUrl === 'string' && t.logoUrl.length > 5) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                        // Safe name fallback (prevents .substring crash)
+                        const safeName = t.name ? String(t.name).substring(0, 10) : ('Team ' + (index + 1));
+                        
+                        strip.innerHTML += `
+                            <div class="franchise-btn" onclick="franchiseBidByIndex(${index})">
+                                <img src="${logo}">
+                                <span style="font-size: 14px; font-weight: bold;">${safeName}</span>
+                            </div>`;
+                    });
+                }
+            } catch(e) {
+                console.error("Error drawing live room teams:", e);
+                strip.innerHTML = '<span style="color:#ef4444;">Error drawing teams.</span>';
             }
+            
             resetLiveBoard();
             applyLiveLogoSize();
         }
@@ -553,14 +564,13 @@
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
             document.getElementById('la-base').innerText = p.basePrice;
             document.getElementById('la-current-bid').innerText = p.basePrice;
-            document.getElementById('la-photo').src = p.photoUrl ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            document.getElementById('la-photo').src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             
             document.getElementById('la-bidder-logo').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
         }
 
         function nextRandomPlayer() {
-            // FIX: Only grab 'available' players!
             const availablePlayers = window.allPlayers.filter(p => p.status === 'available');
             if(availablePlayers.length === 0) return alert("No available players left in the roster!");
             const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
@@ -570,7 +580,7 @@
         function manualSearchPlayer() {
             const term = document.getElementById('la-search-input').value.toLowerCase();
             if(!term) return;
-            const found = window.allPlayers.find(p => p.name.toLowerCase() === term && p.status !== 'sold');
+            const found = window.allPlayers.find(p => String(p.name).toLowerCase() === term && p.status !== 'sold');
             if(found) pushPlayerToScreen(found);
             else alert("Player not found or already sold.");
         }
@@ -604,7 +614,7 @@
             if(!livePlayerActive) return alert("Select a player first!");
             
             const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-            const activeTeams = localTeams.length > 0 ? localTeams : window.allTeams;
+            const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
             const team = activeTeams[index];
             if(!team) return;
 
@@ -616,12 +626,13 @@
             }
             
             liveCurrentTeamId = team._id;
-            const logoUrl = (team.logoUrl && team.logoUrl.startsWith('data:image')) ? team.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            const logoUrl = (team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.length > 5) ? team.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            const safeTeamName = team.name ? String(team.name) : ('Team ' + (index + 1));
             
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
             document.getElementById('la-bidder-logo').src = logoUrl;
             document.getElementById('la-bidder-logo').style.display = 'block';
-            document.getElementById('la-bidder-name').innerText = team.name;
+            document.getElementById('la-bidder-name').innerText = safeTeamName;
             document.getElementById('la-bidder-name').style.display = 'block';
             applyLiveLogoSize();
         }
@@ -648,8 +659,9 @@
                 let localPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
                 let pIndex = localPlayers.findIndex(p => p._id === livePlayerActive._id);
                 
-                // Find winning team logo
-                let winningTeam = window.allTeams.find(t => t._id === liveCurrentTeamId);
+                // Find winning team safely
+                const activeTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId) || window.allTeams.find(t => t._id === liveCurrentTeamId);
                 
                 if(pIndex > -1) {
                     localPlayers[pIndex].status = 'sold';
@@ -721,7 +733,6 @@
             window.allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             window.allTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
             
-            // Clean up any old "unsold" defaults to "available"
             let changed = false;
             window.allPlayers.forEach(p => {
                 if(!p.status || (p.status === 'unsold' && !p.soldPrice)) { p.status = 'available'; changed = true; }
@@ -826,16 +837,19 @@
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
                 const localTeams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
-                const activeTeams = localTeams.length > 0 ? localTeams : window.allTeams;
+                const activeTeams = localTeams.length > 0 ? localTeams : (window.allTeams || []);
                 
                 if(activeTeams && activeTeams.length > 0) {
                     teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
-                    activeTeams.map(t => `
+                    activeTeams.map(t => {
+                        const safeName = t.name ? String(t.name) : 'Unnamed';
+                        const logo = (t.logoUrl && typeof t.logoUrl === 'string' && t.logoUrl.length > 5) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                        return `
                         <div style="display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <img src="${(t.logoUrl && t.logoUrl.length > 10) ? t.logoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1;">
-                            <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${t.name}</strong>
-                        </div>
-                    `).join('') + `</div>`;
+                            <img src="${logo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1;">
+                            <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${safeName}</strong>
+                        </div>`;
+                    }).join('') + `</div>`;
                 } else {
                     teamContainer.innerHTML = '<span style="color: #94a3b8;">No teams added yet.</span>';
                 }
@@ -1000,7 +1014,7 @@
                 
                 let newTeam = {
                     _id: 'team_' + Date.now() + '_' + i,
-                    name: nameInput.value,
+                    name: String(nameInput.value),
                     logoUrl: logoDataUrl,
                     budget: Number(budget),
                     purseRemaining: Number(budget)
@@ -1049,7 +1063,7 @@
                         category: p.Category || p.category || '',
                         club: p.Club || p.club || p.Team || p.team || '',
                         photoUrl: p.Photo || p.photoUrl || p.Image || '',
-                        status: 'available', // FIX: New players start as 'available'
+                        status: 'available', 
                         game: game,
                         tournamentId: 'KBL2026'
                     };
@@ -1093,11 +1107,11 @@
 
             let newPlayer = {
                 _id: 'player_' + Date.now(),
-                name: nameInput,
+                name: String(nameInput),
                 basePrice: finalPrice,
                 category: catInput,
                 photoUrl: photoDataUrl,
-                status: 'available', // FIX: New players start as 'available'
+                status: 'available', 
                 game: document.getElementById('setupSportsType').value,
                 tournamentId: 'KBL2026'
             };
@@ -1213,14 +1227,15 @@
             let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
             
             filteredPlayers.forEach(p => {
-                const photoSrc = p.photoUrl ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                const photoSrc = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                const safeName = p.name ? String(p.name) : 'Unnamed Player';
                 
                 let statusBox = '';
                 let teamLogoOverlay = '';
 
                 if (p.status === 'sold') {
                     statusBox = `<div style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">SOLD: ₹${p.soldPrice || p.basePrice}</div>`;
-                    if (p.teamLogo) {
+                    if (p.teamLogo && p.teamLogo.length > 5) {
                         teamLogoOverlay = `<img src="${p.teamLogo}" style="position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`;
                     }
                 } else if (p.status === 'unsold') {
@@ -1235,7 +1250,7 @@
                         <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
                         ${teamLogoOverlay}
                     </div>
-                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px;">${p.name}</div>
+                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px;">${safeName}</div>
                     <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice}</div>
                     <div style="width: 100%; margin-top: auto;">${statusBox}</div>
                 </div>`;
