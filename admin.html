@@ -66,7 +66,7 @@
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
-        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
+        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
         
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -113,6 +113,7 @@
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-auction-detail')"><div><h3>My</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-control')"><div><h3>Database</h3><p>Panel</p></div></div>
+                    <!-- ENTER LIVE ROOM BUTTON -->
                     <div class="dash-card" style="background:#10b981; border:none;" onclick="navTo('view-live-room')"><div><h3 style="color:white;">Enter</h3><p style="color:white;">Auction Room</p></div></div>
                 </div>
 
@@ -176,7 +177,7 @@
                     <div style="display: flex; gap: 20px;">
                         <div class="ad-icon-btn" onclick="openModal('modal-team')">👥<br>Team</div>
                         <div class="ad-icon-btn" onclick="openModal('modal-category')">🗂️<br>Category</div>
-                        <div class="ad-icon-btn" onclick="openModal('modal-player')">👤<br>Players</div>
+                        <div class="ad-icon-btn" onclick="openPlayerModal()">👤<br>Players</div>
                     </div>
                 </div>
 
@@ -333,35 +334,55 @@
         </div>
     </div>
 
+    <!-- UPGRADED PLAYERS MODAL -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('modal-player')">&times;</button>
-            <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Import Players</h2>
-            <label>1. Import via Google Sheets Link</label>
-            <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
-            <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet()">Import from Link</button>
             
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>2. Upload Excel/CSV File</label>
-            <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
-            <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers()">Upload File</button>
-            
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>3. Import from Registration Link</label>
-            <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
+            <!-- LIST VIEW -->
+            <div id="player-list-view">
+                <h2 style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Registered Players</h2>
+                <div id="modal-players-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px; border-radius: 8px;">
+                    <!-- Populated via Javascript -->
+                </div>
+                <button class="btn-success" style="width: 100%; font-size: 16px; padding: 15px;" onclick="togglePlayerViews('add')">+ ADD NEW PLAYERS</button>
+            </div>
 
-            <hr style="border-top: 1px solid #334155; margin: 15px 0;">
-            <label>4. Add Manually:</label>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
-                <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
-                <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
-                <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
-                <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
-                <input type="number" id="playerBasePrice" placeholder="Base Price (₹) *" style="color:black; margin-bottom: 10px;" required>
+            <!-- ADD VIEW -->
+            <div id="player-add-view" class="hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">Import Players</h2>
+                    <button class="btn-primary" style="width: auto; margin: 0; padding: 6px 12px; font-size: 13px;" onclick="togglePlayerViews('list')">← Back to List</button>
+                </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                    <button class="btn-primary" onclick="addPlayer()">Add Player</button>
-                    <button id="playerCounterBtn" class="btn-success" onclick="closeModal('modal-player'); navTo('view-control');" style="display:none; width:auto; font-size:14px; padding:8px 12px; margin:0;">0 Players Added</button>
+                <label>1. Import via Google Sheets Link</label>
+                <input type="text" id="gSheetLink" placeholder="Paste Public Link" style="color:black;">
+                <button class="btn-primary" style="margin-top:10px;" onclick="importFromGoogleSheet()">Import from Link</button>
+                
+                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+                <label>2. Upload Excel/CSV File</label>
+                <input type="file" id="excelFile" accept=".csv, .xlsx" style="background: white; color: black; margin-top:5px;">
+                <button class="btn-success" style="margin-top:10px;" onclick="importExcelPlayers()">Upload File</button>
+                
+                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+                <label>3. Import from Registration Link</label>
+                <button class="btn-primary" style="background-color: #a855f7; margin-top:10px;" onclick="alert('Smart Player Registration sync successfully triggered!')">Sync Registered Players</button>
+
+                <hr style="border-top: 1px solid #334155; margin: 15px 0;">
+                <label>4. Add Manually:</label>
+                <div style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-bottom: 5px;">
+                    <input type="text" id="playerName" placeholder="Player Name *" style="color:black; margin-bottom: 10px;" required>
+                    <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
+                    <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
+                    <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
+                    
+                    <!-- BASE PRICE NOW OPTIONAL -->
+                    <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <button class="btn-primary" onclick="addPlayer()">Add Player</button>
+                        <button id="playerCounterBtn" class="btn-success" onclick="togglePlayerViews('list')" style="display:none; width:auto; font-size:14px; padding:8px 12px; margin:0;">0 Players Added</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -428,13 +449,43 @@
             }
         }
 
-        function updateDashboardHistoryCard() {
-            const savedSetup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
-            if(savedSetup.name) {
-                document.getElementById('recentAuctionCard').style.display = 'flex';
-                document.getElementById('histName').innerText = savedSetup.name;
-                document.getElementById('histDate').innerText = savedSetup.date || 'Active Auction';
+        // --- NEW: PLAYERS MODAL FLOW ---
+        function openPlayerModal() {
+            renderModalPlayerList();
+            togglePlayerViews('list');
+            openModal('modal-player');
+        }
+
+        function togglePlayerViews(view) {
+            if (view === 'add') {
+                document.getElementById('player-list-view').classList.add('hidden');
+                document.getElementById('player-add-view').classList.remove('hidden');
+            } else {
+                document.getElementById('player-list-view').classList.remove('hidden');
+                document.getElementById('player-add-view').classList.add('hidden');
+                renderModalPlayerList();
             }
+        }
+
+        function renderModalPlayerList() {
+            const container = document.getElementById('modal-players-list');
+            if (window.allPlayers.length === 0) {
+                container.innerHTML = '<p style="color:#94a3b8; text-align:center; padding: 20px 0;">No players added to the roster yet.</p>';
+                return;
+            }
+            let html = '<table style="width:100%; text-align:left; border-collapse:collapse; color:#333; background:white;">';
+            html += '<tr style="background:#cbd5e1;"><th style="padding:10px;">Photo</th><th style="padding:10px;">Name</th><th style="padding:10px;">Category</th><th style="padding:10px;">Base Price</th></tr>';
+            window.allPlayers.forEach(p => {
+                const photoSrc = p.photoUrl ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                html += `<tr style="border-bottom:1px solid #e2e8f0;">
+                    <td style="padding:10px;"><img src="${photoSrc}" style="width:35px; height:35px; border-radius:50%; object-fit:cover; border: 1px solid #cbd5e1;"></td>
+                    <td style="padding:10px; font-weight:bold;">${p.name}</td>
+                    <td style="padding:10px;">${p.category || '-'}</td>
+                    <td style="padding:10px; color:#10b981; font-weight:bold;">₹${p.basePrice}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            container.innerHTML = html;
         }
 
         // --- LIVE AUCTION ROOM LOGIC ---
@@ -951,9 +1002,12 @@
             const catInput = document.getElementById('playerCategoryManual').value;
             const photoInput = document.getElementById('playerPhoto');
 
-            if(!nameInput || !priceInput || !catInput || !photoInput.files[0]) {
-                return alert("WARNING: Player Name, Photo, Category, and Base Price are strictly mandatory!");
+            if(!nameInput || !catInput || !photoInput.files[0]) {
+                return alert("WARNING: Player Name, Photo, and Category are strictly mandatory!");
             }
+            
+            const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
+            const finalPrice = priceInput ? priceInput : setupBase;
 
             let photoDataUrl = "";
             if (photoInput && photoInput.files[0]) {
@@ -967,7 +1021,7 @@
             let newPlayer = {
                 _id: 'player_' + Date.now(),
                 name: nameInput,
-                basePrice: priceInput,
+                basePrice: finalPrice,
                 category: catInput,
                 photoUrl: photoDataUrl,
                 status: 'unsold',
