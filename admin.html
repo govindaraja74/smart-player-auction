@@ -133,7 +133,7 @@
             <!-- VIEW B: SETUP (CREATE AUCTION) -->
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
-                <form onsubmit="submitSetup(event)">
+                <form id="createAuctionForm" onsubmit="submitSetup(event)">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -160,7 +160,7 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <button type="submit" class="ca-btn">SUBMIT</button>
+                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
                     </div>
                 </form>
             </div>
@@ -175,7 +175,7 @@
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <img id="adLogoImage" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1;">
                         <div>
-                            <h2 style="margin: 0; color: #1e73be; font-size: 24px;" id="adName">Loading...</h2>
+                            <h2 style="margin: 0; color: #1e73be; font-size: 24px;" id="adName">No Auction Loaded</h2>
                             <div style="color: #64748b; font-size: 14px; margin-top: 8px;">A-Code: <span id="adCode">KBL-2026</span></div>
                         </div>
                     </div>
@@ -423,7 +423,6 @@
                         let parsed = JSON.parse(data);
                         if (!Array.isArray(parsed) && key !== 'auctionSetup') {
                             localStorage.setItem(key, JSON.stringify([]));
-                            console.warn(`Repaired corrupted array for ${key}`);
                         }
                     }
                 } catch(e) {
@@ -434,7 +433,7 @@
 
         // SAFE SOCKET INITIALIZATION
         let socket = { emit: function(){} };
-        try { if(typeof io !== 'undefined') { socket = io(); socket.emit('joinRoom', 'KBL2026'); } } catch(e) { console.log("Running offline"); }
+        try { if(typeof io !== 'undefined') { socket = io(); socket.emit('joinRoom', 'KBL2026'); } } catch(e) {}
         
         let currentBidIncrease = 0;
         window.currentCategories = [];
@@ -476,15 +475,18 @@
             }
             const nameToUse = (team && team.name && typeof team.name === 'string' && team.name.trim().length > 0) ? team.name.trim() : defaultName;
             const letter = nameToUse.charAt(0).toUpperCase() || 'T';
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#1e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
         function getActiveTeams() {
+            const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
+            localTeams = localTeams.filter(t => t && !deletedTracker.includes(t._id) && !deletedTracker.includes(t.id) && !deletedTracker.includes(String(t.name || '').trim().toLowerCase()));
             if (localTeams.length > 0) return localTeams;
-            return Array.isArray(window.allTeams) ? window.allTeams : [];
+            let globalTeams = Array.isArray(window.allTeams) ? window.allTeams : [];
+            return globalTeams.filter(t => t && !deletedTracker.includes(t._id) && !deletedTracker.includes(t.id) && !deletedTracker.includes(String(t.name || '').trim().toLowerCase()));
         }
 
         // --- IMAGE COMPRESSOR ---
@@ -551,7 +553,8 @@
             if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
-                try { populateAuctionDetails(); loadDashboard(); } catch(e){}
+                populateAuctionDetails(); 
+                try { loadDashboard(); } catch(e){}
             }
             if(viewId === 'view-control') { 
                 document.getElementById('nav-control').classList.add('active'); 
@@ -672,8 +675,6 @@
 
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
-
-            // Prevent deleted ghost teams from accidentally re-merging
             const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
             localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
 
@@ -700,14 +701,7 @@
                 };
 
                 localTeams.push(newTeam);
-                
-                try {
-                    fetch('/api/franchises', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
-                    }).catch(e => {});
-                } catch(e) {}
+                try { fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) }).catch(e => {}); } catch(e) {}
             }
 
             safeSetStorage('auctionTeams', localTeams);
@@ -727,21 +721,25 @@
 
         function deleteTeam(id) {
             if(!confirm("Are you sure you want to delete this franchise?")) return;
-            
-            // Tombstone Tracker: Stop server from bringing it back
+            let localTeams = safeGetStorage('auctionTeams', []);
+            let teamToDelete = localTeams.find(t => t._id === id || t.id === id) || (window.allTeams || []).find(t => t._id === id || t.id === id);
+
             let deletedTracker = safeGetStorage('deletedTeams', []);
-            if(!deletedTracker.includes(id)) deletedTracker.push(id);
+            if (id && !deletedTracker.includes(id)) deletedTracker.push(id);
+            if (teamToDelete && teamToDelete.name && !deletedTracker.includes(teamToDelete.name.trim().toLowerCase())) {
+                deletedTracker.push(teamToDelete.name.trim().toLowerCase());
+            }
             safeSetStorage('deletedTeams', deletedTracker);
 
-            let localTeams = safeGetStorage('auctionTeams', []);
-            localTeams = localTeams.filter(t => t._id !== id);
+            localTeams = localTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             safeSetStorage('auctionTeams', localTeams);
-            window.allTeams = localTeams;
+            if (window.allTeams) window.allTeams = window.allTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             
-            // Wipe from backend if endpoint exists
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
-
             try { renderAuctionDetailLists(); } catch(e) {}
+            if (document.getElementById('view-live-room') && !document.getElementById('view-live-room').classList.contains('hidden')) {
+                try { initLiveAuctionRoom(); } catch(e){}
+            }
         }
 
         function editTeam(id) {
@@ -778,16 +776,12 @@
         // Player Management
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
-            
-            // Tombstone Tracker: Stop server from bringing it back
             let deletedTracker = safeGetStorage('deletedPlayers', []);
             if(!deletedTracker.includes(id)) deletedTracker.push(id);
             safeSetStorage('deletedPlayers', deletedTracker);
 
             window.allPlayers = window.allPlayers.filter(p => p._id !== id);
             safeSetStorage('auctionPlayers', window.allPlayers);
-            
-            // Wipe from backend if endpoint exists
             try { fetch('/api/players/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
 
             renderPlayersDatabase('all');
@@ -838,7 +832,7 @@
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 
                 try { loadDashboard(); } catch(e){}
-                try { populateAuctionDetails(); } catch(e){}
+                populateAuctionDetails(); 
                 try { updateDashboardHistoryCard(); } catch(e){}
                 try { updateManualCategoryDropdowns(); } catch(e){}
             } else {
@@ -882,6 +876,7 @@
             if(logoEl) {
                 logoEl.style.width = size + 'px';
                 logoEl.style.height = size + 'px';
+                if (liveCurrentTeamId) logoEl.style.display = 'inline-block';
             }
             const disp = document.getElementById('liveLogoSizeDisp');
             if(disp) disp.innerText = size + 'px';
@@ -943,7 +938,7 @@
 
         function pushPlayerToScreen(p) {
             livePlayerActive = p;
-            liveCurrentBid = Number(p.basePrice);
+            liveCurrentBid = Number(p.basePrice) || 0;
             liveCurrentTeamId = null;
             isFirstBid = true; 
             
@@ -952,7 +947,7 @@
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
             document.getElementById('la-base').innerText = p.basePrice;
-            document.getElementById('la-current-bid').innerText = p.basePrice;
+            document.getElementById('la-current-bid').innerText = liveCurrentBid;
             document.getElementById('la-photo').src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             
             document.getElementById('la-bidder-logo').style.display = 'none';
@@ -1000,15 +995,18 @@
 
             let calculatedInc = baseInc;
             let highestMetTier = -1;
+            let currentBidNum = Number(liveCurrentBid) || 0;
 
             tiers.forEach(tier => {
-                if (tier.incVal > 0 && tier.afterVal > 0 && liveCurrentBid >= tier.afterVal && tier.afterVal > highestMetTier) {
-                    highestMetTier = tier.afterVal;
-                    calculatedInc = tier.incVal;
+                let tInc = Number(tier.incVal) || 0;
+                let tAfter = Number(tier.afterVal) || 0;
+                if (tInc > 0 && tAfter > 0 && currentBidNum >= tAfter && tAfter > highestMetTier) {
+                    highestMetTier = tAfter;
+                    calculatedInc = tInc;
                 }
             });
 
-            return calculatedInc;
+            return Number(calculatedInc) || baseInc;
         }
 
         function franchiseBidByIndex(index) {
@@ -1017,22 +1015,34 @@
             const team = activeTeams[index];
             if(!team) return;
 
+            liveCurrentBid = Number(liveCurrentBid) || Number(livePlayerActive.basePrice) || 0;
+
             if (isFirstBid) {
                 isFirstBid = false;
             } else {
-                let exactIncrement = getDynamicIncrement();
+                let exactIncrement = Number(getDynamicIncrement()) || 100;
                 liveCurrentBid += exactIncrement;
             }
             
-            liveCurrentTeamId = team._id;
+            liveCurrentTeamId = team._id || team.id;
             const logoUrl = getTeamLogo(team, 'Team ' + (index + 1));
             const safeTeamName = team.name ? String(team.name) : ('Team ' + (index + 1));
             
-            document.getElementById('la-current-bid').innerText = liveCurrentBid;
-            document.getElementById('la-bidder-logo').src = logoUrl;
-            document.getElementById('la-bidder-logo').style.display = 'block';
-            document.getElementById('la-bidder-name').innerText = safeTeamName;
-            document.getElementById('la-bidder-name').style.display = 'block';
+            const bidDisplay = document.getElementById('la-current-bid');
+            if (bidDisplay) bidDisplay.innerText = liveCurrentBid;
+            
+            const bigLogo = document.getElementById('la-bidder-logo');
+            if (bigLogo) {
+                bigLogo.src = logoUrl;
+                bigLogo.style.display = 'inline-block';
+            }
+            
+            const bigName = document.getElementById('la-bidder-name');
+            if (bigName) {
+                bigName.innerText = safeTeamName;
+                bigName.style.display = 'block';
+            }
+            
             applyLiveLogoSize();
         }
 
@@ -1117,6 +1127,88 @@
         }
 
         // --- DASHBOARD AND DATA ---
+        function populateAuctionDetails() {
+            try {
+                let data = safeGetStorage('auctionSetup', {});
+                if (!data || typeof data !== 'object') data = {};
+
+                const nameEl = document.getElementById('adName');
+                if (nameEl) nameEl.innerText = data.name || 'No Name Set';
+
+                const balEl = document.getElementById('adBalance');
+                if (balEl) balEl.innerText = data.budget || '0';
+
+                const baseEl = document.getElementById('adBaseBid');
+                if (baseEl) baseEl.innerText = data.minBid || '0.00';
+
+                const incEl = document.getElementById('adBidInc');
+                if (incEl) incEl.innerText = data.bidInc || '0.00';
+
+                const playEl = document.getElementById('adPlayers');
+                if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`;
+
+                const logoEl = document.getElementById('adLogoImage');
+                if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
+
+                applyLiveLogoSize();
+                updatePlayerCounterBtn();
+                loadBidIncrements();
+                renderAuctionLibrary();
+            } catch (err) {
+                console.error("Error in populateAuctionDetails:", err);
+            }
+        }
+
+        async function submitSetup(event) {
+            event.preventDefault(); 
+            try {
+                const btn = document.getElementById('setupSubmitBtn');
+                if (btn) { btn.innerText = "Saving..."; btn.disabled = true; }
+
+                let auctionLogoUrl = "";
+                const logoInput = document.getElementById('setupLogo');
+                if (logoInput && logoInput.files && logoInput.files[0]) {
+                    auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+                }
+
+                const newAuction = {
+                    id: Date.now().toString(),
+                    logoUrl: auctionLogoUrl,
+                    sportsType: document.getElementById('setupSportsType') ? document.getElementById('setupSportsType').value : '',
+                    name: document.getElementById('setupName') ? document.getElementById('setupName').value : 'Unnamed Auction',
+                    budget: document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0,
+                    minBid: document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0,
+                    bidInc: document.getElementById('setupBidIncrease') ? document.getElementById('setupBidIncrease').value : 0,
+                    maxPlayers: document.getElementById('setupMaxPlayers') ? document.getElementById('setupMaxPlayers').value : 0,
+                    date: document.getElementById('setupDate') ? document.getElementById('setupDate').value : '',
+                    time: document.getElementById('setupTime') ? document.getElementById('setupTime').value : '',
+                    status: 'incomplete'
+                };
+
+                safeSetStorage('auctionSetup', newAuction);
+                currentBidIncrease = Number(newAuction.bidInc) || 0;
+                
+                let history = safeGetStorage('auctionHistory', []);
+                if (!Array.isArray(history)) history = [];
+                let existingIndex = history.findIndex(a => a.name === newAuction.name);
+                if(existingIndex >= 0) history[existingIndex] = newAuction;
+                else history.push(newAuction);
+                safeSetStorage('auctionHistory', history);
+
+                if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+                
+                populateAuctionDetails();
+                navTo('view-auction-detail');
+                alert("Auction created successfully!");
+
+            } catch(e) {
+                console.error("Error saving setup:", e);
+                alert("Error saving auction. Please verify inputs.");
+                const btn = document.getElementById('setupSubmitBtn');
+                if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+            }
+        }
+
         function safeInit() {
             try { loadSavedMemory(); } catch(e) {}
         }
@@ -1125,7 +1217,6 @@
             const deletedPlayers = safeGetStorage('deletedPlayers', []);
             const deletedTeams = safeGetStorage('deletedTeams', []);
 
-            // Filter out ghosts instantly
             window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
             window.allTeams = safeGetStorage('auctionTeams', []).filter(t => !deletedTeams.includes(t._id));
             
@@ -1152,40 +1243,6 @@
             }
         }
 
-        async function submitSetup(event) {
-            event.preventDefault(); 
-            let auctionLogoUrl = "";
-            const logoInput = document.getElementById('setupLogo');
-            if (logoInput && logoInput.files && logoInput.files[0]) {
-                auctionLogoUrl = await compressImage(logoInput.files[0], 250);
-            }
-
-            const newAuction = {
-                id: Date.now().toString(),
-                logoUrl: auctionLogoUrl,
-                sportsType: document.getElementById('setupSportsType').value,
-                name: document.getElementById('setupName').value,
-                budget: document.getElementById('setupBudget').value,
-                minBid: document.getElementById('setupMinBid').value,
-                bidInc: document.getElementById('setupBidIncrease').value,
-                maxPlayers: document.getElementById('setupMaxPlayers').value,
-                date: document.getElementById('setupDate').value,
-                time: document.getElementById('setupTime').value,
-                status: 'incomplete'
-            };
-
-            safeSetStorage('auctionSetup', newAuction);
-            currentBidIncrease = Number(newAuction.bidInc);
-            
-            let history = safeGetStorage('auctionHistory', []);
-            let existingIndex = history.findIndex(a => a.name === newAuction.name);
-            if(existingIndex >= 0) history[existingIndex] = newAuction;
-            else history.push(newAuction);
-            safeSetStorage('auctionHistory', history);
-
-            navTo('view-auction-detail');
-        }
-
         async function loadDashboard() {
             try {
                 let data = { players: [], teams: [] };
@@ -1200,7 +1257,6 @@
                 const deletedPlayers = safeGetStorage('deletedPlayers', []);
                 const deletedTeams = safeGetStorage('deletedTeams', []);
 
-                // Filter server data using Tombstone tracker
                 const serverPlayers = (Array.isArray(data.players) ? data.players : []).filter(p => !deletedPlayers.includes(p._id));
                 const localPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
                 
