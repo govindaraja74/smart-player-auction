@@ -479,14 +479,34 @@
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
+        // --- THE ULTIMATE TEAM FILTER (BLOCKS GHOST TEAMS) ---
         function getActiveTeams() {
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
-            localTeams = localTeams.filter(t => t && !deletedTracker.includes(t._id) && !deletedTracker.includes(t.id) && !deletedTracker.includes(String(t.name || '').trim().toLowerCase()));
-            if (localTeams.length > 0) return localTeams;
-            let globalTeams = Array.isArray(window.allTeams) ? window.allTeams : [];
-            return globalTeams.filter(t => t && !deletedTracker.includes(t._id) && !deletedTracker.includes(t.id) && !deletedTracker.includes(String(t.name || '').trim().toLowerCase()));
+
+            // Combine local and global to ensure we don't miss anything
+            let allPossibleTeams = [...localTeams, ...(Array.isArray(window.allTeams) ? window.allTeams : [])];
+            
+            let uniqueTeams = [];
+            let seenKeys = new Set();
+            
+            allPossibleTeams.forEach(t => {
+                if (!t) return;
+                let nameKey = String(t.name || '').trim().toLowerCase();
+                let idKey = t._id || t.id;
+                
+                // Block if it's on the deleted list
+                if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
+                
+                // Deduplicate so it only shows up once
+                if (!seenKeys.has(nameKey) && nameKey !== '') {
+                    seenKeys.add(nameKey);
+                    uniqueTeams.push(t);
+                }
+            });
+            
+            return uniqueTeams;
         }
 
         // --- IMAGE COMPRESSOR ---
@@ -553,8 +573,7 @@
             if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
-                populateAuctionDetails(); 
-                try { loadDashboard(); } catch(e){}
+                try { populateAuctionDetails(); loadDashboard(); } catch(e){}
             }
             if(viewId === 'view-control') { 
                 document.getElementById('nav-control').classList.add('active'); 
@@ -670,13 +689,10 @@
             const btn = document.getElementById('addTeamBtn');
             
             if(num === 0) return alert("Please enter the number of teams to add.");
-            
             if(btn) { btn.innerText = "Saving Teams... Please wait"; btn.disabled = true; }
 
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
-            const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
-            localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
 
             for(let i=1; i<=num; i++) {
                 const nameInput = document.getElementById('tName_'+i);
@@ -687,7 +703,6 @@
                 if (logoInput && logoInput.files && logoInput.files[0]) {
                     logoDataUrl = await compressImage(logoInput.files[0], 120);
                 }
-                
                 if (!logoDataUrl) {
                     logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
                 }
@@ -713,17 +728,16 @@
             
             closeModal('modal-team');
             try { renderAuctionDetailLists(); } catch(e){}
-            if(document.getElementById('view-live-room').classList.contains('hidden') === false){
-                try { initLiveAuctionRoom(); } catch(e){}
-            }
             alert("Teams added successfully!");
         }
 
         function deleteTeam(id) {
             if(!confirm("Are you sure you want to delete this franchise?")) return;
+            
             let localTeams = safeGetStorage('auctionTeams', []);
             let teamToDelete = localTeams.find(t => t._id === id || t.id === id) || (window.allTeams || []).find(t => t._id === id || t.id === id);
 
+            // TOMBSTONE LIST: Ensure ghost data never returns
             let deletedTracker = safeGetStorage('deletedTeams', []);
             if (id && !deletedTracker.includes(id)) deletedTracker.push(id);
             if (teamToDelete && teamToDelete.name && !deletedTracker.includes(teamToDelete.name.trim().toLowerCase())) {
@@ -733,20 +747,18 @@
 
             localTeams = localTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             safeSetStorage('auctionTeams', localTeams);
-            if (window.allTeams) window.allTeams = window.allTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
+            if (window.allTeams) {
+                window.allTeams = window.allTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
+            }
             
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
             try { renderAuctionDetailLists(); } catch(e) {}
-            if (document.getElementById('view-live-room') && !document.getElementById('view-live-room').classList.contains('hidden')) {
-                try { initLiveAuctionRoom(); } catch(e){}
-            }
         }
 
         function editTeam(id) {
-            let localTeams = safeGetStorage('auctionTeams', []);
-            const t = localTeams.find(t => t._id === id);
+            const t = getActiveTeams().find(t => t._id === id || t.id === id);
             if(!t) return;
-            document.getElementById('editTeamId').value = t._id;
+            document.getElementById('editTeamId').value = t._id || t.id;
             document.getElementById('editTeamName').value = t.name;
             document.getElementById('editTeamLogo').value = ""; 
             openModal('modal-edit-team');
@@ -759,7 +771,7 @@
             if(!newName || newName.trim() === "") return alert("Name is required");
 
             let localTeams = safeGetStorage('auctionTeams', []);
-            let tIndex = localTeams.findIndex(t => t._id === id);
+            let tIndex = localTeams.findIndex(t => t._id === id || t.id === id);
             
             if(tIndex > -1) {
                 localTeams[tIndex].name = newName;
@@ -776,12 +788,14 @@
         // Player Management
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
+            
             let deletedTracker = safeGetStorage('deletedPlayers', []);
             if(!deletedTracker.includes(id)) deletedTracker.push(id);
             safeSetStorage('deletedPlayers', deletedTracker);
 
             window.allPlayers = window.allPlayers.filter(p => p._id !== id);
             safeSetStorage('auctionPlayers', window.allPlayers);
+            
             try { fetch('/api/players/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
 
             renderPlayersDatabase('all');
@@ -832,7 +846,7 @@
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 
                 try { loadDashboard(); } catch(e){}
-                populateAuctionDetails(); 
+                try { populateAuctionDetails(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
                 try { updateManualCategoryDropdowns(); } catch(e){}
             } else {
@@ -972,15 +986,17 @@
             else alert("Player not found or already sold.");
         }
 
+        // --- STRICT MATH FOR BID INCREMENT ---
         function getDynamicIncrement() {
             const setup = safeGetStorage('auctionSetup', {});
-            let baseInc = Number(setup.bidInc) || 100; 
+            let baseInc = Number(setup.bidInc);
+            if (isNaN(baseInc) || baseInc <= 0) baseInc = 100; 
             
             const container = document.getElementById('bidIncrementContainer');
-            let rows = container ? container.querySelectorAll('.bid-tier-row') : [];
             let tiers = [];
 
-            if (rows.length > 0) {
+            if (container) {
+                const rows = container.querySelectorAll('.bid-tier-row');
                 rows.forEach(row => {
                     const inputs = row.querySelectorAll('input');
                     if (inputs.length >= 2) {
@@ -989,7 +1005,8 @@
                         if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
                     }
                 });
-            } else {
+            }
+            if (tiers.length === 0) {
                 tiers = safeGetStorage('auctionBidTiers', []);
             }
 
@@ -1006,7 +1023,7 @@
                 }
             });
 
-            return Number(calculatedInc) || baseInc;
+            return calculatedInc > 0 ? calculatedInc : baseInc;
         }
 
         function franchiseBidByIndex(index) {
@@ -1015,13 +1032,18 @@
             const team = activeTeams[index];
             if(!team) return;
 
-            liveCurrentBid = Number(liveCurrentBid) || Number(livePlayerActive.basePrice) || 0;
+            let currentVal = Number(liveCurrentBid);
+            if (isNaN(currentVal) || currentVal === 0) {
+                currentVal = Number(livePlayerActive.basePrice) || 0;
+            }
 
             if (isFirstBid) {
+                liveCurrentBid = currentVal;
                 isFirstBid = false;
             } else {
-                let exactIncrement = Number(getDynamicIncrement()) || 100;
-                liveCurrentBid += exactIncrement;
+                let exactIncrement = Number(getDynamicIncrement());
+                if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100;
+                liveCurrentBid = currentVal + exactIncrement;
             }
             
             liveCurrentTeamId = team._id || team.id;
@@ -1072,7 +1094,7 @@
                 if(!liveCurrentTeamId) return alert("A franchise must bid to sell!");
                 
                 const activeTeams = getActiveTeams();
-                let winningTeam = activeTeams.find(t => t._id === liveCurrentTeamId);
+                let winningTeam = activeTeams.find(t => (t._id === liveCurrentTeamId || t.id === liveCurrentTeamId));
 
                 const winningName = winningTeam ? (winningTeam.name || 'Team') : 'Team';
                 const winningLogo = winningTeam ? getTeamLogo(winningTeam) : '';
@@ -1127,35 +1149,35 @@
         }
 
         // --- DASHBOARD AND DATA ---
-        function populateAuctionDetails() {
-            try {
-                let data = safeGetStorage('auctionSetup', {});
-                if (!data || typeof data !== 'object') data = {};
+        function safeInit() {
+            try { loadSavedMemory(); } catch(e) {}
+        }
 
-                const nameEl = document.getElementById('adName');
-                if (nameEl) nameEl.innerText = data.name || 'No Name Set';
+        function loadSavedMemory() {
+            const deletedPlayers = safeGetStorage('deletedPlayers', []);
+            
+            window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
+            
+            let changed = false;
+            window.allPlayers.forEach(p => {
+                if(!p.status) { p.status = 'available'; changed = true; }
+            });
+            if(changed) safeSetStorage('auctionPlayers', window.allPlayers);
 
-                const balEl = document.getElementById('adBalance');
-                if (balEl) balEl.innerText = data.budget || '0';
+            updatePlayerCounterBtn();
+            applyLiveLogoSize();
+            loadBidIncrements();
+            updateDashboardHistoryCard();
+            updateManualCategoryDropdowns();
 
-                const baseEl = document.getElementById('adBaseBid');
-                if (baseEl) baseEl.innerText = data.minBid || '0.00';
-
-                const incEl = document.getElementById('adBidInc');
-                if (incEl) incEl.innerText = data.bidInc || '0.00';
-
-                const playEl = document.getElementById('adPlayers');
-                if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`;
-
-                const logoEl = document.getElementById('adLogoImage');
-                if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
-
-                applyLiveLogoSize();
-                updatePlayerCounterBtn();
-                loadBidIncrements();
-                renderAuctionLibrary();
-            } catch (err) {
-                console.error("Error in populateAuctionDetails:", err);
+            const savedSetup = safeGetStorage('auctionSetup', {});
+            if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
+            if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
+            if(savedSetup.budget) document.getElementById('setupBudget').value = savedSetup.budget;
+            if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
+            if(savedSetup.bidInc) {
+                document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
+                currentBidIncrease = Number(savedSetup.bidInc);
             }
         }
 
@@ -1209,40 +1231,6 @@
             }
         }
 
-        function safeInit() {
-            try { loadSavedMemory(); } catch(e) {}
-        }
-
-        function loadSavedMemory() {
-            const deletedPlayers = safeGetStorage('deletedPlayers', []);
-            const deletedTeams = safeGetStorage('deletedTeams', []);
-
-            window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
-            window.allTeams = safeGetStorage('auctionTeams', []).filter(t => !deletedTeams.includes(t._id));
-            
-            let changed = false;
-            window.allPlayers.forEach(p => {
-                if(!p.status) { p.status = 'available'; changed = true; }
-            });
-            if(changed) safeSetStorage('auctionPlayers', window.allPlayers);
-
-            updatePlayerCounterBtn();
-            applyLiveLogoSize();
-            loadBidIncrements();
-            updateDashboardHistoryCard();
-            updateManualCategoryDropdowns();
-
-            const savedSetup = safeGetStorage('auctionSetup', {});
-            if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
-            if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
-            if(savedSetup.budget) document.getElementById('setupBudget').value = savedSetup.budget;
-            if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
-            if(savedSetup.bidInc) {
-                document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
-                currentBidIncrease = Number(savedSetup.bidInc);
-            }
-        }
-
         async function loadDashboard() {
             try {
                 let data = { players: [], teams: [] };
@@ -1265,14 +1253,14 @@
                 localPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
                 window.allPlayers = Array.from(playerMap.values());
 
-                const serverTeams = (Array.isArray(data.teams) ? data.teams : []).filter(t => !deletedTeams.includes(t._id));
-                const localTeams = safeGetStorage('auctionTeams', []).filter(t => !deletedTeams.includes(t._id));
+                const serverTeams = (Array.isArray(data.teams) ? data.teams : []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()));
+                const localTeams = safeGetStorage('auctionTeams', []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()));
                 
                 let teamMap = new Map();
-                localTeams.forEach(t => { if(t && t.name) teamMap.set(t.name.trim().toLowerCase(), t); });
+                localTeams.forEach(t => { if(t && t.name) teamMap.set(String(t.name).trim().toLowerCase(), t); });
                 serverTeams.forEach(st => {
                     if(st && st.name) {
-                        const key = st.name.trim().toLowerCase();
+                        const key = String(st.name).trim().toLowerCase();
                         const existing = teamMap.get(key);
                         if(existing) {
                             teamMap.set(key, { ...st, logoUrl: (st.logoUrl && st.logoUrl.length > 10) ? st.logoUrl : existing.logoUrl });
@@ -1306,8 +1294,8 @@
                                 htmlStr += `
                                 <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 35px 10px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                     <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                                        <button class="edit-del-btn" onclick="editTeam('${t._id}')">✏️</button>
-                                        <button class="edit-del-btn" style="color:red;" onclick="deleteTeam('${t._id}')">🗑️</button>
+                                        <button class="edit-del-btn" onclick="editTeam('${t._id || t.id}')">✏️</button>
+                                        <button class="edit-del-btn" style="color:red;" onclick="deleteTeam('${t._id || t.id}')">🗑️</button>
                                     </div>
                                     <img src="${logo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1; display:block;">
                                     <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${safeName}</strong>
