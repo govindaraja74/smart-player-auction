@@ -446,14 +446,18 @@
 
         // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
-    if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.startsWith('data:image')) {
-        return team.logoUrl;
-    }
-    const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
-    const letter = nameToUse.charAt(0).toUpperCase() || 'T';
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
-    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-}
+            try {
+                if (team && team.logoUrl && typeof team.logoUrl === 'string' && team.logoUrl.startsWith('data:image')) {
+                    return team.logoUrl;
+                }
+                const nameToUse = (team && team.name && team.name.trim().length > 0) ? team.name.trim() : defaultName;
+                const letter = nameToUse.charAt(0).toUpperCase() || 'T';
+                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="#1e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+                return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+            } catch(e) {
+                return 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            }
+        }
 
         // --- IMAGE COMPRESSOR ---
         async function compressImage(file, maxSize = 120) {
@@ -629,7 +633,7 @@
         }
 
         // Team Management
-        async function addMultipleTeams() {
+     async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const budget = document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0; 
             const btn = document.getElementById('addTeamBtn');
@@ -641,36 +645,38 @@
             let localTeams = safeGetStorage('auctionTeams', []);
 
             for(let i=1; i<=num; i++) {
-                const nameInput = document.getElementById('tName_'+i);
-                const logoInput = document.getElementById('tLogo_'+i);
-                if(!nameInput || !nameInput.value.trim()) continue;
-                
-                let logoDataUrl = "";
-                if (logoInput && logoInput.files && logoInput.files[0]) {
-                    logoDataUrl = await compressImage(logoInput.files[0], 120);
-                }
-                
-                if (!logoDataUrl) {
-                    logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
-                }
-                
-                let newTeam = {
-                    _id: 'team_' + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000),
-                    name: String(nameInput.value).trim(),
-                    logoUrl: logoDataUrl,
-                    budget: Number(budget),
-                    purseRemaining: Number(budget)
-                };
-
-                localTeams.push(newTeam);
-                
                 try {
-                    fetch('/api/franchises', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
-                    }).catch(e => {});
-                } catch(e) {}
+                    const nameInput = document.getElementById('tName_'+i);
+                    const logoInput = document.getElementById('tLogo_'+i);
+                    if(!nameInput || !nameInput.value.trim()) continue;
+                    
+                    let logoDataUrl = "";
+                    if (logoInput && logoInput.files && logoInput.files[0]) {
+                        logoDataUrl = await compressImage(logoInput.files[0], 120);
+                    }
+                    
+                    if (!logoDataUrl) {
+                        logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
+                    }
+                    
+                    let newTeam = {
+                        _id: 'team_' + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000),
+                        name: String(nameInput.value).trim(),
+                        logoUrl: logoDataUrl,
+                        budget: Number(budget),
+                        purseRemaining: Number(budget)
+                    };
+
+                    localTeams.push(newTeam);
+                    
+                    try {
+                        fetch('/api/franchises', { 
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json' }, 
+                            body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
+                        }).catch(e => {});
+                    } catch(e) {}
+                } catch(err) { console.error("Error parsing team row: ", err); }
             }
 
             safeSetStorage('auctionTeams', localTeams);
@@ -682,8 +688,10 @@
             
             closeModal('modal-team');
             try { renderAuctionDetailLists(); } catch(e){}
-            if(document.getElementById('view-live-room').classList.contains('hidden') === false){
-                initLiveAuctionRoom();
+            
+            const liveRoom = document.getElementById('view-live-room');
+            if (liveRoom && !liveRoom.classList.contains('hidden')) {
+                try { initLiveAuctionRoom(); } catch(e){}
             }
             alert("Teams added successfully!");
         }
@@ -1260,45 +1268,59 @@
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
-                const activeTeams = getActiveTeams();
-                if(activeTeams && activeTeams.length > 0) {
-                    teamContainer.innerHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">` + 
-                    activeTeams.map((t, i) => {
-                        const safeName = t.name ? String(t.name) : 'Unnamed';
-                        const logo = getTeamLogo(t, 'Team ' + (i + 1));
-                        return `
-                        <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 35px 10px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
-                                <button class="edit-del-btn" onclick="editTeam('${t._id}')">✏️</button>
-                                <button class="edit-del-btn" style="color:red;" onclick="deleteTeam('${t._id}')">🗑️</button>
-                            </div>
-                            <img src="${logo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1;">
-                            <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${safeName}</strong>
-                        </div>`;
-                    }).join('') + `</div>`;
-                } else {
-                    teamContainer.innerHTML = '<span style="color: #94a3b8;">No teams added yet.</span>';
+                try {
+                    const activeTeams = getActiveTeams();
+                    if(activeTeams && activeTeams.length > 0) {
+                        let htmlStr = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px;">`;
+                        activeTeams.forEach((t, i) => {
+                            try {
+                                const safeName = t.name ? String(t.name) : 'Unnamed';
+                                const logo = getTeamLogo(t, 'Team ' + (i + 1));
+                                htmlStr += `
+                                <div style="position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; background: #f8fafc; padding: 35px 10px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <div style="position: absolute; top: 5px; right: 5px; display: flex; gap: 5px;">
+                                        <button class="edit-del-btn" onclick="editTeam('${t._id}')">✏️</button>
+                                        <button class="edit-del-btn" style="color:red;" onclick="deleteTeam('${t._id}')">🗑️</button>
+                                    </div>
+                                    <img src="${logo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-bottom: 8px; border: 2px solid #cbd5e1; display:block;">
+                                    <strong style="color:#0f172a; font-size: 13px; word-break: break-word;">${safeName}</strong>
+                                </div>`;
+                            } catch(err){}
+                        });
+                        htmlStr += `</div>`;
+                        teamContainer.innerHTML = htmlStr;
+                    } else {
+                        teamContainer.innerHTML = '<span style="color: #94a3b8;">No teams added yet.</span>';
+                    }
+                } catch(e) {
+                    teamContainer.innerHTML = '<span style="color: #ef4444;">Error loading teams.</span>';
                 }
             }
 
             const catContainer = document.getElementById('ad-categories-list');
             if (catContainer) {
-                const savedCats = safeGetStorage('auctionCats', []);
-                if(savedCats && savedCats.length > 0) {
-                    catContainer.innerHTML = savedCats.map(c => {
-                        const name = typeof c === 'object' ? c.name : c;
-                        const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px; font-weight:normal;">(Max Limit: ${c.maxPlayers})</span>` : '';
-                        return `
-                        <div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
-                            <div><strong>❖ ${name}</strong>${max}</div>
-                            <div style="display:flex; gap:5px;">
-                                <button class="edit-del-btn" onclick="editCategory('${name}')">✏️</button>
-                                <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${name}')">🗑️</button>
-                            </div>
-                        </div>`;
-                    }).join('');
-                } else {
-                    catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
+                try {
+                    const savedCats = safeGetStorage('auctionCats', []);
+                    if(savedCats && savedCats.length > 0) {
+                        let catHtml = '';
+                        savedCats.forEach(c => {
+                            const name = typeof c === 'object' ? c.name : c;
+                            const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px; font-weight:normal;">(Max Limit: ${c.maxPlayers})</span>` : '';
+                            catHtml += `
+                            <div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
+                                <div><strong>❖ ${name}</strong>${max}</div>
+                                <div style="display:flex; gap:5px;">
+                                    <button class="edit-del-btn" onclick="editCategory('${name}')">✏️</button>
+                                    <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${name}')">🗑️</button>
+                                </div>
+                            </div>`;
+                        });
+                        catContainer.innerHTML = catHtml;
+                    } else {
+                        catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
+                    }
+                } catch(e) {
+                    catContainer.innerHTML = '<span style="color: #ef4444;">Error loading categories.</span>';
                 }
             }
         }
