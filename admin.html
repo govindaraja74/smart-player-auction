@@ -480,33 +480,29 @@
         }
 
         // --- THE ULTIMATE TEAM FILTER (BLOCKS GHOST TEAMS) ---
-        function getActiveTeams() {
+       function getActiveTeams() {
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
 
-            // Combine local and global to ensure we don't miss anything
-            let allPossibleTeams = [...localTeams, ...(Array.isArray(window.allTeams) ? window.allTeams : [])];
-            
-            let uniqueTeams = [];
-            let seenKeys = new Set();
-            
-            allPossibleTeams.forEach(t => {
+            let globalTeams = Array.isArray(window.allTeams) ? window.allTeams : [];
+            let combined = [...localTeams, ...globalTeams];
+
+            let uniqueMap = new Map();
+            combined.forEach(t => {
                 if (!t) return;
                 let nameKey = String(t.name || '').trim().toLowerCase();
                 let idKey = t._id || t.id;
+                if (!nameKey) return;
                 
-                // Block if it's on the deleted list
+                // Exclude deleted teams
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
                 
-                // Deduplicate so it only shows up once
-                if (!seenKeys.has(nameKey) && nameKey !== '') {
-                    seenKeys.add(nameKey);
-                    uniqueTeams.push(t);
+                if (!uniqueMap.has(nameKey)) {
+                    uniqueMap.set(nameKey, t);
                 }
             });
-            
-            return uniqueTeams;
+            return Array.from(uniqueMap.values());
         }
 
         // --- IMAGE COMPRESSOR ---
@@ -919,37 +915,52 @@
         }
 
         // --- LIVE AUCTION ROOM ---
-        async function initLiveAuctionRoom() {
-            await loadDashboard(); 
-            const strip = document.getElementById('la-franchise-strip');
+      async function initLiveAuctionRoom() {
+
+                      const strip = document.getElementById('la-franchise-strip');
             if (!strip) return;
-            strip.innerHTML = '';
-            
+
+            // Render local teams immediately
+            let activeTeams = getActiveTeams();
+            renderFranchiseStrip(activeTeams);
+
+            // Sync with backend asynchronously
             try {
-                const activeTeams = getActiveTeams();
-                if(!activeTeams || activeTeams.length === 0) {
-                    strip.innerHTML = '<span style="color:#64748b;">No franchises found. Add teams in the Dashboard.</span>';
-                } else {
-                    activeTeams.forEach((t, index) => {
-                        try {
-                            const logo = getTeamLogo(t, 'Team ' + (index + 1));
-                            const safeName = t.name ? String(t.name).substring(0, 10) : ('Team ' + (index + 1));
-                            strip.innerHTML += `
-                                <div class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px;">
-                                    <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
-                                    <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block;">${safeName}</span>
-                                </div>`;
-                        } catch(err){}
-                    });
-                }
+                await loadDashboard();
+                activeTeams = getActiveTeams();
+                renderFranchiseStrip(activeTeams);
             } catch(e) {
-                strip.innerHTML = '<span style="color:#ef4444;">Error loading teams.</span>';
+                console.warn("Server sync skipped, showing local teams:", e);
             }
-            
+
             resetLiveBoard();
             applyLiveLogoSize();
         }
 
+        function renderFranchiseStrip(teams) {
+            const strip = document.getElementById('la-franchise-strip');
+            if (!strip) return;
+            strip.innerHTML = '';
+
+            if (!teams || teams.length === 0) {
+                strip.innerHTML = '<span style="color:#64748b; padding:10px;">No franchises found. Add teams in My Auction.</span>';
+                return;
+            }
+
+            teams.forEach((t, index) => {
+                try {
+                    const logo = getTeamLogo(t, 'Team ' + (index + 1));
+                    const safeName = t.name ? String(t.name).substring(0, 12) : ('Team ' + (index + 1));
+                    strip.innerHTML += `
+                        <div class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px; cursor: pointer;">
+                            <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
+                            <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block; color: white;">${safeName}</span>
+                        </div>`;
+                } catch(err) {
+                    console.error("Error rendering team button:", err);
+                }
+            });
+        }
         function resetLiveBoard() {
             livePlayerActive = null;
             liveCurrentBid = 0;
