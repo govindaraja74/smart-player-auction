@@ -191,8 +191,8 @@
                     <!-- Financials -->
                     <div class="ad-card">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance per Team</span> <span id="adBalance">0</span></div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0.00</span></div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Bid Increment</span> <span id="adBidInc">0.00</span></div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0</span></div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Bid Increment</span> <span id="adBidInc">0</span></div>
                         <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
                     </div>
                     
@@ -480,7 +480,7 @@
         }
 
         // --- THE ULTIMATE TEAM FILTER (BLOCKS GHOST TEAMS) ---
-       function getActiveTeams() {
+        function getActiveTeams() {
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
@@ -495,7 +495,7 @@
                 let idKey = t._id || t.id;
                 if (!nameKey) return;
                 
-                // Exclude deleted teams
+                // Exclude strictly if deleted
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
                 
                 if (!uniqueMap.has(nameKey)) {
@@ -690,7 +690,6 @@
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
 
-            // Prevent deleted ghost teams from accidentally re-merging
             const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
             localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
 
@@ -717,14 +716,7 @@
                 };
 
                 localTeams.push(newTeam);
-                
-                try {
-                    fetch('/api/franchises', { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' }, 
-                        body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) 
-                    }).catch(e => {});
-                } catch(e) {}
+                try { fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) }).catch(e => {}); } catch(e) {}
             }
 
             safeSetStorage('auctionTeams', localTeams);
@@ -745,25 +737,23 @@
         function deleteTeam(id) {
             if(!confirm("Are you sure you want to delete this franchise?")) return;
             
-            // Tombstone Tracker: Stop server from bringing it back
-            let deletedTracker = safeGetStorage('deletedTeams', []);
-            if(!deletedTracker.includes(id)) deletedTracker.push(id);
-
             let localTeams = safeGetStorage('auctionTeams', []);
             let teamToDelete = localTeams.find(t => t._id === id || t.id === id) || (window.allTeams || []).find(t => t._id === id || t.id === id);
 
+            let deletedTracker = safeGetStorage('deletedTeams', []);
+            if (id && !deletedTracker.includes(id)) deletedTracker.push(id);
             if (teamToDelete && teamToDelete.name && !deletedTracker.includes(teamToDelete.name.trim().toLowerCase())) {
                 deletedTracker.push(teamToDelete.name.trim().toLowerCase());
             }
             safeSetStorage('deletedTeams', deletedTracker);
 
+            // Nuke the local storage array immediately
             localTeams = localTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             safeSetStorage('auctionTeams', localTeams);
             if (window.allTeams) {
                 window.allTeams = window.allTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             }
             
-            // Wipe from backend if endpoint exists
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
 
             try { renderAuctionDetailLists(); } catch(e) {}
@@ -803,7 +793,6 @@
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             
-            // Tombstone Tracker: Stop server from bringing it back
             let deletedTracker = safeGetStorage('deletedPlayers', []);
             if(!deletedTracker.includes(id)) deletedTracker.push(id);
             safeSetStorage('deletedPlayers', deletedTracker);
@@ -811,7 +800,6 @@
             window.allPlayers = window.allPlayers.filter(p => p._id !== id);
             safeSetStorage('auctionPlayers', window.allPlayers);
             
-            // Wipe from backend if endpoint exists
             try { fetch('/api/players/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
 
             renderPlayersDatabase('all');
@@ -915,22 +903,19 @@
         }
 
         // --- LIVE AUCTION ROOM ---
-      async function initLiveAuctionRoom() {
-
-                      const strip = document.getElementById('la-franchise-strip');
+        async function initLiveAuctionRoom() {
+            const strip = document.getElementById('la-franchise-strip');
             if (!strip) return;
 
-            // Render local teams immediately
             let activeTeams = getActiveTeams();
             renderFranchiseStrip(activeTeams);
 
-            // Sync with backend asynchronously
             try {
                 await loadDashboard();
                 activeTeams = getActiveTeams();
                 renderFranchiseStrip(activeTeams);
             } catch(e) {
-                console.warn("Server sync skipped, showing local teams:", e);
+                console.warn("Server sync skipped, showing local teams");
             }
 
             resetLiveBoard();
@@ -956,11 +941,10 @@
                             <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
                             <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block; color: white;">${safeName}</span>
                         </div>`;
-                } catch(err) {
-                    console.error("Error rendering team button:", err);
-                }
+                } catch(err) {}
             });
         }
+
         function resetLiveBoard() {
             livePlayerActive = null;
             liveCurrentBid = 0;
@@ -983,7 +967,7 @@
 
         function pushPlayerToScreen(p) {
             livePlayerActive = p;
-            liveCurrentBid = Number(p.basePrice) || 0;
+            liveCurrentBid = parseInt(p.basePrice) || 0;
             liveCurrentTeamId = null;
             isFirstBid = true; 
             
@@ -993,14 +977,19 @@
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
             document.getElementById('la-base').innerText = p.basePrice;
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
-            document.getElementById('la-photo').src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            
+            const photoEl = document.getElementById('la-photo');
+            photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; // Clear old instantly
+            
+            setTimeout(() => {
+                photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            }, 50); // Force paint to fix lag
             
             document.getElementById('la-bidder-logo').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
         }
 
         function nextRandomPlayer() {
-            // Bulletproof search ignoring case and undefined statuses
             const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
             if(availablePlayers.length === 0) return alert("No available players left in the roster!");
             const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
@@ -1011,23 +1000,19 @@
             const term = document.getElementById('la-search-input').value.toLowerCase().trim();
             if(!term) return;
             
-            // Bulletproof search by name or slNo ignoring case and verifying they aren't sold
             const found = window.allPlayers.find(p => 
                 (String(p.name).toLowerCase() === term || String(p.serialNumber).toLowerCase() === term) 
                 && (!p.status || String(p.status).toLowerCase() !== 'sold')
             );
             
-            if(found) {
-                pushPlayerToScreen(found);
-            } else {
-                alert("Player not found or already sold.");
-            }
+            if(found) pushPlayerToScreen(found);
+            else alert("Player not found or already sold.");
         }
 
         // --- STRICT MATH FOR BID INCREMENT ---
         function getDynamicIncrement() {
             const setup = safeGetStorage('auctionSetup', {});
-            let baseInc = Number(setup.bidInc);
+            let baseInc = parseInt(setup.bidInc);
             if (isNaN(baseInc) || baseInc <= 0) baseInc = 100; 
             
             const container = document.getElementById('bidIncrementContainer');
@@ -1038,8 +1023,8 @@
                 rows.forEach(row => {
                     const inputs = row.querySelectorAll('input');
                     if (inputs.length >= 2) {
-                        const incVal = Number(inputs[0].value);
-                        const afterVal = Number(inputs[1].value);
+                        const incVal = parseInt(inputs[0].value);
+                        const afterVal = parseInt(inputs[1].value);
                         if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
                     }
                 });
@@ -1050,11 +1035,11 @@
 
             let calculatedInc = baseInc;
             let highestMetTier = -1;
-            let currentBidNum = Number(liveCurrentBid) || 0;
+            let currentBidNum = parseInt(liveCurrentBid) || 0;
 
             tiers.forEach(tier => {
-                let tInc = Number(tier.incVal) || 0;
-                let tAfter = Number(tier.afterVal) || 0;
+                let tInc = parseInt(tier.incVal) || 0;
+                let tAfter = parseInt(tier.afterVal) || 0;
                 if (tInc > 0 && tAfter > 0 && currentBidNum >= tAfter && tAfter > highestMetTier) {
                     highestMetTier = tAfter;
                     calculatedInc = tInc;
@@ -1070,16 +1055,16 @@
             const team = activeTeams[index];
             if(!team) return;
 
-            let currentVal = Number(liveCurrentBid);
+            let currentVal = parseInt(liveCurrentBid);
             if (isNaN(currentVal) || currentVal === 0) {
-                currentVal = Number(livePlayerActive.basePrice) || 0;
+                currentVal = parseInt(livePlayerActive.basePrice) || 0;
             }
 
             if (isFirstBid) {
                 liveCurrentBid = currentVal;
                 isFirstBid = false;
             } else {
-                let exactIncrement = Number(getDynamicIncrement());
+                let exactIncrement = parseInt(getDynamicIncrement());
                 if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100;
                 liveCurrentBid = currentVal + exactIncrement;
             }
@@ -1108,8 +1093,10 @@
 
         function applyManualBid() {
             if(!livePlayerActive) return alert("Select a player first!");
-            const manBid = Number(document.getElementById('la-manual-bid').value);
-            if(manBid > liveCurrentBid) {
+            const manBid = parseInt(document.getElementById('la-manual-bid').value);
+            let currentVal = parseInt(liveCurrentBid) || 0;
+            
+            if(manBid > currentVal) {
                 liveCurrentBid = manBid;
                 isFirstBid = false; 
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
@@ -1214,9 +1201,7 @@
                 updatePlayerCounterBtn();
                 loadBidIncrements();
                 renderAuctionLibrary();
-            } catch (err) {
-                console.error("Error in populateAuctionDetails:", err);
-            }
+            } catch (err) {}
         }
 
         async function submitSetup(event) {
@@ -1246,7 +1231,7 @@
                 };
 
                 safeSetStorage('auctionSetup', newAuction);
-                currentBidIncrease = Number(newAuction.bidInc) || 0;
+                currentBidIncrease = parseInt(newAuction.bidInc) || 0;
                 
                 let history = safeGetStorage('auctionHistory', []);
                 if (!Array.isArray(history)) history = [];
@@ -1262,7 +1247,6 @@
                 alert("Auction created successfully!");
 
             } catch(e) {
-                console.error("Error saving setup:", e);
                 alert("Error saving auction. Please verify inputs.");
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
@@ -1275,7 +1259,16 @@
 
         function loadSavedMemory() {
             const deletedPlayers = safeGetStorage('deletedPlayers', []);
-            
+            const deletedTracker = safeGetStorage('deletedTeams', []);
+
+            // Nuke ghosts perfectly on load
+            let localTeams = safeGetStorage('auctionTeams', []);
+            if (Array.isArray(localTeams)) {
+                let cleanedTeams = localTeams.filter(t => t && !deletedTracker.includes(t._id) && !deletedTracker.includes(t.id) && !deletedTracker.includes(String(t.name || '').trim().toLowerCase()));
+                safeSetStorage('auctionTeams', cleanedTeams);
+                window.allTeams = cleanedTeams;
+            }
+
             window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
             
             let changed = false;
@@ -1297,7 +1290,7 @@
             if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
             if(savedSetup.bidInc) {
                 document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
-                currentBidIncrease = Number(savedSetup.bidInc);
+                currentBidIncrease = parseInt(savedSetup.bidInc);
             }
         }
 
@@ -1346,7 +1339,7 @@
                 try { updatePlayerCounterBtn(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
 
-            } catch (err) { console.error(err); }
+            } catch (err) {}
         }
 
         // --- GRID RENDERING ---
@@ -1404,9 +1397,7 @@
                     } else {
                         catContainer.innerHTML = '<span style="color: #94a3b8;">No categories added yet.</span>';
                     }
-                } catch(e) {
-                    catContainer.innerHTML = '<span style="color: #ef4444;">Error loading categories.</span>';
-                }
+                } catch(e) {}
             }
         }
 
