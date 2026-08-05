@@ -536,6 +536,21 @@
             return { allowed: true };
         }
 
+        // --- CATEGORY CAPACITY CHECKER ---
+        function getAvailableCategories() {
+            const activeTeams = getActiveTeams();
+            const validCategories = safeGetStorage('auctionCats', []).map(c => typeof c === 'object' ? c.name : c);
+            
+            return validCategories.filter(catName => {
+                // A category is 'open' if at least ONE active team has room for it
+                return activeTeams.some(team => {
+                    const check = canTeamBid(team._id || team.id, 0, catName);
+                    // As long as they aren't blocked by a full category or full roster, the category stays open.
+                    return check.reason !== 'category_full' && check.reason !== 'team_full';
+                });
+            });
+        }
+
         function evaluateFranchiseStripForPlayer() {
             if(!livePlayerActive) return;
             const activeTeams = getActiveTeams();
@@ -1177,16 +1192,16 @@
         }
 
         function nextRandomPlayer() {
-            // Get the list of valid added categories
-            const validCategories = safeGetStorage('auctionCats', []).map(c => typeof c === 'object' ? c.name : c);
+            // Get the list of categories that are valid AND have capacity in at least one franchise
+            const activeCategories = getAvailableCategories();
 
-            // Filter for available players AND valid categories
+            // Filter for available players AND open categories
             const availablePlayers = window.allPlayers.filter(p => 
                 (!p.status || String(p.status).toLowerCase() === 'available') &&
-                validCategories.includes(p.category)
+                activeCategories.includes(p.category)
             );
 
-            if(availablePlayers.length === 0) return alert("No available players left in the roster for the added categories!");
+            if(availablePlayers.length === 0) return alert("No available players left for the remaining open categories!");
             
             const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
             pushPlayerToScreen(random);
@@ -1427,11 +1442,11 @@
             // 1. Popup prompt
             alert(alertMessage);
 
-            // 2. Load next player locally instantly (FILTERED BY VALID CATEGORIES)
-            const validCategories = safeGetStorage('auctionCats', []).map(c => typeof c === 'object' ? c.name : c);
+            // 2. Load next player locally instantly (FILTERED BY OPEN CATEGORIES)
+            const activeCategories = getAvailableCategories();
             const availablePlayers = window.allPlayers.filter(p => 
                 (!p.status || String(p.status).toLowerCase() === 'available') &&
-                validCategories.includes(p.category)
+                activeCategories.includes(p.category)
             );
             
             if(availablePlayers.length > 0) {
@@ -1439,7 +1454,7 @@
                 pushPlayerToScreen(random);
             } else {
                 resetLiveBoard();
-                alert("Auction Complete! No more available players left in your valid categories.");
+                alert("Auction Complete! No more available players left for the open categories.");
             }
 
             // 3. Sync silently
