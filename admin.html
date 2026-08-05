@@ -56,11 +56,20 @@
         .live-bidder-name { font-size: 28px; color: #38bdf8; font-weight: bold; display: none; }
 
         .live-bottom-panel { background: #1e293b; border-radius: 12px; padding: 20px; border: 2px solid #334155; }
-        .live-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .live-controls { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; justify-content: center; }
         .franchise-strip { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
         .franchise-btn { background: #334155; border: 2px solid #475569; border-radius: 8px; padding: 10px; min-width: 100px; text-align: center; cursor: pointer; transition: 0.2s; color: white; display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .franchise-btn:hover { background: #475569; border-color: #38bdf8; transform: translateY(-3px); }
         .franchise-btn img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 1px solid #cbd5e1; }
+
+        /* Dynamic Visual Block for Full Categories */
+        .red-shadow {
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
+            border-color: red !important;
+            background-color: #3f1515 !important;
+            opacity: 0.5;
+            pointer-events: none; /* Physically prevents click */
+        }
 
         /* Setup/Detail Classes */
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
@@ -277,20 +286,23 @@
                     </div>
 
                     <div class="live-bottom-panel">
-                       <div class="live-controls">
+                        <!-- Top Controls: Search / Random / Manual -->
                         <div class="live-controls">
                             <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button id="la-search-btn" class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
-                            <button id="la-prev-btn" class="btn-primary" style="background: #f59e0b;" onclick="previousPlayer()">Previous Player</button>
                             <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random Player</button>
                             <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
                             <input type="number" id="la-manual-bid" placeholder="Custom Bid ₹" style="width: 120px; padding: 12px; color:black;">
                             <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6;" onclick="applyManualBid()">Apply Bid</button>
-                            <button id="la-undo-btn" class="btn-primary" style="background: #f97316;" onclick="undoLastBid()">Undo Last Bid</button>
-                            <div style="flex-grow: 1;"></div>
-                            <button id="la-sold-btn" class="btn-success" style="font-size: 18px; padding: 12px 30px;" onclick="finalizeSale('sold')">SOLD!</button>
-                            <button id="la-unsold-btn" class="btn-danger" style="font-size: 18px; padding: 12px 30px;" onclick="finalizeSale('unsold')">UNSOLD</button>
                         </div>
+                        
+                        <!-- Core Auction Actions: Left / Center / Right -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px;">
+                            <button id="la-unsold-btn" class="btn-danger" style="font-size: 18px; padding: 12px 30px; width: 25%;" onclick="finalizeSale('unsold')">UNSOLD</button>
+                            <button id="la-undo-btn" class="btn-primary" style="background: #f97316; font-size: 16px; padding: 12px 30px; width: 25%;" onclick="undoLastBid()">Undo Last Bid</button>
+                            <button id="la-sold-btn" class="btn-success" style="font-size: 18px; padding: 12px 30px; width: 25%;" onclick="finalizeSale('sold')">SOLD!</button>
+                        </div>
+                        
                         <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise Logo to Bid</h4>
                         <div id="la-franchise-strip" class="franchise-strip"></div>
                     </div>
@@ -438,7 +450,6 @@
         window.allPlayers = [];
         window.allTeams = [];
 
-     let livePlayerActive = null;
         let livePlayerActive = null;
         let liveCurrentBid = 0;
         let liveCurrentTeamId = null;
@@ -468,6 +479,81 @@
                 } catch(err) {}
             }
         }
+
+        // --- Bidding Maths & Safety Rules Core Logic ---
+        function getTeamStats(teamId) {
+            const setup = safeGetStorage('auctionSetup', {});
+            // Aggregate all sold players that belong to this specific team
+            const teamPlayers = window.allPlayers.filter(p => p.status === 'sold' && p.teamId === teamId);
+            const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
+            
+            let teamInfo = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
+            const budget = teamInfo ? parseInt(teamInfo.budget) : 0;
+            const maxPlayers = parseInt(setup.maxPlayers || 0);
+            
+            return {
+                totalPlayers: teamPlayers.length,
+                totalSpent: totalSpent,
+                purse: budget - totalSpent,
+                playersNeeded: Math.max(0, maxPlayers - teamPlayers.length),
+                roster: teamPlayers
+            };
+        }
+
+        function canTeamBid(teamId, bidAmount, playerCategory) {
+            const stats = getTeamStats(teamId);
+            const setup = safeGetStorage('auctionSetup', {});
+            const cats = safeGetStorage('auctionCats', []);
+            const basePrice = parseInt(setup.minBid || 0);
+
+            // 1. Verify Category Limits
+            if (playerCategory) {
+                const catDef = cats.find(c => (c.name || c) === playerCategory);
+                if (catDef && catDef.maxPlayers) {
+                    const currentCatCount = stats.roster.filter(p => p.category === playerCategory).length;
+                    if (currentCatCount >= parseInt(catDef.maxPlayers)) {
+                        return { allowed: false, reason: 'category_full' };
+                    }
+                }
+            }
+
+            // 2. Verify Total Team Size Limit
+            const maxPlayers = parseInt(setup.maxPlayers || 0);
+            if (maxPlayers > 0 && stats.totalPlayers >= maxPlayers) {
+                return { allowed: false, reason: 'team_full' };
+            }
+
+            // 3. Verify Financial Integrity & Mandatory Reserve Fund
+            // Note: We subtract 1 from playersNeeded because this prospective bid represents one of those players
+            const remainingNeeded = Math.max(0, stats.playersNeeded - 1);
+            const reserveFund = remainingNeeded * basePrice;
+            const maxAllowableBid = stats.purse - reserveFund;
+
+            if (bidAmount > 0 && bidAmount > maxAllowableBid) {
+                return { allowed: false, reason: 'insufficient_funds', reserve: reserveFund, maxBid: maxAllowableBid };
+            }
+
+            return { allowed: true };
+        }
+
+        function evaluateFranchiseStripForPlayer() {
+            if(!livePlayerActive) return;
+            const activeTeams = getActiveTeams();
+            activeTeams.forEach((t, index) => {
+                const btn = document.getElementById('franchise-btn-' + index);
+                if(!btn) return;
+                
+                // Test a 0-dollar bid purely to check roster sizes & category limits
+                const check = canTeamBid(t._id || t.id, 0, livePlayerActive.category);
+                
+                if(!check.allowed && (check.reason === 'category_full' || check.reason === 'team_full')) {
+                    btn.classList.add('red-shadow');
+                } else {
+                    btn.classList.remove('red-shadow');
+                }
+            });
+        }
+
 
         // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
@@ -973,7 +1059,7 @@
             const hasBid = (liveCurrentTeamId !== null);
 
             // Buttons to disable when a bid is placed
-            const lockButtons = ['la-search-btn', 'la-next-btn', 'la-prev-btn', 'la-unsold-btn'];
+            const lockButtons = ['la-search-btn', 'la-next-btn', 'la-unsold-btn'];
             lockButtons.forEach(id => {
                 let el = document.getElementById(id);
                 if(el) { 
@@ -1025,12 +1111,13 @@
                     const logo = getTeamLogo(t, 'Team ' + (index + 1));
                     const safeName = t.name ? String(t.name).substring(0, 12) : ('Team ' + (index + 1));
                     strip.innerHTML += `
-                        <div class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px; cursor: pointer;">
+                        <div id="franchise-btn-${index}" class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px; cursor: pointer;">
                             <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
                             <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block; color: white;">${safeName}</span>
                         </div>`;
                 } catch(err) {}
             });
+            evaluateFranchiseStripForPlayer();
         }
 
         function resetLiveBoard() {
@@ -1054,6 +1141,7 @@
 
             applyLiveLogoSize();
             updateLiveControls();
+            evaluateFranchiseStripForPlayer(); // Clears all red shadows
         }
 
         function pushPlayerToScreen(p, isGoingBack = false) {
@@ -1085,12 +1173,7 @@
             document.getElementById('la-bidder-name').style.display = 'none';
 
             updateLiveControls();
-        }
-
-        function previousPlayer() {
-            if(livePlayerHistory.length === 0) return alert("No previous player in your history.");
-            const prev = livePlayerHistory.pop();
-            pushPlayerToScreen(prev, true);
+            evaluateFranchiseStripForPlayer(); // Immediately update red shadows based on new category
         }
 
         function nextRandomPlayer() {
@@ -1159,6 +1242,25 @@
             const team = activeTeams[index];
             if(!team) return;
 
+            let currentVal = parseInt(liveCurrentBid);
+            if (isNaN(currentVal) || currentVal === 0) {
+                currentVal = parseInt(livePlayerActive.basePrice) || 0;
+            }
+
+            let exactIncrement = parseInt(getDynamicIncrement());
+            if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100;
+            
+            let proposedBid = isFirstBid ? currentVal : currentVal + exactIncrement;
+
+            // Ensure they are legally allowed to bid this amount
+            const check = canTeamBid(team._id || team.id, proposedBid, livePlayerActive.category);
+            if (!check.allowed) {
+                if (check.reason === 'category_full') return alert(`${team.name} has reached the max limit for category: ${livePlayerActive.category}`);
+                if (check.reason === 'team_full') return alert(`${team.name} roster is fully complete!`);
+                if (check.reason === 'insufficient_funds') return alert(`Insufficient Funds! ${team.name} must keep ₹${check.reserve} in reserve for remaining players. Max possible bid is ₹${check.maxBid}.`);
+                return;
+            }
+
             // SAVE STATE FOR UNDO
             liveBidHistory.push({
                 bid: liveCurrentBid,
@@ -1169,19 +1271,8 @@
                 displayState: document.getElementById('la-bidder-logo').style.display
             });
 
-            let currentVal = parseInt(liveCurrentBid);
-            if (isNaN(currentVal) || currentVal === 0) {
-                currentVal = parseInt(livePlayerActive.basePrice) || 0;
-            }
-
-            if (isFirstBid) {
-                liveCurrentBid = currentVal;
-                isFirstBid = false;
-            } else {
-                let exactIncrement = parseInt(getDynamicIncrement());
-                if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100;
-                liveCurrentBid = currentVal + exactIncrement;
-            }
+            liveCurrentBid = proposedBid;
+            isFirstBid = false;
 
             liveCurrentTeamId = team._id || team.id;
             const logoUrl = getTeamLogo(team, 'Team ' + (index + 1));
@@ -1214,6 +1305,12 @@
             let currentVal = parseInt(liveCurrentBid) || 0;
 
             if(manBid > currentVal) {
+                
+                const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
+                if (!check.allowed && check.reason === 'insufficient_funds') {
+                    return alert(`Insufficient Funds! Team must keep ₹${check.reserve} in reserve. Max possible bid is ₹${check.maxBid}.`);
+                }
+
                 // SAVE STATE FOR UNDO
                 liveBidHistory.push({
                     bid: liveCurrentBid,
@@ -1536,7 +1633,6 @@
                 } catch(e) {
                     teamContainer.innerHTML = '<span style="color: #ef4444;">Error loading teams.</span>';
                 }
-                } catch(e) {}
             }
 
             const catContainer = document.getElementById('ad-categories-list');
