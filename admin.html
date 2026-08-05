@@ -129,6 +129,12 @@
                     <div class="dash-card" style="background:#10b981; border:none;" onclick="navTo('view-live-room')"><div><h3 style="color:white;">Enter</h3><p style="color:white;">Auction Room</p></div></div>
                 </div>
 
+                <!-- NEW: Franchise Standings Section -->
+                <div class="dash-section-bar" style="max-width: 950px; margin-top: 30px;">Franchise Standings</div>
+                <div id="dashboard-franchises-list" style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 950px; margin-bottom: 40px;">
+                    <span style="color: #94a3b8;">No franchises added yet.</span>
+                </div>
+
                 <div class="dash-section-bar" style="max-width: 950px;">Your Active Auction</div>
                 <div class="auction-history-card" onclick="navTo('view-auction-detail')" id="recentAuctionCard" style="display: none;">
                     <img id="histLogo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;">
@@ -367,6 +373,17 @@
         </div>
     </div>
 
+    <!-- NEW: FRANCHISE ROSTER MODAL -->
+    <div id="modal-franchise-roster" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 700px;">
+            <button class="close-btn" onclick="closeModal('modal-franchise-roster')">&times;</button>
+            <h2 id="fr-team-name" style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Team Roster</h2>
+            <div id="fr-roster-list" style="margin-top: 15px;">
+                <!-- Dynamically injected table -->
+            </div>
+        </div>
+    </div>
+
     <!-- ADD PLAYERS MODAL -->
     <div id="modal-player" class="modal-overlay hidden">
         <div class="modal-content">
@@ -500,6 +517,22 @@
             };
         }
 
+        function getFranchiseFinancials(teamId) {
+            const stats = getTeamStats(teamId);
+            const setup = safeGetStorage('auctionSetup', {});
+            const basePrice = parseInt(setup.minBid || 0);
+            
+            const remainingNeeded = Math.max(0, stats.playersNeeded - 1);
+            const reserveFund = remainingNeeded * basePrice;
+            const maxAllowableBid = stats.purse - reserveFund;
+
+            return {
+                ...stats,
+                reserve: reserveFund,
+                maxBid: maxAllowableBid
+            };
+        }
+
         function canTeamBid(teamId, bidAmount, playerCategory) {
             const stats = getTeamStats(teamId);
             const setup = safeGetStorage('auctionSetup', {});
@@ -569,6 +602,87 @@
             });
         }
 
+        // --- DASHBOARD FRANCHISE STANDINGS RENDERING ---
+        function renderDashboardFranchiseStandings() {
+            const container = document.getElementById('dashboard-franchises-list');
+            if (!container) return;
+
+            const activeTeams = getActiveTeams();
+            if (activeTeams.length === 0) {
+                container.innerHTML = '<span style="color: #94a3b8;">No franchises added yet.</span>';
+                return;
+            }
+
+            let html = '';
+            activeTeams.forEach((t, i) => {
+                const fin = getFranchiseFinancials(t._id || t.id);
+                const logo = getTeamLogo(t, 'Team ' + (i + 1));
+                const safeName = t.name ? String(t.name) : 'Unnamed';
+
+                html += `
+                <div class="ad-card" style="width: 280px; padding: 15px; cursor: pointer; text-align: center;" onclick="showFranchiseRoster('${t._id || t.id}')">
+                    <img src="${logo}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #cbd5e1;">
+                    <h3 style="margin: 0 0 10px 0; color: #1e73be;">${safeName}</h3>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
+                        <span>Needed Players:</span> <strong>${fin.playersNeeded}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
+                        <span>Amount Remaining:</span> <strong>₹${fin.purse}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
+                        <span>Reserve Fund:</span> <strong style="color: #ef4444;">₹${fin.reserve}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155;">
+                        <span>Max Possible Bid:</span> <strong style="color: #10b981;">₹${fin.maxBid}</strong>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function showFranchiseRoster(teamId) {
+            const team = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
+            if (!team) return;
+
+            document.getElementById('fr-team-name').innerText = team.name + " - Roster";
+            
+            const fin = getFranchiseFinancials(teamId);
+            const rosterContainer = document.getElementById('fr-roster-list');
+            
+            if (fin.roster.length === 0) {
+                rosterContainer.innerHTML = '<p style="color: #94a3b8;">No players bought yet.</p>';
+            } else {
+                let html = '<table style="width: 100%; border-collapse: collapse; color: white;">';
+                html += `
+                    <tr style="border-bottom: 2px solid #334155; text-align: left;">
+                        <th style="padding: 10px;">Sl No</th>
+                        <th style="padding: 10px;">Player Name</th>
+                        <th style="padding: 10px;">Category</th>
+                        <th style="padding: 10px;">Sold Price</th>
+                    </tr>`;
+                fin.roster.forEach(p => {
+                    html += `
+                    <tr style="border-bottom: 1px solid #334155;">
+                        <td style="padding: 10px;">#${p.serialNumber || '-'}</td>
+                        <td style="padding: 10px; font-weight: bold;">${p.name}</td>
+                        <td style="padding: 10px;">${p.category || '-'}</td>
+                        <td style="padding: 10px; color: #10b981; font-weight: bold;">₹${p.soldPrice}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                
+                // Add summary row
+                html += `
+                    <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between;">
+                        <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
+                        <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
+                    </div>`;
+
+                rosterContainer.innerHTML = html;
+            }
+            
+            openModal('modal-franchise-roster');
+        }
 
         // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
@@ -1631,6 +1745,7 @@
                 try { renderAuctionDetailLists(); } catch(e){}
                 try { updatePlayerCounterBtn(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
+                try { renderDashboardFranchiseStandings(); } catch(e){} // Renders the new Standings Cards
 
             } catch (err) {}
         }
