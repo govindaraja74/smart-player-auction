@@ -1177,8 +1177,17 @@
         }
 
         function nextRandomPlayer() {
-            const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
-            if(availablePlayers.length === 0) return alert("No available players left in the roster!");
+            // Get the list of valid added categories
+            const validCategories = safeGetStorage('auctionCats', []).map(c => typeof c === 'object' ? c.name : c);
+
+            // Filter for available players AND valid categories
+            const availablePlayers = window.allPlayers.filter(p => 
+                (!p.status || String(p.status).toLowerCase() === 'available') &&
+                validCategories.includes(p.category)
+            );
+
+            if(availablePlayers.length === 0) return alert("No available players left in the roster for the added categories!");
+            
             const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
             pushPlayerToScreen(random);
         }
@@ -1187,13 +1196,17 @@
             const term = document.getElementById('la-search-input').value.toLowerCase().trim();
             if(!term) return;
 
+            // Get the list of valid added categories
+            const validCategories = safeGetStorage('auctionCats', []).map(c => typeof c === 'object' ? c.name : c);
+
             const found = window.allPlayers.find(p => 
                 (String(p.name).toLowerCase() === term || String(p.serialNumber).toLowerCase() === term) 
                 && (!p.status || String(p.status).toLowerCase() !== 'sold')
+                && validCategories.includes(p.category) // Must match added categories
             );
 
             if(found) pushPlayerToScreen(found);
-            else alert("Player not found or already sold.");
+            else alert("Player not found, already sold, or doesn't belong to a valid category.");
         }
 
         // --- STRICT MATH FOR BID INCREMENT ---
@@ -1414,14 +1427,19 @@
             // 1. Popup prompt
             alert(alertMessage);
 
-            // 2. Load next player locally instantly
-            const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
+            // 2. Load next player locally instantly (FILTERED BY VALID CATEGORIES)
+            const validCategories = safeGetStorage('auctionCats', []).map(c => typeof c === 'object' ? c.name : c);
+            const availablePlayers = window.allPlayers.filter(p => 
+                (!p.status || String(p.status).toLowerCase() === 'available') &&
+                validCategories.includes(p.category)
+            );
+            
             if(availablePlayers.length > 0) {
                 const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
                 pushPlayerToScreen(random);
             } else {
                 resetLiveBoard();
-                alert("Auction Complete! No more available players left.");
+                alert("Auction Complete! No more available players left in your valid categories.");
             }
 
             // 3. Sync silently
