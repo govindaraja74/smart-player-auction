@@ -1173,6 +1173,8 @@
                 (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
             );
 
+            let alertMessage = "";
+
             if(resultType === 'sold') {
                 if(!liveCurrentTeamId) return alert("A franchise must bid to sell!");
                 
@@ -1201,6 +1203,9 @@
                 safeSetStorage('auctionPlayers', localPlayers);
                 try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: 'KBL2026' }); } catch(e){}
 
+                // Prepare Sold Popup Message
+                alertMessage = `SOLD! \n\n${livePlayerActive.name} was sold to ${winningName} for ₹${liveCurrentBid}.`;
+
             } else if(resultType === 'unsold') {
                 livePlayerActive.status = 'unsold';
 
@@ -1215,22 +1220,27 @@
 
                 safeSetStorage('auctionPlayers', localPlayers);
                 try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold' }); } catch(e){}
+
+                // Prepare Unsold Popup Message
+                alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
             }
             
-            // Auto Advance
-            setTimeout(async () => { 
-                await loadDashboard(); 
-                const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
-                if(availablePlayers.length > 0) {
-                    const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-                    pushPlayerToScreen(random);
-                } else {
-                    resetLiveBoard();
-                    alert("Auction Complete! No more available players left.");
-                }
-            }, 500);
-        }
+            // 1. Trigger the popup prompt
+            alert(alertMessage);
 
+            // 2. Immediately load the next player locally (No lag)
+            const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
+            if(availablePlayers.length > 0) {
+                const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+                pushPlayerToScreen(random);
+            } else {
+                resetLiveBoard();
+                alert("Auction Complete! No more available players left.");
+            }
+
+            // 3. Sync with backend silently in the background
+            loadDashboard().catch(e => console.log("Silent sync error:", e));
+        }
         // --- DASHBOARD AND DATA ---
         function populateAuctionDetails() {
             try {
