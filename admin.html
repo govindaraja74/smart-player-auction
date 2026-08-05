@@ -200,12 +200,7 @@
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Tiers</div>
                         <div id="bidIncrementContainer">
-                            <div class="bid-tier-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
-                                <input type="number" class="ad-small-input" placeholder="Incr." onchange="saveBidIncrements()">
-                                <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
-                                <input type="number" class="ad-small-input" placeholder="Amount" onchange="saveBidIncrements()">
-                                <button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>
-                            </div>
+                            <!-- Populated by JS -->
                         </div>
                         <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room defaults to standard Base Increment if blank.</div>
                     </div>
@@ -495,7 +490,6 @@
                 let idKey = t._id || t.id;
                 if (!nameKey) return;
                 
-                // Exclude strictly if deleted
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
                 
                 if (!uniqueMap.has(nameKey)) {
@@ -579,6 +573,74 @@
                 document.getElementById('nav-live').classList.add('active');
                 try { initLiveAuctionRoom(); } catch(e){}
             }
+        }
+
+        // --- BID INCREMENT DYNAMIC ROWS ---
+        function loadBidIncrements() {
+            const container = document.getElementById('bidIncrementContainer');
+            if (!container) return;
+            
+            const tiers = safeGetStorage('auctionBidTiers', []);
+            container.innerHTML = '';
+            
+            if (tiers.length === 0) {
+                container.innerHTML = createBidRowHTML('', '', true);
+            } else {
+                tiers.forEach((tier) => {
+                    container.innerHTML += createBidRowHTML(tier.incVal, tier.afterVal, false); 
+                });
+                container.innerHTML += createBidRowHTML('', '', true);
+            }
+        }
+
+        function createBidRowHTML(incVal, afterVal, isAdd) {
+            const btnHtml = isAdd 
+                ? `<button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>`
+                : `<button type="button" class="ad-btn-small" style="background: #ef4444;" onclick="removeBidIncrementRow(this)">REMOVE</button>`;
+                
+            return `
+            <div class="bid-tier-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
+                <input type="number" class="ad-small-input" placeholder="Incr." value="${incVal}" onchange="saveBidIncrements()" style="width: 80px; padding: 8px;">
+                <span style="font-size: 14px; white-space: nowrap;">Incr. After</span>
+                <input type="number" class="ad-small-input" placeholder="Amount" value="${afterVal}" onchange="saveBidIncrements()" style="width: 100px; padding: 8px;">
+                ${btnHtml}
+            </div>`;
+        }
+
+        function addBidIncrementRow(btn) {
+            btn.innerText = "REMOVE";
+            btn.style.background = "#ef4444";
+            btn.setAttribute("onclick", "removeBidIncrementRow(this)");
+            
+            const container = document.getElementById('bidIncrementContainer');
+            container.insertAdjacentHTML('beforeend', createBidRowHTML('', '', true));
+            saveBidIncrements();
+        }
+
+        function removeBidIncrementRow(btn) {
+            const row = btn.closest('.bid-tier-row');
+            if (row) row.remove();
+            saveBidIncrements();
+        }
+
+        function saveBidIncrements() {
+            const container = document.getElementById('bidIncrementContainer');
+            if (!container) return;
+            
+            const rows = container.querySelectorAll('.bid-tier-row');
+            let tiers = [];
+            
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                if (inputs.length >= 2) {
+                    const incVal = parseInt(inputs[0].value);
+                    const afterVal = parseInt(inputs[1].value);
+                    if (incVal > 0 && afterVal > 0) {
+                        tiers.push({ incVal, afterVal });
+                    }
+                }
+            });
+            safeSetStorage('auctionBidTiers', tiers);
         }
 
         // --- INPUT FIELD GENERATORS ---
@@ -690,9 +752,6 @@
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
 
-            const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
-            localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
-
             for(let i=1; i<=num; i++) {
                 const nameInput = document.getElementById('tName_'+i);
                 const logoInput = document.getElementById('tLogo_'+i);
@@ -747,7 +806,6 @@
             }
             safeSetStorage('deletedTeams', deletedTracker);
 
-            // Nuke the local storage array immediately
             localTeams = localTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             safeSetStorage('auctionTeams', localTeams);
             if (window.allTeams) {
@@ -755,7 +813,6 @@
             }
             
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
-
             try { renderAuctionDetailLists(); } catch(e) {}
         }
 
@@ -978,12 +1035,13 @@
             document.getElementById('la-base').innerText = p.basePrice;
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
             
+            // Force browser to repaint photo immediately
             const photoEl = document.getElementById('la-photo');
-            photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; // Clear old instantly
+            photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; 
             
             setTimeout(() => {
                 photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-            }, 50); // Force paint to fix lag
+            }, 50); 
             
             document.getElementById('la-bidder-logo').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
@@ -1261,10 +1319,15 @@
             const deletedPlayers = safeGetStorage('deletedPlayers', []);
             const deletedTracker = safeGetStorage('deletedTeams', []);
 
-            // Nuke ghosts perfectly on load
+            // Nuke ghosts completely on load
             let localTeams = safeGetStorage('auctionTeams', []);
             if (Array.isArray(localTeams)) {
-                let cleanedTeams = localTeams.filter(t => t && !deletedTracker.includes(t._id) && !deletedTracker.includes(t.id) && !deletedTracker.includes(String(t.name || '').trim().toLowerCase()));
+                let cleanedTeams = localTeams.filter(t => {
+                    if (!t) return false;
+                    let idKey = t._id || t.id;
+                    let nameKey = String(t.name || '').trim().toLowerCase();
+                    return !deletedTracker.includes(idKey) && !deletedTracker.includes(nameKey);
+                });
                 safeSetStorage('auctionTeams', cleanedTeams);
                 window.allTeams = cleanedTeams;
             }
