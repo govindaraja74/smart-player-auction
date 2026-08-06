@@ -149,8 +149,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Ensure the form halts native submission before executing code -->
-                <form id="createAuctionForm" onsubmit="submitSetup(event)">
+                <!-- FIX: Replaced form tag with pure DIV structure so browser refresh is impossible -->
+                <div id="createAuctionFormContainer">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -177,16 +177,17 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
+                        <!-- Button type changed to button to prevent native submission hooks -->
+                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
                     </div>
-                </form>
+                </div>
             </div>
 
             <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
             <div id="view-auction-detail" class="hidden" style="max-width: 1050px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <h1 class="dash-title" style="margin: 0;">AUCTION DETAIL</h1>
-                    <a href="#" onclick="navTo('view-live-room')" style="color: #10b981; font-weight: bold; font-size: 18px; text-decoration: underline;">Go to Live Auction Room →</a>
+                    <a href="javascript:void(0)" onclick="navTo('view-live-room')" style="color: #10b981; font-weight: bold; font-size: 18px; text-decoration: underline;">Go to Live Auction Room →</a>
                 </div>
 
                 <!-- Header -->
@@ -1729,6 +1730,101 @@
                 dropdown.value = currentVal;
             } else {
                 dropdown.value = 'all';
+            }
+        }
+
+        async function submitSetup() {
+            // Manual required field checking before saving
+            const reqFields = ['setupName', 'setupDate', 'setupBudget', 'setupMinBid', 'setupBidIncrease', 'setupMaxPlayers'];
+            for (let id of reqFields) {
+                const el = document.getElementById(id);
+                if (el && (!el.value || String(el.value).trim() === '')) {
+                    alert("Please fill out all required fields marked with *.");
+                    el.focus();
+                    return;
+                }
+            }
+
+            if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
+                return;
+            }
+
+            try {
+                const btn = document.getElementById('setupSubmitBtn');
+                if (btn) { btn.innerText = "Saving..."; btn.disabled = true; }
+
+                let auctionLogoUrl = "";
+                const logoInput = document.getElementById('setupLogo');
+                if (logoInput && logoInput.files && logoInput.files[0]) {
+                    auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+                }
+
+                const newAuction = {
+                    id: Date.now().toString(),
+                    logoUrl: auctionLogoUrl,
+                    sportsType: document.getElementById('setupSportsType') ? document.getElementById('setupSportsType').value : '',
+                    name: document.getElementById('setupName') ? document.getElementById('setupName').value : 'Unnamed Auction',
+                    budget: document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0,
+                    minBid: document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0,
+                    bidInc: document.getElementById('setupBidIncrease') ? document.getElementById('setupBidIncrease').value : 0,
+                    maxPlayers: document.getElementById('setupMaxPlayers') ? document.getElementById('setupMaxPlayers').value : 0,
+                    date: document.getElementById('setupDate') ? document.getElementById('setupDate').value : '',
+                    time: document.getElementById('setupTime') ? document.getElementById('setupTime').value : '',
+                    status: 'incomplete'
+                };
+
+                // WIPE CURRENT STATE FOR A COMPLETELY NEW AUCTION
+                safeSetStorage('auctionTeams', []);
+                safeSetStorage('auctionPlayers', []);
+                safeSetStorage('auctionCats', []);
+                safeSetStorage('auctionBidTiers', []);
+                safeSetStorage('deletedTeams', []);
+                safeSetStorage('deletedPlayers', []);
+                
+                window.allTeams = [];
+                window.allPlayers = [];
+                window.currentCategories = [];
+
+                safeSetStorage('auctionSetup', newAuction);
+                currentBidIncrease = parseInt(newAuction.bidInc) || 0;
+
+                let archive = {
+                    setup: newAuction,
+                    teams: [],
+                    players: [],
+                    cats: [],
+                    tiers: []
+                };
+
+                let history = safeGetStorage('auctionHistory', []);
+                if (!Array.isArray(history)) history = [];
+                let existingIndex = history.findIndex(a => (a.setup && a.setup.id === newAuction.id) || a.id === newAuction.id);
+                
+                if(existingIndex >= 0) history[existingIndex] = archive;
+                else history.push(archive);
+                
+                safeSetStorage('auctionHistory', history);
+
+                if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+
+                populateAuctionDetails();
+                
+                // Clear input forms manually
+                document.querySelectorAll('.ca-input').forEach(el => {
+                    if(el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+                        if(el.type !== 'date' && el.type !== 'time') el.value = '';
+                    }
+                });
+                if(logoInput) logoInput.value = '';
+
+                navTo('view-auction-detail');
+                alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
+
+            } catch(e) {
+                console.error("Submit Error:", e);
+                alert("Error saving auction. Please verify inputs.");
+                const btn = document.getElementById('setupSubmitBtn');
+                if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
             }
         }
 
