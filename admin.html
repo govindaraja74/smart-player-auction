@@ -979,6 +979,10 @@
             const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
             localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
 
+            // Pull active tourney ID so it saves locally with the right tag
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+
             for(let i=1; i<=num; i++) {
                 const nameInput = document.getElementById('tName_'+i);
                 const logoInput = document.getElementById('tLogo_'+i);
@@ -998,11 +1002,12 @@
                     name: String(nameInput.value).trim(),
                     logoUrl: logoDataUrl,
                     budget: Number(budget),
-                    purseRemaining: Number(budget)
+                    purseRemaining: Number(budget),
+                    tournamentId: activeTourneyId
                 };
 
                 localTeams.push(newTeam);
-                try { fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: 'KBL2026'}) }).catch(e => {}); } catch(e) {}
+                try { fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: activeTourneyId}) }).catch(e => {}); } catch(e) {}
             }
 
             safeSetStorage('auctionTeams', localTeams);
@@ -1617,6 +1622,11 @@
 
         async function submitSetup(event) {
             event.preventDefault(); 
+            
+            if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
+                return;
+            }
+
             try {
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "Saving..."; btn.disabled = true; }
@@ -1641,6 +1651,18 @@
                     status: 'incomplete'
                 };
 
+                // WIPE CURRENT STATE FOR A COMPLETELY NEW AUCTION
+                safeSetStorage('auctionTeams', []);
+                safeSetStorage('auctionPlayers', []);
+                safeSetStorage('auctionCats', []);
+                safeSetStorage('auctionBidTiers', []);
+                safeSetStorage('deletedTeams', []);
+                safeSetStorage('deletedPlayers', []);
+                
+                window.allTeams = [];
+                window.allPlayers = [];
+                window.currentCategories = [];
+
                 safeSetStorage('auctionSetup', newAuction);
                 currentBidIncrease = parseInt(newAuction.bidInc) || 0;
 
@@ -1654,8 +1676,9 @@
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
 
                 populateAuctionDetails();
+                document.getElementById('createAuctionForm').reset();
                 navTo('view-auction-detail');
-                alert("Auction created successfully!");
+                alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
 
             } catch(e) {
                 alert("Error saving auction. Please verify inputs.");
@@ -1894,6 +1917,10 @@
 
             const currentMaxSlNo = window.allPlayers.length > 0 ? Math.max(...window.allPlayers.map(pl => Number(pl.serialNumber) || 0)) : 0;
 
+            // Pull active tourney ID
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+
             for (let p of playersArray) {
                 const pName = p.Name || p.name || p.Player || p['Player Name'];
                 const pPrice = p.BasePrice || p.baseprice || p.Price || p['Base Price'] || setupBase;
@@ -1912,7 +1939,7 @@
                         photoUrl: p.Photo || p.photoUrl || p.Image || '',
                         status: 'available', 
                         game: game,
-                        tournamentId: 'KBL2026'
+                        tournamentId: activeTourneyId
                     };
                     localPlayers.push(newPlayer);
                     window.allPlayers.push(newPlayer);
@@ -1943,6 +1970,8 @@
             }
 
             const currentMaxSlNo = window.allPlayers.length > 0 ? Math.max(...window.allPlayers.map(pl => Number(pl.serialNumber) || 0)) : 0;
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
 
             let newPlayer = {
                 _id: 'player_' + Date.now(),
@@ -1953,7 +1982,7 @@
                 photoUrl: photoDataUrl,
                 status: 'available', 
                 game: document.getElementById('setupSportsType').value,
-                tournamentId: 'KBL2026'
+                tournamentId: activeTourneyId
             };
 
             let localPlayers = safeGetStorage('auctionPlayers', []);
