@@ -502,12 +502,17 @@
         // --- Bidding Maths & Safety Rules Core Logic ---
         function getTeamStats(teamId) {
             const setup = safeGetStorage('auctionSetup', {});
+            const globalBudget = parseInt(setup.budget) || 0; // The master budget from Setup
+
             // Aggregate all sold players that belong to this specific team
             const teamPlayers = window.allPlayers.filter(p => p.status === 'sold' && p.teamId === teamId);
             const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
             
             let teamInfo = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
-            const budget = teamInfo ? parseInt(teamInfo.budget) : 0;
+            
+            // If the team has no budget saved, assign it the global setup budget automatically
+            let budget = (teamInfo && parseInt(teamInfo.budget) > 0) ? parseInt(teamInfo.budget) : globalBudget;
+            
             const maxPlayers = parseInt(setup.maxPlayers || 0);
             
             return {
@@ -975,7 +980,6 @@
         // Team Management
         async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
-            const budget = document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0; 
             const btn = document.getElementById('addTeamBtn');
             
             if(num === 0) return alert("Please enter the number of teams to add.");
@@ -989,6 +993,9 @@
 
             const activeSetup = safeGetStorage('auctionSetup', {});
             const activeTourneyId = activeSetup.id || 'KBL2026';
+            
+            // FIX: Pull budget directly from saved memory
+            const budget = parseInt(activeSetup.budget) || 0;
 
             for(let i=1; i<=num; i++) {
                 const nameInput = document.getElementById('tName_'+i);
@@ -1314,6 +1321,8 @@
             document.getElementById('la-name').innerText = slNoDisplay + p.name;
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
+            
+            // FIX: Output the calculated current bid instead of the raw empty player data
             document.getElementById('la-base').innerText = liveCurrentBid;
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
