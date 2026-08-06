@@ -129,7 +129,7 @@
                     <div class="dash-card" style="background:#10b981; border:none;" onclick="navTo('view-live-room')"><div><h3 style="color:white;">Enter</h3><p style="color:white;">Auction Room</p></div></div>
                 </div>
 
-                <!-- NEW: Franchise Standings Section -->
+                <!-- Franchise Standings Section -->
                 <div class="dash-section-bar" style="max-width: 950px; margin-top: 30px;">Franchise Standings</div>
                 <div id="dashboard-franchises-list" style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 950px; margin-bottom: 40px;">
                     <span style="color: #94a3b8;">No franchises added yet.</span>
@@ -373,7 +373,7 @@
         </div>
     </div>
 
-    <!-- NEW: FRANCHISE ROSTER MODAL -->
+    <!-- FRANCHISE ROSTER MODAL -->
     <div id="modal-franchise-roster" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 700px;">
             <button class="close-btn" onclick="closeModal('modal-franchise-roster')">&times;</button>
@@ -529,7 +529,7 @@
             return {
                 ...stats,
                 reserve: reserveFund,
-                maxBid: maxAllowableBid
+                maxBid: Math.max(0, maxAllowableBid)
             };
         }
 
@@ -620,7 +620,7 @@
                 const safeName = t.name ? String(t.name) : 'Unnamed';
 
                 html += `
-                <div class="ad-card" style="width: 280px; padding: 15px; cursor: pointer; text-align: center;" onclick="showFranchiseRoster('${t._id || t.id}')">
+                <div class="ad-card" style="width: 280px; padding: 15px; cursor: pointer; text-align: center; border: 1px solid #cbd5e1;" onclick="showFranchiseRoster('${t._id || t.id}')">
                     <img src="${logo}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #cbd5e1;">
                     <h3 style="margin: 0 0 10px 0; color: #1e73be;">${safeName}</h3>
                     <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
@@ -780,7 +780,10 @@
             
             document.getElementById(viewId).classList.remove('hidden');
             
-            if(viewId === 'view-dashboard') document.getElementById('nav-dashboard').classList.add('active');
+            if(viewId === 'view-dashboard') {
+                document.getElementById('nav-dashboard').classList.add('active');
+                try { loadDashboard(); renderDashboardFranchiseStandings(); } catch(e){}
+            }
             if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
@@ -1011,6 +1014,7 @@
             
             closeModal('modal-team');
             try { renderAuctionDetailLists(); } catch(e){}
+            try { renderDashboardFranchiseStandings(); } catch(e){}
             if(document.getElementById('view-live-room').classList.contains('hidden') === false){
                 try { initLiveAuctionRoom(); } catch(e){}
             }
@@ -1038,6 +1042,7 @@
             
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
             try { renderAuctionDetailLists(); } catch(e) {}
+            try { renderDashboardFranchiseStandings(); } catch(e) {}
         }
 
         function editTeam(id) {
@@ -1066,6 +1071,7 @@
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
                 try { renderAuctionDetailLists(); } catch(e) {}
+                try { renderDashboardFranchiseStandings(); } catch(e) {}
                 closeModal('modal-edit-team');
             }
         }
@@ -1085,6 +1091,7 @@
 
             renderPlayersDatabase('all');
             updatePlayerCounterBtn();
+            try { renderDashboardFranchiseStandings(); } catch(e) {}
         }
 
         function openEditPlayerModal(id) {
@@ -1121,6 +1128,7 @@
                 safeSetStorage('auctionPlayers', window.allPlayers);
                 renderPlayersDatabase('all');
                 closeModal('modal-edit-player');
+                try { renderDashboardFranchiseStandings(); } catch(e) {}
             }
         }
 
@@ -1134,6 +1142,7 @@
                 try { populateAuctionDetails(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
                 try { updateManualCategoryDropdowns(); } catch(e){}
+                try { renderDashboardFranchiseStandings(); } catch(e){}
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
             }
@@ -1689,6 +1698,7 @@
             loadBidIncrements();
             updateDashboardHistoryCard();
             updateManualCategoryDropdowns();
+            try { renderDashboardFranchiseStandings(); } catch(e){}
 
             const savedSetup = safeGetStorage('auctionSetup', {});
             if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
@@ -1745,7 +1755,7 @@
                 try { renderAuctionDetailLists(); } catch(e){}
                 try { updatePlayerCounterBtn(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
-                try { renderDashboardFranchiseStandings(); } catch(e){} // Renders the new Standings Cards
+                try { renderDashboardFranchiseStandings(); } catch(e){}
 
             } catch (err) {}
         }
