@@ -149,7 +149,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Call function directly with event -->
+                <!-- FIX: Ensure the form halts native submission before executing code -->
                 <form id="createAuctionForm" onsubmit="submitSetup(event)">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
@@ -1720,12 +1720,12 @@
             
             uniqueCats.forEach(cat => {
                 const opt = document.createElement('option');
-                opt.value = cat;
+                opt.value = 'category:' + cat;
                 opt.innerText = cat;
                 dropdown.appendChild(opt);
             });
             
-            if (uniqueCats.includes(currentVal)) {
+            if (uniqueCats.includes(currentVal.replace('category:', ''))) {
                 dropdown.value = currentVal;
             } else {
                 dropdown.value = 'all';
@@ -1804,11 +1804,6 @@
 
             html += `</div>`;
             container.innerHTML = html;
-        }
-
-        function downloadPDF() {
-            const element = document.getElementById('pdf-content');
-            html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
         }
 
     </script>
