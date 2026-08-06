@@ -335,8 +335,12 @@
             <div id="view-control" class="hidden">
                 <h1 class="dash-title">PLAYERS ROSTER</h1>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-                    <button class="btn-primary" style="background: #334155;" onclick="renderPlayersDatabase('all')">All Players</button>
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+                    <!-- Dropdown for Category Filter -->
+                    <select id="rosterCategoryFilter" class="btn-primary" style="background: #334155; border: 1px solid #475569; outline: none; cursor: pointer; padding: 10px 15px; border-radius: 4px; color: white; font-weight: bold; font-size: 14px;" onchange="renderPlayersDatabase('category:' + this.value)">
+                        <option value="all">All Categories (All Players)</option>
+                    </select>
+
                     <button class="btn-primary" style="background: #10b981;" onclick="renderPlayersDatabase('available')">Available</button>
                     <button class="btn-primary" style="background: #3b82f6;" onclick="renderPlayersDatabase('sold')">Sold</button>
                     <button class="btn-primary" style="background: #ef4444;" onclick="renderPlayersDatabase('unsold')">Unsold</button>
@@ -618,7 +622,6 @@
                 const btn = document.getElementById('franchise-btn-' + index);
                 if(!btn) return;
                 
-                // Test a 0-dollar bid purely to check roster sizes & category limits
                 const check = canTeamBid(t._id || t.id, 0, livePlayerActive.category);
                 
                 if(!check.allowed && (check.reason === 'category_full' || check.reason === 'team_full')) {
@@ -1701,6 +1704,105 @@
 
             // 3. Sync silently
             loadDashboard().catch(e => console.log(e));
+        }
+
+        // --- FILTER ROSTER BY DROPDOWN ---
+        function updateRosterCategoryDropdown() {
+            const dropdown = document.getElementById('rosterCategoryFilter');
+            if (!dropdown) return;
+            
+            // Extract unique categories from window.allPlayers
+            const uniqueCats = [...new Set(window.allPlayers.map(p => p.category).filter(c => c && String(c).trim() !== ''))].sort();
+            
+            const currentVal = dropdown.value;
+            dropdown.innerHTML = '<option value="all">All Categories (All Players)</option>';
+            
+            uniqueCats.forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                opt.innerText = cat;
+                dropdown.appendChild(opt);
+            });
+            
+            if (uniqueCats.includes(currentVal)) {
+                dropdown.value = currentVal;
+            } else {
+                dropdown.value = 'all';
+            }
+        }
+
+        function renderPlayersDatabase(filter = 'all') {
+            updateRosterCategoryDropdown(); // Keep dropdown in sync
+
+            const container = document.getElementById('playersListContainer');
+            if(window.allPlayers.length === 0) {
+                container.innerHTML = "<p>No players registered yet.</p>";
+                return;
+            }
+
+            let filteredPlayers = window.allPlayers;
+            
+            if (filter.startsWith('category:')) {
+                const cat = filter.replace('category:', '');
+                if (cat !== 'all') {
+                    filteredPlayers = window.allPlayers.filter(p => p.category === cat);
+                }
+            } else if (filter !== 'all') {
+                filteredPlayers = window.allPlayers.filter(p => p.status === filter);
+                // Reset the dropdown if a status button is clicked
+                const drop = document.getElementById('rosterCategoryFilter');
+                if(drop && drop.value !== 'all') drop.value = 'all';
+            } else {
+                const drop = document.getElementById('rosterCategoryFilter');
+                if(drop && drop.value !== 'all') drop.value = 'all';
+            }
+
+            if(filteredPlayers.length === 0) {
+                container.innerHTML = `<p>No players found for this filter.</p>`;
+                return;
+            }
+
+            let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
+
+            filteredPlayers.forEach(p => {
+                const photoSrc = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                const safeName = p.name ? String(p.name) : 'Unnamed Player';
+
+                let statusBox = '';
+                let teamLogoOverlay = '';
+
+                if (p.status === 'sold') {
+                    statusBox = `<div style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">SOLD: ₹${p.soldPrice || p.basePrice}</div>`;
+                    if (p.teamLogo && p.teamLogo.length > 5) {
+                        teamLogoOverlay = `<img src="${p.teamLogo}" style="position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`;
+                    }
+                } else if (p.status === 'unsold') {
+                    statusBox = `<div style="background: #ef4444; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">UNSOLD</div>`;
+                } else {
+                    statusBox = `<div style="background: #3b82f6; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">AVAILABLE</div>`;
+                }
+
+                html += `
+                <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">#${p.serialNumber || '-'}</span>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="edit-del-btn" onclick="openEditPlayerModal('${p._id}')">✏️</button>
+                            <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${p._id}')">🗑️</button>
+                        </div>
+                    </div>
+                    <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
+                        <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+                        ${teamLogoOverlay}
+                    </div>
+                    <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px; word-break: break-word;">${safeName}</div>
+                    <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice}</div>
+                    <div style="width: 100%; margin-top: auto;">${statusBox}</div>
+                </div>`;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
         }
 
     </script>
