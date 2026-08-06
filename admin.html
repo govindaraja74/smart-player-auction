@@ -459,8 +459,10 @@
         })();
 
         // SAFE SOCKET INITIALIZATION
+        let activeSetupForSocket = safeGetStorage('auctionSetup', {});
+        let activeTourneyIdForSocket = activeSetupForSocket.id || 'KBL2026';
         let socket = { emit: function(){} };
-        try { if(typeof io !== 'undefined') { socket = io(); socket.emit('joinRoom', 'KBL2026'); } } catch(e) {}
+        try { if(typeof io !== 'undefined') { socket = io(); socket.emit('joinRoom', activeTourneyIdForSocket); } } catch(e) {}
 
         let currentBidIncrease = 0;
         window.currentCategories = [];
@@ -695,8 +697,11 @@
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
-        // --- THE ULTIMATE TEAM FILTER (BLOCKS GHOST TEAMS) ---
+        // --- THE ULTIMATE TEAM FILTER (STRICTLY LOCKS TO ACTIVE AUCTION) ---
         function getActiveTeams() {
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026'; // Locks to the currently active auction ID
+
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
@@ -712,6 +717,9 @@
                 if (!nameKey) return;
 
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
+                
+                // STRITCT FILTER: Reject any team that does not belong to the current active auction
+                if (t.tournamentId && t.tournamentId !== activeTourneyId) return;
 
                 if (!uniqueMap.has(nameKey)) {
                     uniqueMap.set(nameKey, t);
@@ -979,7 +987,6 @@
             const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
             localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
 
-            // Pull active tourney ID so it saves locally with the right tag
             const activeSetup = safeGetStorage('auctionSetup', {});
             const activeTourneyId = activeSetup.id || 'KBL2026';
 
@@ -1293,7 +1300,12 @@
             }
 
             livePlayerActive = p;
-            liveCurrentBid = parseInt(p.basePrice) || 0;
+            
+            // SAFELY PULL BASE PRICE
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const fallbackBase = activeSetup.minBid || 0;
+            liveCurrentBid = parseInt(p.basePrice) || parseInt(p.BasePrice) || parseInt(fallbackBase);
+            
             liveCurrentTeamId = null;
             isFirstBid = true; 
             liveBidHistory = []; 
@@ -1302,7 +1314,7 @@
             document.getElementById('la-name').innerText = slNoDisplay + p.name;
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
-            document.getElementById('la-base').innerText = p.basePrice;
+            document.getElementById('la-base').innerText = liveCurrentBid;
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
             const photoEl = document.getElementById('la-photo');
@@ -1400,7 +1412,9 @@
 
             let currentVal = parseInt(liveCurrentBid);
             if (isNaN(currentVal) || currentVal === 0) {
-                currentVal = parseInt(livePlayerActive.basePrice) || 0;
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                const fallbackBase = activeSetup.minBid || 0;
+                currentVal = parseInt(livePlayerActive.basePrice) || parseInt(fallbackBase);
             }
 
             let exactIncrement = parseInt(getDynamicIncrement());
@@ -1545,7 +1559,10 @@
                 else { window.allPlayers.push(livePlayerActive); }
 
                 safeSetStorage('auctionPlayers', localPlayers);
-                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: 'KBL2026' }); } catch(e){}
+                
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                const activeTourneyId = activeSetup.id || 'KBL2026';
+                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: activeTourneyId }); } catch(e){}
 
                 alertMessage = `SOLD! \n\n${livePlayerActive.name} was sold to ${winningName} for ₹${liveCurrentBid}.`;
 
@@ -1562,7 +1579,10 @@
                 if(globalIndex > -1) { window.allPlayers[globalIndex].status = 'unsold'; }
 
                 safeSetStorage('auctionPlayers', localPlayers);
-                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: 'KBL2026', statusOverride: 'unsold' }); } catch(e){}
+                
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                const activeTourneyId = activeSetup.id || 'KBL2026';
+                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: activeTourneyId, statusOverride: 'unsold' }); } catch(e){}
 
                 alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
             }
@@ -1692,23 +1712,27 @@
         }
 
         function loadSavedMemory() {
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+
             const deletedPlayers = safeGetStorage('deletedPlayers', []);
             const deletedTracker = safeGetStorage('deletedTeams', []);
 
-            // Nuke ghosts completely on load
+            // Nuke ghosts completely on load, STRICT filter by active tourney ID
             let localTeams = safeGetStorage('auctionTeams', []);
             if (Array.isArray(localTeams)) {
                 let cleanedTeams = localTeams.filter(t => {
                     if (!t) return false;
                     let idKey = t._id || t.id;
                     let nameKey = String(t.name || '').trim().toLowerCase();
+                    if (t.tournamentId && t.tournamentId !== activeTourneyId) return false;
                     return !deletedTracker.includes(idKey) && !deletedTracker.includes(nameKey);
                 });
                 safeSetStorage('auctionTeams', cleanedTeams);
                 window.allTeams = cleanedTeams;
             }
 
-            window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
+            window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id) && (!p.tournamentId || p.tournamentId === activeTourneyId));
 
             let changed = false;
             window.allPlayers.forEach(p => {
@@ -1736,6 +1760,9 @@
 
         async function loadDashboard() {
             try {
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                const activeTourneyId = activeSetup.id || 'KBL2026';
+
                 let data = { players: [], teams: [] };
                 try {
                     const res = await fetch('/api/dashboard');
@@ -1748,16 +1775,16 @@
                 const deletedPlayers = safeGetStorage('deletedPlayers', []);
                 const deletedTeams = safeGetStorage('deletedTeams', []);
 
-                const serverPlayers = (Array.isArray(data.players) ? data.players : []).filter(p => !deletedPlayers.includes(p._id));
-                const localPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id));
+                const serverPlayers = (Array.isArray(data.players) ? data.players : []).filter(p => !deletedPlayers.includes(p._id) && (!p.tournamentId || p.tournamentId === activeTourneyId));
+                const localPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id) && (!p.tournamentId || p.tournamentId === activeTourneyId));
 
                 let playerMap = new Map();
                 serverPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
                 localPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
                 window.allPlayers = Array.from(playerMap.values());
 
-                const serverTeams = (Array.isArray(data.teams) ? data.teams : []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()));
-                const localTeams = safeGetStorage('auctionTeams', []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()));
+                const serverTeams = (Array.isArray(data.teams) ? data.teams : []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()) && (!t.tournamentId || t.tournamentId === activeTourneyId));
+                const localTeams = safeGetStorage('auctionTeams', []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()) && (!t.tournamentId || t.tournamentId === activeTourneyId));
 
                 let teamMap = new Map();
                 localTeams.forEach(t => { if(t && t.name) teamMap.set(String(t.name).trim().toLowerCase(), t); });
@@ -1912,14 +1939,14 @@
         // --- PLAYER IMPORT / RENDER ---
         async function bulkAddPlayers(playersArray, game) {
             let localPlayers = safeGetStorage('auctionPlayers', []);
-            const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
+            
+            // Pull active tourney ID & base settings
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+            const setupBase = activeSetup.minBid || 0;
             let addedCount = 0;
 
             const currentMaxSlNo = window.allPlayers.length > 0 ? Math.max(...window.allPlayers.map(pl => Number(pl.serialNumber) || 0)) : 0;
-
-            // Pull active tourney ID
-            const activeSetup = safeGetStorage('auctionSetup', {});
-            const activeTourneyId = activeSetup.id || 'KBL2026';
 
             for (let p of playersArray) {
                 const pName = p.Name || p.name || p.Player || p['Player Name'];
@@ -1961,7 +1988,8 @@
                 return alert("WARNING: Player Name, Photo, and Category are strictly mandatory!");
             }
 
-            const setupBase = document.getElementById('setupMinBid') ? document.getElementById('setupMinBid').value : 0;
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const setupBase = activeSetup.minBid || 0;
             const finalPrice = priceInput ? priceInput : setupBase;
 
             let photoDataUrl = "";
@@ -1970,7 +1998,6 @@
             }
 
             const currentMaxSlNo = window.allPlayers.length > 0 ? Math.max(...window.allPlayers.map(pl => Number(pl.serialNumber) || 0)) : 0;
-            const activeSetup = safeGetStorage('auctionSetup', {});
             const activeTourneyId = activeSetup.id || 'KBL2026';
 
             let newPlayer = {
