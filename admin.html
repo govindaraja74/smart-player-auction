@@ -75,7 +75,7 @@
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
-        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
+        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: margin-top: 30px; grid-column: 2; width: 150px; }
 
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -149,7 +149,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <form id="createAuctionForm" onsubmit="return submitSetup(event);">
+                <!-- FIX: Form tag is entirely replaced with a div to completely block browser reload -->
+                <div id="createAuctionForm">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -176,9 +177,10 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
+                        <!-- Submit via pure JavaScript -->
+                        <button type="button" id="setupSubmitBtn" class="ca-btn" style="background: #1e73be; color: white;" onclick="submitSetup(event)">SUBMIT</button>
                     </div>
-                </form>
+                </div>
             </div>
 
             <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
@@ -1825,10 +1827,9 @@
 
                 try { populateAuctionDetails(); } catch(e){}
                 
-                try { 
-                    const formEl = document.getElementById('createAuctionForm');
-                    if(formEl) formEl.reset(); 
-                } catch(e){}
+                // Manually reset inputs
+                document.querySelectorAll('#createAuctionForm .ca-input').forEach(el => el.value = '');
+                if(logoInput) logoInput.value = '';
 
                 navTo('view-auction-detail');
                 alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
