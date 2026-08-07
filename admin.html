@@ -120,7 +120,9 @@
             <!-- VIEW A: DASHBOARD -->
             <div id="view-dashboard">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
-                <h1 class="dash-title">DASHBOARD</h1>
+                
+                <!-- VERSION CHECK TITLE: If you don't see v4.0, your browser is caching the old code! -->
+                <h1 class="dash-title">DASHBOARD (v4.0)</h1>
 
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
@@ -149,7 +151,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Purged <form> tag to physically prevent browser refresh. Changed to standard <div> container -->
+                <!-- PURE DIV: No form tag, physically impossible to reload the page on submit -->
                 <div id="createAuctionFormContainer">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
@@ -177,7 +179,7 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- Use type="button" to prevent default submit bindings -->
+                        <!-- Pure JS Button -->
                         <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
                     </div>
                 </div>
@@ -510,22 +512,26 @@
             }
         }
 
+        // AGGRESSIVE QUOTA MANAGEMENT
         function safeSetStorage(key, data) {
-            try { localStorage.setItem(key, JSON.stringify(data)); } 
-            catch (e) {
+            try { 
+                localStorage.setItem(key, JSON.stringify(data)); 
+            } catch (e) {
+                console.warn("Storage Full! Purging history to save current state.");
                 try {
                     localStorage.removeItem('auctionHistory');
                     localStorage.setItem(key, JSON.stringify(data));
-                } catch(err) {}
+                } catch(err) {
+                    console.error("Storage completely broken. Images may be too large.");
+                }
             }
         }
 
         // --- Bidding Maths & Safety Rules Core Logic ---
         function getTeamStats(teamId) {
             const setup = safeGetStorage('auctionSetup', {});
-            const globalBudget = parseInt(setup.budget) || 0; // Master budget fallback
+            const globalBudget = parseInt(setup.budget) || 0; 
 
-            // Aggregate all sold players that belong to this specific team
             const teamPlayers = window.allPlayers.filter(p => p.status === 'sold' && p.teamId === teamId);
             const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
             
@@ -565,7 +571,6 @@
             const cats = safeGetStorage('auctionCats', []);
             const basePrice = parseInt(setup.minBid || 0);
 
-            // 1. Verify Category Limits (Case & Space Insensitive)
             if (playerCategory) {
                 const targetCat = String(playerCategory).trim().toLowerCase();
                 const catDef = cats.find(c => String(c.name || c).trim().toLowerCase() === targetCat);
@@ -577,14 +582,11 @@
                 }
             }
 
-            // 2. Verify Total Team Size Limit
             const maxPlayers = parseInt(setup.maxPlayers || 0);
             if (maxPlayers > 0 && stats.totalPlayers >= maxPlayers) {
                 return { allowed: false, reason: 'team_full' };
             }
 
-            // 3. Verify Financial Integrity & Mandatory Reserve Fund
-            // Note: We subtract 1 from playersNeeded because this prospective bid represents one of those players
             const remainingNeeded = Math.max(0, stats.playersNeeded - 1);
             const reserveFund = remainingNeeded * basePrice;
             const maxAllowableBid = stats.purse - reserveFund;
@@ -596,12 +598,10 @@
             return { allowed: true };
         }
 
-        // --- CATEGORY CAPACITY CHECKER ---
         function getAvailableCategories() {
             const activeTeams = getActiveTeams();
             const rawCats = safeGetStorage('auctionCats', []);
             
-            // Safety Net: If user has not created specific categories, allow ALL players
             if (!rawCats || rawCats.length === 0) return null;
 
             const validCategories = rawCats.map(c => typeof c === 'object' ? String(c.name || '').trim().toLowerCase() : String(c).trim().toLowerCase()).filter(Boolean);
@@ -623,7 +623,6 @@
                 const btn = document.getElementById('franchise-btn-' + index);
                 if(!btn) return;
                 
-                // Test a 0-dollar bid purely to check roster sizes & category limits
                 const check = canTeamBid(t._id || t.id, 0, livePlayerActive.category);
                 
                 if(!check.allowed && (check.reason === 'category_full' || check.reason === 'team_full')) {
@@ -634,7 +633,6 @@
             });
         }
 
-        // --- DASHBOARD FRANCHISE STANDINGS RENDERING ---
         function renderDashboardFranchiseStandings() {
             const container = document.getElementById('dashboard-franchises-list');
             if (!container) return;
@@ -703,7 +701,6 @@
                 });
                 html += '</table>';
                 
-                // Add summary row
                 html += `
                     <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between;">
                         <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
@@ -716,7 +713,6 @@
             openModal('modal-franchise-roster');
         }
 
-        // --- CRASH-PROOF LOGO GENERATOR ---
         function getTeamLogo(team, defaultName = 'Team') {
             if (team && typeof team.logoUrl === 'string' && team.logoUrl.startsWith('data:image')) {
                 return team.logoUrl;
@@ -727,10 +723,9 @@
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
-        // --- THE ULTIMATE TEAM FILTER (STRICTLY LOCKS TO ACTIVE AUCTION) ---
         function getActiveTeams() {
             const activeSetup = safeGetStorage('auctionSetup', {});
-            const activeTourneyId = activeSetup.id || 'KBL2026'; // Locks to the currently active auction ID
+            const activeTourneyId = activeSetup.id || 'KBL2026';
 
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
@@ -747,8 +742,6 @@
                 if (!nameKey) return;
 
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
-                
-                // STRITCT FILTER: Reject any team that does not belong to the current active auction
                 if (t.tournamentId && t.tournamentId !== activeTourneyId) return;
 
                 if (!uniqueMap.has(nameKey)) {
@@ -758,13 +751,12 @@
             return Array.from(uniqueMap.values());
         }
 
-        // --- IMAGE COMPRESSOR ---
         async function compressImage(file, maxSize = 120) {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 if (!file) return resolve("");
                 const timer = setTimeout(() => {
                     resolve("");
-                }, 2000);
+                }, 1500);
 
                 const reader = new FileReader();
                 reader.onerror = () => { clearTimeout(timer); resolve(""); };
@@ -787,8 +779,8 @@
                             canvas.height = Math.max(1, height);
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            resolve(canvas.toDataURL('image/webp', 0.6)); 
-                        } catch(e) { resolve(dataUrl); }
+                            resolve(canvas.toDataURL('image/jpeg', 0.5)); 
+                        } catch(e) { resolve(""); }
                     };
                     img.src = dataUrl;
                 };
@@ -796,7 +788,6 @@
             });
         }
 
-        // --- UI NAVIGATION ---
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
@@ -834,7 +825,6 @@
             }
         }
 
-        // --- BID INCREMENT DYNAMIC ROWS ---
         function loadBidIncrements() {
             const container = document.getElementById('bidIncrementContainer');
             if (!container) return;
@@ -902,7 +892,6 @@
             safeSetStorage('auctionBidTiers', tiers);
         }
 
-        // --- INPUT FIELD GENERATORS ---
         function generateTeamInputs() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const container = document.getElementById('teamInputsContainer');
@@ -935,9 +924,6 @@
             }
         }
 
-        // --- ADD / EDIT / DELETE FUNCTIONS ---
-
-        // Category Management
         async function saveCategories() {
             const num = parseInt(document.getElementById('numOfCategories').value) || 0;
             window.currentCategories = safeGetStorage('auctionCats', []);
@@ -999,7 +985,6 @@
             });
         }
 
-        // Team Management
         async function addMultipleTeams() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
             const btn = document.getElementById('addTeamBtn');
@@ -1115,7 +1100,6 @@
             }
         }
 
-        // Player Management
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             
@@ -1171,7 +1155,6 @@
             }
         }
 
-        // --- DASHBOARD AND LOGIN ---
         function checkPassword() {
             if (document.getElementById('adminPassword').value === "MasterUnlock2026") {
                 document.getElementById('loginSection').classList.add('hidden');
@@ -1210,7 +1193,6 @@
             openModal('modal-player');
         }
 
-        // --- LIVE LOGO RESIZER ---
         function changeLiveLogoSize(val) {
             document.getElementById('liveLogoSizeDisp').innerText = val + 'px';
             localStorage.setItem('liveLogoSize', val);
@@ -1231,11 +1213,9 @@
             if(slider) slider.value = size;
         }
 
-        // --- UI LOCK CONTROLS ---
         function updateLiveControls() {
             const hasBid = (liveCurrentTeamId !== null);
 
-            // Buttons to disable when a bid is placed
             const lockButtons = ['la-search-btn', 'la-next-btn', 'la-unsold-btn'];
             lockButtons.forEach(id => {
                 let el = document.getElementById(id);
@@ -1246,7 +1226,6 @@
                 }
             });
 
-            // Undo button (Only active when a bid exists)
             let undoBtn = document.getElementById('la-undo-btn');
             if(undoBtn) {
                 undoBtn.disabled = !hasBid;
@@ -1255,7 +1234,6 @@
             }
         }
 
-        // --- LIVE AUCTION ROOM ---
         async function initLiveAuctionRoom() {
             const strip = document.getElementById('la-franchise-strip');
             if (!strip) return;
@@ -1318,7 +1296,7 @@
 
             applyLiveLogoSize();
             updateLiveControls();
-            evaluateFranchiseStripForPlayer(); // Clears all red shadows
+            evaluateFranchiseStripForPlayer(); 
         }
 
         function pushPlayerToScreen(p, isGoingBack = false) {
@@ -1328,7 +1306,6 @@
 
             livePlayerActive = p;
             
-            // SAFELY PULL BASE PRICE ACROSS ALL PROPERTY NAME VARIATIONS
             const activeSetup = safeGetStorage('auctionSetup', {});
             const fallbackBase = parseInt(activeSetup.minBid) || 0;
             
@@ -1344,7 +1321,6 @@
             document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
             document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
             
-            // DISPLAY CALCULATED BASE PRICE
             document.getElementById('la-base').innerText = liveCurrentBid;
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
@@ -1399,7 +1375,6 @@
             else alert("Player not found, already sold, or doesn't belong to a valid category.");
         }
 
-        // --- SAVE SYSTEM ---
         function saveAuctionProgress(status) {
             let currentSetup = safeGetStorage('auctionSetup', null);
             if (!currentSetup || !currentSetup.id) return alert("No active auction to save. Please create one first.");
@@ -1462,7 +1437,6 @@
             }
         }
 
-        // --- STRICT MATH FOR BID INCREMENT ---
         function getDynamicIncrement() {
             const setup = safeGetStorage('auctionSetup', {});
             let baseInc = parseInt(setup.bidInc);
@@ -1521,7 +1495,6 @@
             
             let proposedBid = isFirstBid ? currentVal : currentVal + exactIncrement;
 
-            // Ensure they are legally allowed to bid this amount
             const check = canTeamBid(team._id || team.id, proposedBid, livePlayerActive.category);
             if (!check.allowed) {
                 if (check.reason === 'category_full') return alert(`${team.name} has reached the max limit for category: ${livePlayerActive.category}`);
@@ -1530,7 +1503,6 @@
                 return;
             }
 
-            // SAVE STATE FOR UNDO
             liveBidHistory.push({
                 bid: liveCurrentBid,
                 teamId: liveCurrentTeamId,
@@ -1580,7 +1552,6 @@
                     return alert(`Insufficient Funds! Team must keep ₹${check.reserve} in reserve. Max possible bid is ₹${check.maxBid}.`);
                 }
 
-                // SAVE STATE FOR UNDO
                 liveBidHistory.push({
                     bid: liveCurrentBid,
                     teamId: liveCurrentTeamId,
@@ -1686,10 +1657,8 @@
                 alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
             }
 
-            // 1. Popup prompt
             alert(alertMessage);
 
-            // 2. Load next player locally instantly (FILTERED BY OPEN CATEGORIES)
             const activeCategories = getAvailableCategories();
             const availablePlayers = window.allPlayers.filter(p => {
                 const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
@@ -1706,16 +1675,13 @@
                 alert("Auction Complete! No more available players left for the open categories.");
             }
 
-            // 3. Sync silently
             loadDashboard().catch(e => console.log(e));
         }
 
-        // --- FILTER ROSTER BY DROPDOWN ---
         function updateRosterCategoryDropdown() {
             const dropdown = document.getElementById('rosterCategoryFilter');
             if (!dropdown) return;
             
-            // Extract unique categories from window.allPlayers
             const uniqueCats = [...new Set(window.allPlayers.map(p => p.category).filter(c => c && String(c).trim() !== ''))].sort();
             
             const currentVal = dropdown.value;
@@ -1735,10 +1701,7 @@
             }
         }
 
-        async function submitSetup(event) {
-            if (event) event.preventDefault();
-
-            // Manual required field checking before saving
+        async function submitSetup() {
             const reqFields = ['setupName', 'setupDate', 'setupBudget', 'setupMinBid', 'setupBidIncrease', 'setupMaxPlayers'];
             for (let id of reqFields) {
                 const el = document.getElementById(id);
@@ -1781,7 +1744,6 @@
                     status: 'incomplete'
                 };
 
-                // WIPE CURRENT STATE FOR A COMPLETELY NEW AUCTION
                 safeSetStorage('auctionTeams', []);
                 safeSetStorage('auctionPlayers', []);
                 safeSetStorage('auctionCats', []);
@@ -1807,7 +1769,6 @@
                 let history = safeGetStorage('auctionHistory', []);
                 if (!Array.isArray(history)) history = [];
                 
-                // Bulletproof null check when searching history array
                 let existingIndex = history.findIndex(a => {
                     if(!a) return false;
                     if(a.setup && a.setup.id === newAuction.id) return true;
@@ -1824,7 +1785,6 @@
 
                 try { populateAuctionDetails(); } catch(e){}
                 
-                // Manually reset inputs
                 try {
                     document.querySelectorAll('.ca-input').forEach(el => {
                         if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
@@ -1847,7 +1807,7 @@
         }
 
         function renderPlayersDatabase(filter = 'all') {
-            updateRosterCategoryDropdown(); // Keep dropdown in sync
+            updateRosterCategoryDropdown(); 
 
             const container = document.getElementById('playersListContainer');
             if(window.allPlayers.length === 0) {
@@ -1864,7 +1824,6 @@
                 }
             } else if (filter !== 'all') {
                 filteredPlayers = window.allPlayers.filter(p => p.status === filter);
-                // Reset the dropdown if a status button is clicked
                 const drop = document.getElementById('rosterCategoryFilter');
                 if(drop && drop.value !== 'all') drop.value = 'all';
             } else {
