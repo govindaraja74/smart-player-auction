@@ -149,8 +149,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Replaced form tag with pure DIV structure so browser refresh is impossible -->
-                <div id="createAuctionFormContainer">
+                <form id="createAuctionForm" onsubmit="return submitSetup(event);">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -177,10 +176,9 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- Button type changed to button to prevent native submission hooks -->
-                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
+                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
                     </div>
-                </div>
+                </form>
             </div>
 
             <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
@@ -1419,7 +1417,12 @@
             };
 
             let history = safeGetStorage('auctionHistory', []);
-            let existingIndex = history.findIndex(a => (a.setup && a.setup.id === currentSetup.id) || a.id === currentSetup.id);
+            let existingIndex = history.findIndex(a => {
+                if(!a) return false;
+                if(a.setup && a.setup.id === currentSetup.id) return true;
+                if(a.id === currentSetup.id) return true;
+                return false;
+            });
 
             if (existingIndex >= 0) {
                 history[existingIndex] = archive;
@@ -1733,20 +1736,22 @@
             }
         }
 
-        async function submitSetup() {
+        async function submitSetup(event) {
+            if (event) event.preventDefault();
+
             // Manual required field checking before saving
             const reqFields = ['setupName', 'setupDate', 'setupBudget', 'setupMinBid', 'setupBidIncrease', 'setupMaxPlayers'];
             for (let id of reqFields) {
                 const el = document.getElementById(id);
                 if (el && (!el.value || String(el.value).trim() === '')) {
                     alert("Please fill out all required fields marked with *.");
-                    el.focus();
-                    return;
+                    if(el.focus) el.focus();
+                    return false;
                 }
             }
 
             if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
-                return;
+                return false;
             }
 
             try {
@@ -1755,13 +1760,17 @@
 
                 let auctionLogoUrl = "";
                 const logoInput = document.getElementById('setupLogo');
-                if (logoInput && logoInput.files && logoInput.files[0]) {
-                    auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+                if (logoInput && logoInput.files && logoInput.files.length > 0) {
+                    try {
+                        auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+                    } catch (imgErr) {
+                        console.error("Image compression error", imgErr);
+                    }
                 }
 
                 const newAuction = {
                     id: Date.now().toString(),
-                    logoUrl: auctionLogoUrl,
+                    logoUrl: auctionLogoUrl || "",
                     sportsType: document.getElementById('setupSportsType') ? document.getElementById('setupSportsType').value : '',
                     name: document.getElementById('setupName') ? document.getElementById('setupName').value : 'Unnamed Auction',
                     budget: document.getElementById('setupBudget') ? document.getElementById('setupBudget').value : 0,
@@ -1798,7 +1807,14 @@
 
                 let history = safeGetStorage('auctionHistory', []);
                 if (!Array.isArray(history)) history = [];
-                let existingIndex = history.findIndex(a => (a.setup && a.setup.id === newAuction.id) || a.id === newAuction.id);
+                
+                // Bulletproof null check when searching history array
+                let existingIndex = history.findIndex(a => {
+                    if(!a) return false;
+                    if(a.setup && a.setup.id === newAuction.id) return true;
+                    if(a.id === newAuction.id) return true;
+                    return false;
+                });
                 
                 if(existingIndex >= 0) history[existingIndex] = archive;
                 else history.push(archive);
@@ -1807,15 +1823,12 @@
 
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
 
-                populateAuctionDetails();
+                try { populateAuctionDetails(); } catch(e){}
                 
-                // Clear input forms manually
-                document.querySelectorAll('.ca-input').forEach(el => {
-                    if(el.tagName === 'INPUT' || el.tagName === 'SELECT') {
-                        if(el.type !== 'date' && el.type !== 'time') el.value = '';
-                    }
-                });
-                if(logoInput) logoInput.value = '';
+                try { 
+                    const formEl = document.getElementById('createAuctionForm');
+                    if(formEl) formEl.reset(); 
+                } catch(e){}
 
                 navTo('view-auction-detail');
                 alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
@@ -1826,6 +1839,8 @@
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
             }
+
+            return false;
         }
 
         function renderPlayersDatabase(filter = 'all') {
@@ -1900,6 +1915,11 @@
 
             html += `</div>`;
             container.innerHTML = html;
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('pdf-content');
+            html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
         }
 
     </script>
