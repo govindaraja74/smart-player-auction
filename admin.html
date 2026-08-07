@@ -149,7 +149,6 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Completely removed the form tag. It is now a physically secure div so browser cannot reload -->
                 <div id="createAuctionFormContainer">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
@@ -1686,10 +1685,8 @@
                 alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
             }
 
-            // 1. Popup prompt
             alert(alertMessage);
 
-            // 2. Load next player locally instantly (FILTERED BY OPEN CATEGORIES)
             const activeCategories = getAvailableCategories();
             const availablePlayers = window.allPlayers.filter(p => {
                 const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
@@ -1706,42 +1703,12 @@
                 alert("Auction Complete! No more available players left for the open categories.");
             }
 
-            // 3. Sync silently
             loadDashboard().catch(e => console.log(e));
         }
 
-        // --- DASHBOARD AND DATA ---
-        function populateAuctionDetails() {
-            try {
-                let data = safeGetStorage('auctionSetup', {});
-                if (!data || typeof data !== 'object') data = {};
+        async function submitSetup(event) {
+            if (event) event.preventDefault();
 
-                try { const nameEl = document.getElementById('adName'); if (nameEl) nameEl.innerText = data.name || 'No Name Set'; } catch(e){}
-                
-                try { 
-                    const codeEl = document.getElementById('adCode'); 
-                    if (codeEl) {
-                        const idStr = String(data.id || '');
-                        codeEl.innerText = idStr ? 'AUC-' + idStr.slice(-6) : 'KBL-2026';
-                    }
-                } catch(e){}
-                
-                try { const balEl = document.getElementById('adBalance'); if (balEl) balEl.innerText = data.budget || '0'; } catch(e){}
-                try { const baseEl = document.getElementById('adBaseBid'); if (baseEl) baseEl.innerText = data.minBid || '0.00'; } catch(e){}
-                try { const incEl = document.getElementById('adBidInc'); if (incEl) incEl.innerText = data.bidInc || '0.00'; } catch(e){}
-                try { const playEl = document.getElementById('adPlayers'); if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`; } catch(e){}
-                try { const logoEl = document.getElementById('adLogoImage'); if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction'); } catch(e){}
-
-                applyLiveLogoSize();
-                updatePlayerCounterBtn();
-                loadBidIncrements();
-                renderAuctionLibrary();
-            } catch (err) {
-                console.error("Populate Failed", err);
-            }
-        }
-
-        async function submitSetup() {
             // Manual required field checking before saving
             const reqFields = ['setupName', 'setupDate', 'setupBudget', 'setupMinBid', 'setupBidIncrease', 'setupMaxPlayers'];
             for (let id of reqFields) {
@@ -1828,14 +1795,10 @@
 
                 try { populateAuctionDetails(); } catch(e){}
                 
-                // Manually reset inputs
-                try {
-                    document.querySelectorAll('.ca-input').forEach(el => {
-                        if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
-                    });
-                    const logoInp = document.getElementById('setupLogo');
-                    if(logoInp) logoInp.value = '';
-                } catch(e) {}
+                try { 
+                    const formEl = document.getElementById('createAuctionForm');
+                    if(formEl) formEl.reset(); 
+                } catch(e){}
 
                 navTo('view-auction-detail');
                 alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
