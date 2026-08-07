@@ -75,7 +75,7 @@
         .ca-grid { display: grid; grid-template-columns: 180px 300px 120px 300px; gap: 20px 15px; align-items: center; max-width: 950px; margin-top: 20px; }
         .ca-label { color: #64748b; font-size: 15px; font-weight: normal; }
         .ca-logo-box { width: 120px; height: 120px; border: 1px dashed #cbd5e1; border-radius: 8px; display: flex; justify-content: center; align-items: center; overflow: hidden; background: #f1f5f9; }
-        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: margin-top: 30px; grid-column: 2; width: 150px; }
+        .ca-btn { background: #1e73be; color: white; border: none; padding: 12px 30px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 30px; grid-column: 2; width: 150px; }
 
         .ad-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); margin-bottom: 20px; }
         .ad-icon-btn { text-align: center; color: #1e73be; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -149,8 +149,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Form tag is entirely replaced with a div to completely block browser reload -->
-                <div id="createAuctionForm">
+                <!-- FIX: Purged <form> tag to physically prevent browser refresh. Changed to standard <div> container -->
+                <div id="createAuctionFormContainer">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -177,8 +177,8 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- Submit via pure JavaScript -->
-                        <button type="button" id="setupSubmitBtn" class="ca-btn" style="background: #1e73be; color: white;" onclick="submitSetup(event)">SUBMIT</button>
+                        <!-- Use type="button" to prevent default submit bindings -->
+                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
                     </div>
                 </div>
             </div>
@@ -760,14 +760,11 @@
 
         // --- IMAGE COMPRESSOR ---
         async function compressImage(file, maxSize = 120) {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 if (!file) return resolve("");
                 const timer = setTimeout(() => {
-                    const rawReader = new FileReader();
-                    rawReader.onload = (e) => resolve(e.target.result || "");
-                    rawReader.onerror = () => resolve("");
-                    rawReader.readAsDataURL(file);
-                }, 1200);
+                    resolve("");
+                }, 2000);
 
                 const reader = new FileReader();
                 reader.onerror = () => { clearTimeout(timer); resolve(""); };
@@ -1828,15 +1825,20 @@
                 try { populateAuctionDetails(); } catch(e){}
                 
                 // Manually reset inputs
-                document.querySelectorAll('#createAuctionForm .ca-input').forEach(el => el.value = '');
-                if(logoInput) logoInput.value = '';
+                try {
+                    document.querySelectorAll('.ca-input').forEach(el => {
+                        if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
+                    });
+                    const logoInp = document.getElementById('setupLogo');
+                    if(logoInp) logoInp.value = '';
+                } catch(e) {}
 
                 navTo('view-auction-detail');
                 alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
 
             } catch(e) {
-                console.error("Submit Error:", e);
-                alert("Error saving auction. Please verify inputs.");
+                console.error("FATAL Submit Error:", e);
+                alert("Error saving auction. Reason: " + e.message);
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
             }
