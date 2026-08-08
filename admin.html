@@ -113,6 +113,8 @@
             <div class="sidebar-item" id="nav-detail" onclick="navTo('view-auction-detail')">My Auction</div>
             <div class="sidebar-item" id="nav-live" onclick="navTo('view-live-room')">Live Auction Room</div>
             <div class="sidebar-item" id="nav-control" onclick="navTo('view-control')">Players Roster</div>
+            <!-- NEW: Separate Franchise Standings Tab -->
+            <div class="sidebar-item" id="nav-standings" onclick="navTo('view-franchise-standings')">Franchise Standings</div>
         </div>
 
         <div class="dash-main" style="position: relative;">
@@ -120,19 +122,13 @@
             <!-- VIEW A: DASHBOARD -->
             <div id="view-dashboard">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
-                <h1 class="dash-title">DASHBOARD</h1>
+                <h1 class="dash-title">DASHBOARD (v5.0)</h1>
 
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-auction-detail')"><div><h3>My</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-control')"><div><h3>Players</h3><p>Roster</p></div></div>
                     <div class="dash-card" style="background:#10b981; border:none;" onclick="navTo('view-live-room')"><div><h3 style="color:white;">Enter</h3><p style="color:white;">Auction Room</p></div></div>
-                </div>
-
-                <!-- Franchise Standings Section -->
-                <div class="dash-section-bar" style="max-width: 950px; margin-top: 30px;">Franchise Standings</div>
-                <div id="dashboard-franchises-list" style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 950px; margin-bottom: 40px;">
-                    <span style="color: #94a3b8;">No franchises added yet.</span>
                 </div>
 
                 <div class="dash-section-bar" style="max-width: 950px;">Your Active Auction</div>
@@ -176,6 +172,7 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
+                        <!-- Pure JS Button -->
                         <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
                     </div>
                 </div>
@@ -282,7 +279,11 @@
 
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h1 style="margin: 0; color: white;">LIVE AUCTION ROOM</h1>
-                        <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
+                        <div>
+                            <!-- NEW: Button to open franchise standings -->
+                            <button class="btn-primary" style="background: #3b82f6; margin-right: 10px;" onclick="navTo('view-franchise-standings')">📊 Franchise Standings</button>
+                            <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
+                        </div>
                     </div>
 
                     <div class="live-top-section">
@@ -350,6 +351,14 @@
 
                 <div style="background: white; padding: 20px; border-radius: 8px;" id="pdf-content">
                     <div id="playersListContainer" style="color: black;"></div>
+                </div>
+            </div>
+
+            <!-- NEW VIEW F: FULL PAGE FRANCHISE STANDINGS -->
+            <div id="view-franchise-standings" class="hidden">
+                <h1 class="dash-title">FRANCHISE STANDINGS</h1>
+                <div id="standings-franchises-list" style="display: flex; flex-wrap: wrap; gap: 20px; max-width: 1050px; margin-bottom: 40px;">
+                    <span style="color: #94a3b8;">No franchises added yet.</span>
                 </div>
             </div>
 
@@ -466,39 +475,43 @@
                 try {
                     let data = localStorage.getItem(key);
                     if (data) {
-                        JSON.parse(data); // Test if it parses correctly
+                        JSON.parse(data); 
                     }
                 } catch(e) {
-                    localStorage.removeItem(key); // Delete corrupted keys
+                    localStorage.removeItem(key); 
                 }
             });
         })();
 
         // --- BULLETPROOF RAM MEMORY FALLBACK ---
-        // If the browser's hard drive storage fills up, the app instantly switches to this RAM object
-        // so it never crashes and the data always displays correctly during your active session.
         window.memoryFallback = {};
 
         function safeGetStorage(key, defaultVal) {
+            // FIX: If we just saved something to memoryFallback, prioritize reading it instantly
+            if (window.memoryFallback && window.memoryFallback[key] !== undefined) {
+                return window.memoryFallback[key];
+            }
             try { 
                 const item = localStorage.getItem(key);
-                if (item === null || item === undefined) return window.memoryFallback[key] || defaultVal;
+                if (item === null || item === undefined) return defaultVal;
                 const parsed = JSON.parse(item);
-                if (Array.isArray(defaultVal) && !Array.isArray(parsed)) return window.memoryFallback[key] || defaultVal;
+                if (Array.isArray(defaultVal) && !Array.isArray(parsed)) return defaultVal;
+                
+                window.memoryFallback[key] = parsed; // Sync RAM with local storage
                 return parsed; 
             } catch(e) { 
-                return window.memoryFallback[key] || defaultVal; 
+                return defaultVal; 
             }
         }
 
         function safeSetStorage(key, data) {
-            window.memoryFallback[key] = data; // Always guarantee it lives in current session memory
+            window.memoryFallback[key] = data; // Always guarantee it lives in active RAM
             try { 
                 localStorage.setItem(key, JSON.stringify(data)); 
             } catch (e) {
                 console.warn("Storage Quota Exceeded. Relying on active RAM fallback.");
                 try {
-                    localStorage.removeItem('auctionHistory'); // Try to make room by sacrificing history
+                    localStorage.removeItem('auctionHistory'); 
                     localStorage.setItem(key, JSON.stringify(data));
                 } catch(err) {
                     // Fail silently, memoryFallback already holds the data perfectly!
@@ -527,7 +540,7 @@
         // --- Bidding Maths & Safety Rules Core Logic ---
         function getTeamStats(teamId) {
             const setup = safeGetStorage('auctionSetup', {});
-            const globalBudget = parseInt(setup.budget) || 0; // Master budget fallback
+            const globalBudget = parseInt(setup.budget) || 0; 
 
             const teamPlayers = window.allPlayers.filter(p => p.status === 'sold' && p.teamId === teamId);
             const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
@@ -630,13 +643,14 @@
             });
         }
 
-        function renderDashboardFranchiseStandings() {
-            const container = document.getElementById('dashboard-franchises-list');
+        // --- NEW: RENDER FRANCHISE STANDINGS ON SEPARATE PAGE ---
+        function renderFranchiseStandings() {
+            const container = document.getElementById('standings-franchises-list');
             if (!container) return;
 
             const activeTeams = getActiveTeams();
             if (activeTeams.length === 0) {
-                container.innerHTML = '<span style="color: #94a3b8;">No franchises added yet.</span>';
+                container.innerHTML = '<span style="color: #94a3b8; padding: 20px; font-size: 18px;">No franchises added yet. Please add teams in the My Auction tab.</span>';
                 return;
             }
 
@@ -647,20 +661,20 @@
                 const safeName = t.name ? String(t.name) : 'Unnamed';
 
                 html += `
-                <div class="ad-card" style="width: 280px; padding: 15px; cursor: pointer; text-align: center; border: 1px solid #cbd5e1;" onclick="showFranchiseRoster('${t._id || t.id}')">
-                    <img src="${logo}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #cbd5e1;">
-                    <h3 style="margin: 0 0 10px 0; color: #1e73be;">${safeName}</h3>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
+                <div class="ad-card" style="width: 300px; padding: 20px; cursor: pointer; text-align: center; border: 2px solid #cbd5e1; background: white;" onclick="showFranchiseRoster('${t._id || t.id}')">
+                    <img src="${logo}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #1e73be; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h3 style="margin: 0 0 15px 0; color: #1e73be; font-size: 22px;">${safeName}</h3>
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
                         <span>Needed Players:</span> <strong>${fin.playersNeeded}</strong>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Amount Remaining:</span> <strong>₹${fin.purse}</strong>
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
+                        <span>Amount Remaining:</span> <strong style="color: #10b981;">₹${fin.purse}</strong>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
                         <span>Reserve Fund:</span> <strong style="color: #ef4444;">₹${fin.reserve}</strong>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155;">
-                        <span>Max Possible Bid:</span> <strong style="color: #10b981;">₹${fin.maxBid}</strong>
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155;">
+                        <span>Max Possible Bid:</span> <strong style="color: #3b82f6;">₹${fin.maxBid}</strong>
                     </div>
                 </div>`;
             });
@@ -722,7 +736,7 @@
 
         function getActiveTeams() {
             const activeSetup = safeGetStorage('auctionSetup', {});
-            const activeTourneyId = activeSetup.id || 'KBL2026';
+            const activeTourneyId = activeSetup.id || 'KBL2026'; 
 
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
@@ -789,25 +803,23 @@
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
         function navTo(viewId) {
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-setup').classList.add('hidden');
-            document.getElementById('view-auction-detail').classList.add('hidden');
-            document.getElementById('view-live-room').classList.add('hidden');
-            document.getElementById('view-control').classList.add('hidden');
+            ['view-dashboard', 'view-setup', 'view-auction-detail', 'view-live-room', 'view-control', 'view-franchise-standings'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
             
-            document.getElementById('nav-dashboard').classList.remove('active');
-            document.getElementById('nav-setup').classList.remove('active');
-            document.getElementById('nav-detail').classList.remove('active');
-            document.getElementById('nav-live').classList.remove('active');
-            document.getElementById('nav-control').classList.remove('active');
-            
+            ['nav-dashboard', 'nav-setup', 'nav-detail', 'nav-live', 'nav-control', 'nav-standings'].forEach(id => {
+                if(document.getElementById(id)) document.getElementById(id).classList.remove('active');
+            });
+
             document.getElementById(viewId).classList.remove('hidden');
-            
+
             if(viewId === 'view-dashboard') {
                 document.getElementById('nav-dashboard').classList.add('active');
-                try { loadDashboard(); renderDashboardFranchiseStandings(); } catch(e){}
+                try { loadDashboard(); } catch(e){}
             }
-            if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
+            if(viewId === 'view-setup') {
+                document.getElementById('nav-setup').classList.add('active');
+            }
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
                 try { populateAuctionDetails(); loadDashboard(); } catch(e){}
@@ -819,6 +831,10 @@
             if(viewId === 'view-live-room') {
                 document.getElementById('nav-live').classList.add('active');
                 try { initLiveAuctionRoom(); } catch(e){}
+            }
+            if(viewId === 'view-franchise-standings') {
+                document.getElementById('nav-standings').classList.add('active');
+                try { renderFranchiseStandings(); } catch(e){}
             }
         }
 
@@ -1035,7 +1051,6 @@
             
             closeModal('modal-team');
             try { renderAuctionDetailLists(); } catch(e){}
-            try { renderDashboardFranchiseStandings(); } catch(e){}
             if(document.getElementById('view-live-room').classList.contains('hidden') === false){
                 try { initLiveAuctionRoom(); } catch(e){}
             }
@@ -1063,7 +1078,6 @@
             
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
             try { renderAuctionDetailLists(); } catch(e) {}
-            try { renderDashboardFranchiseStandings(); } catch(e) {}
         }
 
         function editTeam(id) {
@@ -1092,7 +1106,6 @@
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
                 try { renderAuctionDetailLists(); } catch(e) {}
-                try { renderDashboardFranchiseStandings(); } catch(e) {}
                 closeModal('modal-edit-team');
             }
         }
@@ -1111,7 +1124,6 @@
 
             renderPlayersDatabase('all');
             updatePlayerCounterBtn();
-            try { renderDashboardFranchiseStandings(); } catch(e) {}
         }
 
         function openEditPlayerModal(id) {
@@ -1148,7 +1160,6 @@
                 safeSetStorage('auctionPlayers', window.allPlayers);
                 renderPlayersDatabase('all');
                 closeModal('modal-edit-player');
-                try { renderDashboardFranchiseStandings(); } catch(e) {}
             }
         }
 
@@ -1161,7 +1172,6 @@
                 try { populateAuctionDetails(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
                 try { updateManualCategoryDropdowns(); } catch(e){}
-                try { renderDashboardFranchiseStandings(); } catch(e){}
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
             }
@@ -1699,7 +1709,6 @@
         }
 
         async function submitSetup() {
-            // Manual required field checking before saving
             const reqFields = ['setupName', 'setupDate', 'setupBudget', 'setupMinBid', 'setupBidIncrease', 'setupMaxPlayers'];
             for (let id of reqFields) {
                 const el = document.getElementById(id);
@@ -1782,7 +1791,8 @@
 
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
 
-                try { populateAuctionDetails(); } catch(e){}
+                // We explicitly pass the exact new auction data here so it displays immediately
+                try { populateAuctionDetails(newAuction); } catch(e){}
                 
                 try {
                     document.querySelectorAll('.ca-input').forEach(el => {
@@ -1803,6 +1813,37 @@
             }
 
             return false;
+        }
+
+        function populateAuctionDetails(forcedData = null) {
+            try {
+                let data = forcedData || safeGetStorage('auctionSetup', {});
+                if (!data || typeof data !== 'object') data = {};
+
+                try { const nameEl = document.getElementById('adName'); if (nameEl) nameEl.innerText = data.name || 'No Auction Loaded'; } catch(e){}
+                
+                try { 
+                    const codeEl = document.getElementById('adCode'); 
+                    if (codeEl) {
+                        const idStr = String(data.id || '');
+                        codeEl.innerText = idStr ? 'AUC-' + idStr.slice(-6) : 'KBL-2026';
+                    }
+                } catch(e){}
+                
+                try { const balEl = document.getElementById('adBalance'); if (balEl) balEl.innerText = data.budget || '0'; } catch(e){}
+                try { const baseEl = document.getElementById('adBaseBid'); if (baseEl) baseEl.innerText = data.minBid || '0'; } catch(e){}
+                try { const incEl = document.getElementById('adBidInc'); if (incEl) incEl.innerText = data.bidInc || '0'; } catch(e){}
+                try { const playEl = document.getElementById('adPlayers'); if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`; } catch(e){}
+                try { const logoEl = document.getElementById('adLogoImage'); if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction'); } catch(e){}
+
+                applyLiveLogoSize();
+                updatePlayerCounterBtn();
+                loadBidIncrements();
+                renderAuctionDetailLists();
+                renderAuctionLibrary();
+            } catch (err) {
+                console.error("Populate Failed", err);
+            }
         }
 
         function renderPlayersDatabase(filter = 'all') {
