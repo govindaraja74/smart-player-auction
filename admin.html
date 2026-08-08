@@ -122,7 +122,7 @@
             <!-- VIEW A: DASHBOARD -->
             <div id="view-dashboard">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
-                <h1 class="dash-title">DASHBOARD (v5.0)</h1>
+                <h1 class="dash-title">DASHBOARD (v6.0)</h1>
 
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
@@ -280,7 +280,6 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h1 style="margin: 0; color: white;">LIVE AUCTION ROOM</h1>
                         <div>
-                            <!-- NEW: Button to open franchise standings -->
                             <button class="btn-primary" style="background: #3b82f6; margin-right: 10px;" onclick="navTo('view-franchise-standings')">📊 Franchise Standings</button>
                             <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
                         </div>
@@ -487,7 +486,7 @@
         window.memoryFallback = {};
 
         function safeGetStorage(key, defaultVal) {
-            // FIX: If we just saved something to memoryFallback, prioritize reading it instantly
+            // Always trust active RAM first to prevent sync overwrites
             if (window.memoryFallback && window.memoryFallback[key] !== undefined) {
                 return window.memoryFallback[key];
             }
@@ -496,8 +495,7 @@
                 if (item === null || item === undefined) return defaultVal;
                 const parsed = JSON.parse(item);
                 if (Array.isArray(defaultVal) && !Array.isArray(parsed)) return defaultVal;
-                
-                window.memoryFallback[key] = parsed; // Sync RAM with local storage
+                window.memoryFallback[key] = parsed; 
                 return parsed; 
             } catch(e) { 
                 return defaultVal; 
@@ -505,17 +503,11 @@
         }
 
         function safeSetStorage(key, data) {
-            window.memoryFallback[key] = data; // Always guarantee it lives in active RAM
+            window.memoryFallback[key] = data; // Lock data into active session RAM
             try { 
                 localStorage.setItem(key, JSON.stringify(data)); 
             } catch (e) {
-                console.warn("Storage Quota Exceeded. Relying on active RAM fallback.");
-                try {
-                    localStorage.removeItem('auctionHistory'); 
-                    localStorage.setItem(key, JSON.stringify(data));
-                } catch(err) {
-                    // Fail silently, memoryFallback already holds the data perfectly!
-                }
+                console.warn("Storage Full. Relying on active RAM.");
             }
         }
 
@@ -540,7 +532,7 @@
         // --- Bidding Maths & Safety Rules Core Logic ---
         function getTeamStats(teamId) {
             const setup = safeGetStorage('auctionSetup', {});
-            const globalBudget = parseInt(setup.budget) || 0; 
+            const globalBudget = parseInt(setup.budget) || 0; // Master budget fallback
 
             const teamPlayers = window.allPlayers.filter(p => p.status === 'sold' && p.teamId === teamId);
             const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
@@ -562,7 +554,7 @@
         function getFranchiseFinancials(teamId) {
             const stats = getTeamStats(teamId);
             const setup = safeGetStorage('auctionSetup', {});
-            const basePrice = parseInt(setup.minBid) || 0;
+            const basePrice = parseInt(setup.minBid || 0);
             
             const remainingNeeded = Math.max(0, stats.playersNeeded - 1);
             const reserveFund = remainingNeeded * basePrice;
@@ -579,7 +571,7 @@
             const stats = getTeamStats(teamId);
             const setup = safeGetStorage('auctionSetup', {});
             const cats = safeGetStorage('auctionCats', []);
-            const basePrice = parseInt(setup.minBid) || 0;
+            const basePrice = parseInt(setup.minBid || 0);
 
             if (playerCategory) {
                 const targetCat = String(playerCategory).trim().toLowerCase();
@@ -592,7 +584,7 @@
                 }
             }
 
-            const maxPlayers = parseInt(setup.maxPlayers) || 0;
+            const maxPlayers = parseInt(setup.maxPlayers || 0);
             if (maxPlayers > 0 && stats.totalPlayers >= maxPlayers) {
                 return { allowed: false, reason: 'team_full' };
             }
@@ -1051,6 +1043,7 @@
             
             closeModal('modal-team');
             try { renderAuctionDetailLists(); } catch(e){}
+            try { renderDashboardFranchiseStandings(); } catch(e){}
             if(document.getElementById('view-live-room').classList.contains('hidden') === false){
                 try { initLiveAuctionRoom(); } catch(e){}
             }
@@ -1078,6 +1071,7 @@
             
             try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
             try { renderAuctionDetailLists(); } catch(e) {}
+            try { renderDashboardFranchiseStandings(); } catch(e) {}
         }
 
         function editTeam(id) {
@@ -1106,6 +1100,7 @@
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
                 try { renderAuctionDetailLists(); } catch(e) {}
+                try { renderDashboardFranchiseStandings(); } catch(e) {}
                 closeModal('modal-edit-team');
             }
         }
@@ -1124,6 +1119,7 @@
 
             renderPlayersDatabase('all');
             updatePlayerCounterBtn();
+            try { renderDashboardFranchiseStandings(); } catch(e) {}
         }
 
         function openEditPlayerModal(id) {
@@ -1160,6 +1156,7 @@
                 safeSetStorage('auctionPlayers', window.allPlayers);
                 renderPlayersDatabase('all');
                 closeModal('modal-edit-player');
+                try { renderDashboardFranchiseStandings(); } catch(e) {}
             }
         }
 
@@ -1172,6 +1169,7 @@
                 try { populateAuctionDetails(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
                 try { updateManualCategoryDropdowns(); } catch(e){}
+                try { renderDashboardFranchiseStandings(); } catch(e){}
             } else {
                 document.getElementById('errorMessage').style.display = 'block';
             }
@@ -1719,9 +1717,7 @@
                 }
             }
 
-            if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
-                return false;
-            }
+            if(!confirm("Are you sure you want to start a brand new auction? This will clear out current active data to give you a clean slate.")) return false;
 
             try {
                 const btn = document.getElementById('setupSubmitBtn');
@@ -1751,96 +1747,75 @@
                     status: 'incomplete'
                 };
 
-                // WIPE CURRENT STATE FOR A COMPLETELY NEW AUCTION
+                // Clear out old data
                 safeSetStorage('auctionTeams', []);
                 safeSetStorage('auctionPlayers', []);
                 safeSetStorage('auctionCats', []);
                 safeSetStorage('auctionBidTiers', []);
-                safeSetStorage('deletedTeams', []);
-                safeSetStorage('deletedPlayers', []);
-                
                 window.allTeams = [];
                 window.allPlayers = [];
                 window.currentCategories = [];
 
+                // Save new data
                 safeSetStorage('auctionSetup', newAuction);
-                currentBidIncrease = parseInt(newAuction.bidInc) || 0;
-
-                let archive = {
-                    setup: newAuction,
-                    teams: [],
-                    players: [],
-                    cats: [],
-                    tiers: []
-                };
 
                 let history = safeGetStorage('auctionHistory', []);
                 if (!Array.isArray(history)) history = [];
-                
-                let existingIndex = history.findIndex(a => {
-                    if(!a) return false;
-                    if(a.setup && a.setup.id === newAuction.id) return true;
-                    if(a.id === newAuction.id) return true;
-                    return false;
-                });
-                
-                if(existingIndex >= 0) history[existingIndex] = archive;
-                else history.push(archive);
-                
+                history.push({ setup: newAuction, teams: [], players: [], cats: [], tiers: [] });
                 safeSetStorage('auctionHistory', history);
 
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
 
-                // We explicitly pass the exact new auction data here so it displays immediately
-                try { populateAuctionDetails(newAuction); } catch(e){}
+                // Force UI to load instantly with the fresh data
+                populateAuctionDetails(newAuction);
                 
-                try {
-                    document.querySelectorAll('.ca-input').forEach(el => {
-                        if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
-                    });
-                    const logoInp = document.getElementById('setupLogo');
-                    if(logoInp) logoInp.value = '';
-                } catch(e) {}
+                document.querySelectorAll('.ca-input').forEach(el => {
+                    if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
+                });
 
                 navTo('view-auction-detail');
-                alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
+                alert("Brand new auction created successfully!");
 
             } catch(e) {
-                console.error("FATAL Submit Error:", e);
-                alert("Error saving auction. Reason: " + e.message);
+                alert("Error saving auction: " + e.message);
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
             }
-
             return false;
         }
 
         function populateAuctionDetails(forcedData = null) {
             try {
                 let data = forcedData || safeGetStorage('auctionSetup', {});
-                if (!data || typeof data !== 'object') data = {};
+                if (!data || Object.keys(data).length === 0) return; // Wait until data exists
 
-                try { const nameEl = document.getElementById('adName'); if (nameEl) nameEl.innerText = data.name || 'No Auction Loaded'; } catch(e){}
+                const nameEl = document.getElementById('adName'); 
+                if (nameEl) nameEl.innerText = data.name || 'No Auction Loaded';
                 
-                try { 
-                    const codeEl = document.getElementById('adCode'); 
-                    if (codeEl) {
-                        const idStr = String(data.id || '');
-                        codeEl.innerText = idStr ? 'AUC-' + idStr.slice(-6) : 'KBL-2026';
-                    }
-                } catch(e){}
+                const codeEl = document.getElementById('adCode'); 
+                if (codeEl) codeEl.innerText = data.id ? 'AUC-' + String(data.id).slice(-6) : 'KBL-2026';
                 
-                try { const balEl = document.getElementById('adBalance'); if (balEl) balEl.innerText = data.budget || '0'; } catch(e){}
-                try { const baseEl = document.getElementById('adBaseBid'); if (baseEl) baseEl.innerText = data.minBid || '0'; } catch(e){}
-                try { const incEl = document.getElementById('adBidInc'); if (incEl) incEl.innerText = data.bidInc || '0'; } catch(e){}
-                try { const playEl = document.getElementById('adPlayers'); if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`; } catch(e){}
-                try { const logoEl = document.getElementById('adLogoImage'); if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction'); } catch(e){}
+                const balEl = document.getElementById('adBalance'); 
+                if (balEl) balEl.innerText = data.budget || '0';
+                
+                const baseEl = document.getElementById('adBaseBid'); 
+                if (baseEl) baseEl.innerText = data.minBid || '0';
+                
+                const incEl = document.getElementById('adBidInc'); 
+                if (incEl) incEl.innerText = data.bidInc || '0';
+                
+                const playEl = document.getElementById('adPlayers'); 
+                if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`;
+                
+                const logoEl = document.getElementById('adLogoImage'); 
+                if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
 
-                applyLiveLogoSize();
-                updatePlayerCounterBtn();
-                loadBidIncrements();
+                // Force these lists to redraw instantly
                 renderAuctionDetailLists();
                 renderAuctionLibrary();
+                updatePlayerCounterBtn();
+                loadBidIncrements();
+
             } catch (err) {
                 console.error("Populate Failed", err);
             }
