@@ -801,7 +801,7 @@
             container.innerHTML = html;
         }
 
-        function showFranchiseRoster(teamId) {
+      function showFranchiseRoster(teamId) {
             const team = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
             if (!team) return;
 
@@ -809,38 +809,94 @@
             
             const fin = getFranchiseFinancials(teamId);
             const rosterContainer = document.getElementById('fr-roster-list');
+            const allCats = safeGetStorage('auctionCats', []);
             
-            if (fin.roster.length === 0) {
-                rosterContainer.innerHTML = '<p style="color: #94a3b8;">No players bought yet.</p>';
-            } else {
-                let html = '<table style="width: 100%; border-collapse: collapse; color: white;">';
-                html += `
-                    <tr style="border-bottom: 2px solid #334155; text-align: left;">
-                        <th style="padding: 10px;">Sl No</th>
-                        <th style="padding: 10px;">Player Name</th>
-                        <th style="padding: 10px;">Category</th>
-                        <th style="padding: 10px;">Sold Price</th>
-                    </tr>`;
-                fin.roster.forEach(p => {
-                    html += `
-                    <tr style="border-bottom: 1px solid #334155;">
-                        <td style="padding: 10px;">#${p.serialNumber || '-'}</td>
-                        <td style="padding: 10px; font-weight: bold;">${p.name}</td>
-                        <td style="padding: 10px;">${p.category || '-'}</td>
-                        <td style="padding: 10px; color: #10b981; font-weight: bold;">₹${p.soldPrice}</td>
-                    </tr>`;
-                });
-                html += '</table>';
-                
-                html += `
-                    <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between;">
-                        <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
-                        <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
-                    </div>`;
+            let html = '';
 
-                rosterContainer.innerHTML = html;
+            // Build the visual grid grouped by Category
+            if (allCats.length > 0) {
+                const rosterByCat = {};
+                fin.roster.forEach(p => {
+                    const c = String(p.category || '').trim().toLowerCase();
+                    if(!rosterByCat[c]) rosterByCat[c] = [];
+                    rosterByCat[c].push(p);
+                });
+
+                allCats.forEach(cat => {
+                    const catName = typeof cat === 'object' ? cat.name : cat;
+                    const normalizedCatName = String(catName).trim().toLowerCase();
+                    const limit = typeof cat === 'object' ? parseInt(cat.maxPlayers) || 0 : 0;
+                    
+                    const boughtPlayers = rosterByCat[normalizedCatName] || [];
+                    
+                    // Decide how many boxes to draw (Use the set limit, or at least 1 if no limit is set)
+                    const totalSlots = limit > 0 ? limit : Math.max(boughtPlayers.length, 1);
+
+                    html += `<h4 style="color: #38bdf8; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">${catName}</h4>`;
+                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    
+                    for(let i = 0; i < totalSlots; i++) {
+                        if (i < boughtPlayers.length) {
+                            const p = boughtPlayers[i];
+                            // FILLED BOX (Green)
+                            html += `
+                            <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;">
+                                <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
+                                <div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div>
+                            </div>`;
+                        } else {
+                            // EMPTY BOX (Dark Blue Dashed)
+                            html += `
+                            <div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 55px; box-sizing: border-box;">
+                                <span style="font-size: 12px; font-style: italic;">Empty Slot</span>
+                            </div>`;
+                        }
+                    }
+                    html += `</div>`;
+                });
+
+                // Failsafe: Just in case a player was bought but their category was later deleted/changed
+                const matchedCats = allCats.map(c => String(typeof c === 'object' ? c.name : c).trim().toLowerCase());
+                const unmatchedPlayers = fin.roster.filter(p => !matchedCats.includes(String(p.category || '').trim().toLowerCase()));
+                
+                if (unmatchedPlayers.length > 0) {
+                    html += `<h4 style="color: #ef4444; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">Other / Uncategorized</h4>`;
+                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    unmatchedPlayers.forEach(p => {
+                        html += `
+                        <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;">
+                            <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
+                            <div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
+
+            } else {
+                // Fallback if no categories exist at all
+                if (fin.roster.length === 0) {
+                    html = '<p style="color: #94a3b8;">No players bought yet.</p>';
+                } else {
+                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    fin.roster.forEach(p => {
+                        html += `
+                        <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;">
+                            <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
+                            <div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                }
             }
             
+            // Append Financial Summary Footer
+            html += `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">
+                    <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
+                    <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
+                </div>`;
+
+            rosterContainer.innerHTML = html;
             openModal('modal-franchise-roster');
         }
 
