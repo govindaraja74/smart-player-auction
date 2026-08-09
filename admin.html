@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Smart Players Auction</title>
+    <!-- XLSX Library required for Excel upload processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -113,7 +114,6 @@
             <div class="sidebar-item" id="nav-detail" onclick="navTo('view-auction-detail')">My Auction</div>
             <div class="sidebar-item" id="nav-live" onclick="navTo('view-live-room')">Live Auction Room</div>
             <div class="sidebar-item" id="nav-control" onclick="navTo('view-control')">Players Roster</div>
-            <!-- Separate Franchise Standings Tab -->
             <div class="sidebar-item" id="nav-standings" onclick="navTo('view-franchise-standings')">Franchise Standings</div>
         </div>
 
@@ -122,7 +122,7 @@
             <!-- VIEW A: DASHBOARD -->
             <div id="view-dashboard">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
-                <h1 class="dash-title">DASHBOARD (v10.0)</h1>
+                <h1 class="dash-title">DASHBOARD (v11.0)</h1>
 
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
@@ -145,8 +145,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Form correctly binds single submission event -->
-                <form id="createAuctionForm" onsubmit="event.preventDefault(); submitSetup(); return false;">
+                <form id="createAuctionForm">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -529,7 +528,15 @@
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
+        // Attach Secure Form Interceptor
         function safeInit() {
+            const form = document.getElementById('createAuctionForm');
+            if(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault(); // STOP BROWSER REFRESH INSTANTLY
+                    submitSetup(); // Run save logic safely
+                });
+            }
             try { loadSavedMemory(); } catch(e) {}
         }
 
@@ -577,58 +584,6 @@
                 document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
                 currentBidIncrease = parseInt(savedSetup.bidInc);
             }
-        }
-
-        async function loadDashboard() {
-            try {
-                const activeSetup = safeGetStorage('auctionSetup', {});
-                const activeTourneyId = activeSetup.id || 'KBL2026';
-
-                let data = { players: [], teams: [] };
-                try {
-                    const res = await fetch('/api/dashboard');
-                    if (res.ok) {
-                        const resData = await res.json();
-                        if (resData) data = resData;
-                    }
-                } catch(e) {}
-
-                const deletedPlayers = safeGetStorage('deletedPlayers', []);
-                const deletedTeams = safeGetStorage('deletedTeams', []);
-
-                const serverPlayers = (Array.isArray(data.players) ? data.players : []).filter(p => !deletedPlayers.includes(p._id) && (!p.tournamentId || String(p.tournamentId) === String(activeTourneyId)));
-                const localPlayers = safeGetStorage('auctionPlayers', []).filter(p => !deletedPlayers.includes(p._id) && (!p.tournamentId || String(p.tournamentId) === String(activeTourneyId)));
-
-                let playerMap = new Map();
-                serverPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
-                localPlayers.forEach(p => { if(p && p.name) playerMap.set(p.name.trim().toLowerCase(), p); });
-                window.allPlayers = Array.from(playerMap.values());
-
-                const serverTeams = (Array.isArray(data.teams) ? data.teams : []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()) && (!t.tournamentId || String(t.tournamentId) === String(activeTourneyId)));
-                const localTeams = safeGetStorage('auctionTeams', []).filter(t => t && !deletedTeams.includes(t._id) && !deletedTeams.includes(t.id) && !deletedTeams.includes(String(t.name || '').trim().toLowerCase()) && (!t.tournamentId || String(t.tournamentId) === String(activeTourneyId)));
-
-                let teamMap = new Map();
-                localTeams.forEach(t => { if(t && t.name) teamMap.set(String(t.name).trim().toLowerCase(), t); });
-                serverTeams.forEach(st => {
-                    if(st && st.name) {
-                        const key = String(st.name).trim().toLowerCase();
-                        const existing = teamMap.get(key);
-                        if(existing) {
-                            teamMap.set(key, { ...st, logoUrl: (st.logoUrl && st.logoUrl.length > 10) ? st.logoUrl : existing.logoUrl });
-                        } else {
-                            teamMap.set(key, st);
-                        }
-                    }
-                });
-                window.allTeams = Array.from(teamMap.values());
-                safeSetStorage('auctionTeams', window.allTeams);
-
-                try { renderAuctionDetailLists(); } catch(e){}
-                try { updatePlayerCounterBtn(); } catch(e){}
-                try { updateDashboardHistoryCard(); } catch(e){}
-                try { renderDashboardFranchiseStandings(); } catch(e){}
-
-            } catch (err) {}
         }
 
         // --- Bidding Maths & Safety Rules Core Logic ---
@@ -735,43 +690,6 @@
                     btn.classList.remove('red-shadow');
                 }
             });
-        }
-
-        function renderDashboardFranchiseStandings() {
-            const container = document.getElementById('dashboard-franchises-list');
-            if (!container) return;
-
-            const activeTeams = getActiveTeams();
-            if (activeTeams.length === 0) {
-                container.innerHTML = '<span style="color: #94a3b8;">No franchises added yet.</span>';
-                return;
-            }
-
-            let html = '';
-            activeTeams.forEach((t, i) => {
-                const fin = getFranchiseFinancials(t._id || t.id);
-                const logo = getTeamLogo(t, 'Team ' + (i + 1));
-                const safeName = t.name ? String(t.name) : 'Unnamed';
-
-                html += `
-                <div class="ad-card" style="width: 280px; padding: 15px; cursor: pointer; text-align: center; border: 1px solid #cbd5e1;" onclick="showFranchiseRoster('${t._id || t.id}')">
-                    <img src="${logo}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #cbd5e1;">
-                    <h3 style="margin: 0 0 10px 0; color: #1e73be;">${safeName}</h3>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Needed Players:</span> <strong>${fin.playersNeeded}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Amount Remaining:</span> <strong>₹${fin.purse}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Reserve Fund:</span> <strong style="color: #ef4444;">₹${fin.reserve}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155;">
-                        <span>Max Possible Bid:</span> <strong style="color: #10b981;">₹${fin.maxBid}</strong>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
         }
 
         function renderFranchiseStandings() {
@@ -883,6 +801,7 @@
                 if (!nameKey) return;
 
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
+                
                 if (t.tournamentId && String(t.tournamentId) !== String(activeTourneyId)) return;
 
                 if (!uniqueMap.has(nameKey)) {
@@ -1064,7 +983,6 @@
             }
         }
 
-        // --- RESTORED RENDER AUCTION LISTS FUNCTION ---
         function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
@@ -1121,7 +1039,29 @@
             }
         }
 
-        // --- RESTORED RENDER AUCTION LIBRARY FUNCTION ---
+        // --- NEW: MISSING AUCTION LIBRARY ACTION FUNCTIONS ---
+        function markAuctionComplete(index) {
+            let history = safeGetStorage('auctionHistory', []);
+            if (history[index]) {
+                if (history[index].setup) {
+                    history[index].setup.status = 'completed';
+                } else {
+                    history[index].status = 'completed';
+                }
+                safeSetStorage('auctionHistory', history);
+                renderAuctionLibrary();
+                alert("Auction marked as complete!");
+            }
+        }
+
+        function deleteHistoricalAuction(index) {
+            if (!confirm("Are you sure you want to PERMANENTLY delete this auction from your history?")) return;
+            let history = safeGetStorage('auctionHistory', []);
+            history.splice(index, 1);
+            safeSetStorage('auctionHistory', history);
+            renderAuctionLibrary();
+        }
+
         function renderAuctionLibrary() {
             let history = safeGetStorage('auctionHistory', []);
             const incContainer = document.getElementById('incomplete-auctions-list');
@@ -1132,7 +1072,7 @@
             let hasInc = false, hasComp = false;
 
             history.forEach((auc, index) => {
-                let setupData = auc.setup || auc; // Safety fallback
+                let setupData = auc.setup || auc; 
                 let aucName = setupData.name || 'Unnamed';
                 let aucDate = setupData.date || 'N/A';
                 let aucBudget = setupData.budget || 0;
@@ -1344,6 +1284,123 @@
                 closeModal('modal-edit-team');
             }
         }
+
+        // --- NEW: MISSING PLAYER ADD AND EXCEL IMPORT FUNCTIONS ---
+        async function addPlayer() {
+            const name = document.getElementById('playerName').value;
+            const cat = document.getElementById('playerCategoryManual').value;
+            const price = document.getElementById('playerBasePrice').value;
+            const photoInput = document.getElementById('playerPhoto');
+
+            if (!name || !cat) return alert("Player Name and Category are required!");
+
+            let photoUrl = "";
+            if (photoInput && photoInput.files[0]) {
+                photoUrl = await compressImage(photoInput.files[0], 200);
+            }
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            if (!Array.isArray(localPlayers)) localPlayers = [];
+
+            const newPlayer = {
+                _id: 'plyr_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                serialNumber: localPlayers.length + 1,
+                name: name.trim(),
+                category: cat,
+                basePrice: parseInt(price) || parseInt(activeSetup.minBid) || 0,
+                status: 'available',
+                photoUrl: photoUrl,
+                tournamentId: activeTourneyId
+            };
+
+            localPlayers.push(newPlayer);
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+
+            renderPlayersDatabase('all');
+            updatePlayerCounterBtn();
+
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerBasePrice').value = '';
+            if(photoInput) photoInput.value = '';
+
+            alert("Player added successfully!");
+        }
+
+        function importExcelPlayers(btn) {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            if (!file) return alert("Please select an Excel or CSV file first.");
+
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (json.length === 0) throw new Error("File is empty.");
+
+                    let localPlayers = safeGetStorage('auctionPlayers', []);
+                    if (!Array.isArray(localPlayers)) localPlayers = [];
+
+                    const activeSetup = safeGetStorage('auctionSetup', {});
+                    const activeTourneyId = activeSetup.id || 'KBL2026';
+
+                    let addedCount = 0;
+                    json.forEach((row, index) => {
+                        let name = row['Player Name'] || row['Name'] || row['Player'] || row['name'] || row.__EMPTY;
+                        let cat = row['Category'] || row['Cat'] || row['category'] || 'Default';
+                        let price = row['Base Price'] || row['Price'] || row['BasePrice'] || row['basePrice'] || 0;
+                        let slno = row['Sl No'] || row['Sl. No.'] || row['Sl'] || row['SlNo'] || (localPlayers.length + 1);
+                        
+                        if (name) {
+                            localPlayers.push({
+                                _id: 'plyr_' + Date.now() + '_' + Math.floor(Math.random()*1000) + index,
+                                serialNumber: slno,
+                                name: String(name).trim(),
+                                category: String(cat).trim(),
+                                basePrice: parseInt(price) || parseInt(activeSetup.minBid) || 0,
+                                status: 'available',
+                                photoUrl: '',
+                                tournamentId: activeTourneyId
+                            });
+                            addedCount++;
+                        }
+                    });
+
+                    safeSetStorage('auctionPlayers', localPlayers);
+                    window.allPlayers = localPlayers;
+                    
+                    renderPlayersDatabase('all');
+                    updatePlayerCounterBtn();
+                    
+                    alert(`Successfully imported ${addedCount} players!`);
+                    closeModal('modal-player');
+                    fileInput.value = '';
+                } catch(err) {
+                    console.error(err);
+                    alert("Error processing file. Please ensure it's a valid Excel/CSV with columns like 'Player Name', 'Category', 'Base Price'.");
+                } finally {
+                    btn.innerText = "Upload File";
+                    btn.disabled = false;
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function importFromGoogleSheet(btn) {
+            alert("Google Sheets sync requires a backend endpoint setup. Please use the Excel/CSV upload feature instead.");
+        }
+
 
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
@@ -2165,22 +2222,6 @@
             html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
         }
 
-        // --- NEW: Attach Event Listener Safely ---
-        function attachSafeListeners() {
-            const form = document.getElementById('createAuctionForm');
-            if (form) {
-                form.onsubmit = function(event) {
-                    event.preventDefault();
-                    submitSetup();
-                    return false;
-                };
-            }
-        }
-        
-        function safeInit() {
-            attachSafeListeners();
-            try { loadSavedMemory(); } catch(e) {}
-        }
     </script>
 </body>
 </html>
