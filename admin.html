@@ -204,12 +204,26 @@
 
                 <!-- 3-Column Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <!-- Financials -->
+                    <!-- Editable Auction Details & Financials -->
                     <div class="ad-card">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Balance per Team</span> <span id="adBalance">0</span></div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Player's Base Price</span> <span id="adBaseBid">0</span></div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Bid Increment</span> <span id="adBidInc">0</span></div>
-                        <div style="display: flex; justify-content: space-between; font-size: 15px;"><span style="color: #1e73be; font-weight: bold;">Players</span> <span id="adPlayers">0 /Team</span></div>
+                        <div style="font-size: 15px; font-weight: bold; color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 8px; margin-bottom: 15px;">Auction Details & Financials</div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 14px;">
+                            <span style="color: #334155; font-weight: bold;">Balance per Team</span> 
+                            <input type="number" id="adBalance" onchange="updateAuctionFinancials()" style="width: 100px; padding: 6px; border-radius: 20px; border: 2px solid #10b981; background: #d1fae5; color: #059669; font-weight: bold; text-align: center; outline: none; cursor: pointer;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 14px;">
+                            <span style="color: #334155; font-weight: bold;">Player's Base Price</span> 
+                            <input type="number" id="adBaseBid" onchange="updateAuctionFinancials()" style="width: 100px; padding: 6px; border-radius: 20px; border: 2px solid #10b981; background: #d1fae5; color: #059669; font-weight: bold; text-align: center; outline: none; cursor: pointer;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-size: 14px;">
+                            <span style="color: #334155; font-weight: bold;">Bid Increment</span> 
+                            <input type="number" id="adBidInc" onchange="updateAuctionFinancials()" style="width: 100px; padding: 6px; border-radius: 20px; border: 2px solid #10b981; background: #d1fae5; color: #059669; font-weight: bold; text-align: center; outline: none; cursor: pointer;">
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px;">
+                            <span style="color: #334155; font-weight: bold;">Players / Team</span> 
+                            <input type="number" id="adPlayers" onchange="updateAuctionFinancials()" style="width: 100px; padding: 6px; border-radius: 20px; border: 2px solid #10b981; background: #d1fae5; color: #059669; font-weight: bold; text-align: center; outline: none; cursor: pointer;">
+                        </div>
                     </div>
 
                     <!-- Bid Increments -->
@@ -468,6 +482,34 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+        // --- NEW: UPDATE FINANCIALS DIRECTLY FROM MY AUCTION PAGE ---
+        function updateAuctionFinancials() {
+            let data = safeGetStorage('auctionSetup', {});
+            if (!data || !data.id) return alert("No active auction to update.");
+
+            const oldBudget = data.budget;
+
+            data.budget = parseInt(document.getElementById('adBalance').value) || 0;
+            data.minBid = parseInt(document.getElementById('adBaseBid').value) || 0;
+            data.bidInc = parseInt(document.getElementById('adBidInc').value) || 0;
+            data.maxPlayers = parseInt(document.getElementById('adPlayers').value) || 0;
+
+            safeSetStorage('auctionSetup', data);
+
+            // If budget changed, sync the new budget to all teams currently in this auction
+            if (data.budget !== oldBudget) {
+                let localTeams = safeGetStorage('auctionTeams', []);
+                localTeams.forEach(t => {
+                    if (t.tournamentId === data.id) {
+                        t.budget = data.budget;
+                    }
+                });
+                safeSetStorage('auctionTeams', localTeams);
+                window.allTeams = localTeams;
+            }
+
+            alert("Auction Details & Financials updated securely!");
+        }
         // --- BULLETPROOF STORAGE ENGINE ---
         window.spaMemory = {}; 
 
@@ -2078,7 +2120,7 @@
             return false;
         }
 
-        function populateAuctionDetails(forcedData = null) {
+       function populateAuctionDetails(forcedData = null) {
             try {
                 let data = forcedData || safeGetStorage('auctionSetup', {});
                 if (!data || Object.keys(data).length === 0) return; 
@@ -2089,17 +2131,18 @@
                 const codeEl = document.getElementById('adCode'); 
                 if (codeEl) codeEl.innerText = data.id ? 'AUC-' + String(data.id).slice(-6) : 'KBL-2026';
                 
+                // FIX: These are now inputs, so we set their .value
                 const balEl = document.getElementById('adBalance'); 
-                if (balEl) balEl.innerText = data.budget || '0';
+                if (balEl) balEl.value = data.budget || 0;
                 
                 const baseEl = document.getElementById('adBaseBid'); 
-                if (baseEl) baseEl.innerText = data.minBid || '0';
+                if (baseEl) baseEl.value = data.minBid || 0;
                 
                 const incEl = document.getElementById('adBidInc'); 
-                if (incEl) incEl.innerText = data.bidInc || '0';
+                if (incEl) incEl.value = data.bidInc || 0;
                 
                 const playEl = document.getElementById('adPlayers'); 
-                if (playEl) playEl.innerText = `${data.maxPlayers || '0'} /Team`;
+                if (playEl) playEl.value = data.maxPlayers || 0;
                 
                 const logoEl = document.getElementById('adLogoImage'); 
                 if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
@@ -2113,7 +2156,6 @@
                 console.error("Populate Failed", err);
             }
         }
-
         function renderPlayersDatabase(filter = 'all') {
             updateRosterCategoryDropdown(); 
 
