@@ -1250,7 +1250,121 @@
                 closeModal('modal-edit-team');
             }
         }
+// --- MISSING PLAYER ADD AND EXCEL IMPORT FUNCTIONS ---
+        async function addPlayer() {
+            const name = document.getElementById('playerName').value;
+            const cat = document.getElementById('playerCategoryManual').value;
+            const price = document.getElementById('playerBasePrice').value;
+            const photoInput = document.getElementById('playerPhoto');
 
+            if (!name || !cat) return alert("Player Name and Category are required!");
+
+            let photoUrl = "";
+            if (photoInput && photoInput.files[0]) {
+                photoUrl = await compressImage(photoInput.files[0], 200);
+            }
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            if (!Array.isArray(localPlayers)) localPlayers = [];
+
+            const newPlayer = {
+                _id: 'plyr_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                serialNumber: localPlayers.length + 1,
+                name: name.trim(),
+                category: cat,
+                basePrice: parseInt(price) || parseInt(activeSetup.minBid) || 0,
+                status: 'available',
+                photoUrl: photoUrl,
+                tournamentId: activeTourneyId
+            };
+
+            localPlayers.push(newPlayer);
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+
+            renderPlayersDatabase('all');
+            updatePlayerCounterBtn();
+
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerBasePrice').value = '';
+            if(photoInput) photoInput.value = '';
+
+            alert("Player added successfully!");
+        }
+
+        function importExcelPlayers(btn) {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            if (!file) return alert("Please select an Excel or CSV file first.");
+
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (json.length === 0) throw new Error("File is empty.");
+
+                    let localPlayers = safeGetStorage('auctionPlayers', []);
+                    if (!Array.isArray(localPlayers)) localPlayers = [];
+
+                    const activeSetup = safeGetStorage('auctionSetup', {});
+                    const activeTourneyId = activeSetup.id || 'KBL2026';
+
+                    let addedCount = 0;
+                    json.forEach((row, index) => {
+                        let name = row['Player Name'] || row['Name'] || row['Player'] || row['name'] || row.__EMPTY;
+                        let cat = row['Category'] || row['Cat'] || row['category'] || 'Default';
+                        let price = row['Base Price'] || row['Price'] || row['BasePrice'] || row['basePrice'] || 0;
+                        let slno = row['Sl No'] || row['Sl. No.'] || row['Sl'] || row['SlNo'] || (localPlayers.length + 1);
+                        
+                        if (name) {
+                            localPlayers.push({
+                                _id: 'plyr_' + Date.now() + '_' + Math.floor(Math.random()*1000) + index,
+                                serialNumber: slno,
+                                name: String(name).trim(),
+                                category: String(cat).trim(),
+                                basePrice: parseInt(price) || parseInt(activeSetup.minBid) || 0,
+                                status: 'available',
+                                photoUrl: '',
+                                tournamentId: activeTourneyId
+                            });
+                            addedCount++;
+                        }
+                    });
+
+                    safeSetStorage('auctionPlayers', localPlayers);
+                    window.allPlayers = localPlayers;
+                    
+                    renderPlayersDatabase('all');
+                    updatePlayerCounterBtn();
+                    
+                    alert(`Successfully imported ${addedCount} players!`);
+                    closeModal('modal-player');
+                    fileInput.value = '';
+                } catch(err) {
+                    console.error(err);
+                    alert("Error processing file. Please ensure it's a valid Excel/CSV with columns like 'Player Name', 'Category', 'Base Price'.");
+                } finally {
+                    btn.innerText = "Upload File";
+                    btn.disabled = false;
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function importFromGoogleSheet(btn) {
+            alert("Google Sheets sync requires a backend endpoint setup. Please use the Excel/CSV upload feature instead.");
+        }
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             
