@@ -1775,22 +1775,24 @@
             evaluateFranchiseStripForPlayer();
         }
 
-        function franchiseBidByIndex(index) {
+       function franchiseBidByIndex(index) {
             if(!livePlayerActive) return alert("Select a player first!");
             const activeTeams = getActiveTeams();
             const team = activeTeams[index];
             if(!team) return;
 
             let currentVal = parseInt(liveCurrentBid);
+            const activeSetup = safeGetStorage('auctionSetup', {}); // Fetch setup safely
+            
             if (isNaN(currentVal) || currentVal === 0) {
-                const activeSetup = safeGetStorage('auctionSetup', {});
                 const fallbackBase = parseInt(activeSetup.minBid) || 0;
                 let rawPrice = livePlayerActive.basePrice || livePlayerActive.BasePrice || livePlayerActive['Base Price'] || fallbackBase;
                 currentVal = parseInt(rawPrice) || fallbackBase;
             }
 
-            let exactIncrement = parseInt(getDynamicIncrement());
-            if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100;
+            // FIXED: Pull increment directly from active setup, default to 100 if missing
+            let exactIncrement = parseInt(activeSetup.bidIncrement);
+            if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100; 
             
             let proposedBid = isFirstBid ? currentVal : currentVal + exactIncrement;
 
@@ -1836,7 +1838,6 @@
 
             updateLiveControls();
         }
-
         function applyManualBid() {
             if(!livePlayerActive) return alert("Select a player first!");
             if(!liveCurrentTeamId) return alert("A franchise must click their logo to claim the bid before you can apply a custom price!");
