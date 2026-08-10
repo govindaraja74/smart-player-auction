@@ -1986,6 +1986,48 @@
                 loadDashboard().catch(e => console.log(e));
             }, 100);
         }
+        // --- SEARCH & RANDOM FUNCTIONS RESTORED ---
+        function nextRandomPlayer() {
+            if (!window.allPlayers || window.allPlayers.length === 0) {
+                return alert("No players found! Please add players in the Roster first.");
+            }
+
+            // Find players who haven't been sold yet
+            const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
+
+            if(availablePlayers.length === 0) {
+                return alert("Auction Complete! No available players left.");
+            }
+
+            // Pick a random player and push to screen
+            const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+            pushPlayerToScreen(randomPlayer);
+        }
+
+        function manualSearchPlayer() {
+            const term = document.getElementById('la-search-input').value.trim().toLowerCase();
+            if(!term) return alert("Please enter a player name or Serial Number to search.");
+
+            if (!window.allPlayers || window.allPlayers.length === 0) {
+                return alert("Database is empty!");
+            }
+
+            // Find the exact player
+            const found = window.allPlayers.find(p => 
+                (p.serialNumber && String(p.serialNumber).toLowerCase() === term) || 
+                (p.name && p.name.toLowerCase().includes(term))
+            );
+
+            if(!found) return alert("Player not found in database!");
+            
+            // Warn if player is already sold, but allow override
+            if(found.status && String(found.status).toLowerCase() !== 'available') {
+                const proceed = confirm(`Player ${found.name} is already marked as ${found.status.toUpperCase()}. Bring to auction screen anyway?`);
+                if(!proceed) return;
+            }
+
+            pushPlayerToScreen(found);
+        }
 
         function updateRosterCategoryDropdown() {
             const dropdown = document.getElementById('rosterCategoryFilter');
