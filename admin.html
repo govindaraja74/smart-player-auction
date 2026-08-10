@@ -1736,23 +1736,33 @@
             evaluateFranchiseStripForPlayer(); 
         }
 
+       // --- AUTO-RESTORE CURRENT PLAYER ---
+        setTimeout(() => {
+            const saved = safeGetStorage('savedLivePlayer', null);
+            if (saved && !livePlayerActive) {
+                pushPlayerToScreen(saved);
+            }
+        }, 800);
+
         function pushPlayerToScreen(p, isGoingBack = false) {
             if(livePlayerActive && !isGoingBack) {
                 livePlayerHistory.push(livePlayerActive);
             }
-
+            
             livePlayerActive = p;
             
+            // THE MAGIC SAVE COMMAND: Remembers the player even if you switch tabs!
+            safeSetStorage('savedLivePlayer', p);
+
             const activeSetup = safeGetStorage('auctionSetup', {});
             const fallbackBase = parseInt(activeSetup.minBid) || 0;
-            
+
             let rawPrice = p.basePrice || p.BasePrice || p['Base Price'] || p.price || p.Price || fallbackBase;
             liveCurrentBid = parseInt(rawPrice) || fallbackBase;
-            
-            liveCurrentTeamId = null;
-            isFirstBid = true; 
-            liveBidHistory = []; 
 
+            liveCurrentTeamId = null;
+            isFirstBid = true;
+            liveBidHistory = [];
             document.getElementById('la-sl-no').innerText = p.serialNumber || '0';
             document.getElementById('la-name').innerText = p.name;
             document.getElementById('la-cat').innerText = p.category || 'N/A';
