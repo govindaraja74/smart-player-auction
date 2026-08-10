@@ -1775,14 +1775,35 @@
             evaluateFranchiseStripForPlayer();
         }
 
-       function franchiseBidByIndex(index) {
+     // --- CALCULATE DYNAMIC BID TIERS ---
+        function getDynamicIncrement() {
+            let currentVal = parseInt(liveCurrentBid) || 0;
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            
+            // Check if custom tiers are set up
+            if (activeSetup.tiers && activeSetup.tiers.length > 0) {
+                // Sort highest to lowest to find the right bracket
+                const sortedTiers = [...activeSetup.tiers].sort((a, b) => b.threshold - a.threshold);
+                for (let tier of sortedTiers) {
+                    if (currentVal >= tier.threshold) {
+                        return parseInt(tier.increment);
+                    }
+                }
+            }
+            
+            // Fallback to default bid increment if no tiers match
+            return parseInt(activeSetup.bidIncrement) || 100;
+        }
+
+        // --- Bidding Function ---
+        function franchiseBidByIndex(index) {
             if(!livePlayerActive) return alert("Select a player first!");
             const activeTeams = getActiveTeams();
             const team = activeTeams[index];
             if(!team) return;
 
             let currentVal = parseInt(liveCurrentBid);
-            const activeSetup = safeGetStorage('auctionSetup', {}); // Fetch setup safely
+            const activeSetup = safeGetStorage('auctionSetup', {}); 
             
             if (isNaN(currentVal) || currentVal === 0) {
                 const fallbackBase = parseInt(activeSetup.minBid) || 0;
@@ -1790,8 +1811,8 @@
                 currentVal = parseInt(rawPrice) || fallbackBase;
             }
 
-            // FIXED: Pull increment directly from active setup, default to 100 if missing
-            let exactIncrement = parseInt(activeSetup.bidIncrement);
+            // USE TIERED INCREMENT
+            let exactIncrement = getDynamicIncrement();
             if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100; 
             
             let proposedBid = isFirstBid ? currentVal : currentVal + exactIncrement;
