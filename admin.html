@@ -133,7 +133,6 @@
         .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
   /* --- LIVE AUCTION ROOM UI ENHANCEMENTS --- */
-/* Force the Live Room to fit on one screen without scrolling */
 #view-live-room {
     height: 100vh !important;
     overflow: hidden !important;
@@ -141,27 +140,43 @@
     flex-direction: column;
 }
 
-/* Make franchise logos auto-resize into a single line */
+/* This shrinks the entire live room to fit 80% size so it never falls off the screen! */
+#view-live-room > div:not(.dash-sidebar) {
+    zoom: 0.75; 
+}
+
+/* Make franchise logos auto-resize into a single line, pinned to the bottom */
 #la-franchise-strip {
     display: flex !important;
     flex-wrap: nowrap !important;
     justify-content: center;
     align-items: center;
     width: 100%;
-    gap: 5px;
-    padding: 5px 0;
+    gap: 8px;
+    padding: 15px 5px;
+    min-height: 80px;
+    margin-top: auto !important; /* Pushes the logos up into view */
+    background: rgba(0,0,0,0.1);
+    border-radius: 10px;
 }
-#la-franchise-strip img {
-    flex: 1; 
-    min-width: 30px; 
-    max-width: 80px; 
-    height: auto;
-    object-fit: contain;
+#la-franchise-strip .franchise-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     cursor: pointer;
     transition: transform 0.2s;
 }
-#la-franchise-strip img:hover {
-    transform: scale(1.1);
+#la-franchise-strip .franchise-btn:hover {
+    transform: scale(1.15);
+}
+#la-franchise-strip img {
+    min-width: 40px; 
+    max-width: 90px; 
+    height: auto;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 3px solid #fff;
 }
 
 /* Sidebar Hover Effect (Arrow) */
