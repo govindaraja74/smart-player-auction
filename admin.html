@@ -1930,12 +1930,30 @@
             const bidderName = document.getElementById('la-bidder-name');
             if (bidderName) bidderName.innerText = team.name;
         }
+                // --- MANUAL BID FUNCTION ---
+        function applyManualBid() {
+            if (!livePlayerActive) {
+                return alert("⚠️ No player is currently on the auction block!");
+            }
+            
+            const manInput = document.getElementById('la-manual-bid');
+            if (!manInput || manInput.value === '') return;
+            
+            const manBid = parseInt(manInput.value);
+            if (isNaN(manBid)) return alert("Please enter a valid number.");
+            
+            let currentPrice = parseInt(liveCurrentBid) || 0;
+
+            if (isFirstBid || manBid > currentPrice) {
                 liveCurrentBid = manBid;
-                isFirstBid = false; 
+                isFirstBid = false;
+                
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
                 document.getElementById('la-manual-bid').value = '';
-
-                updateLiveControls();
+                
+                if (typeof updateLiveControls === 'function') {
+                    updateLiveControls();
+                }
             } else {
                 alert("Manual bid must be higher than current bid.");
             }
