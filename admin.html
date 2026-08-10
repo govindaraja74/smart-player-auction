@@ -2071,6 +2071,27 @@
 
             pushPlayerToScreen(found);
         }
+        // --- RESET PLAYER STATUS TO AVAILABLE UPON REMOVAL ---
+        function resetPlayerToAvailable(playerId) {
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            
+            localPlayers = localPlayers.map(p => {
+                const pId = p._id || p.id || p.serialNumber;
+                if (String(pId) === String(playerId)) {
+                    p.status = 'available'; 
+                    delete p.soldTo;
+                    delete p.soldPrice;
+                }
+                return p;
+            });
+
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+            
+            if (typeof loadDashboard === 'function') {
+                loadDashboard().catch(e => console.log(e));
+            }
+        }
         function updateRosterCategoryDropdown() {
             const dropdown = document.getElementById('rosterCategoryFilter');
             if (!dropdown) return;
