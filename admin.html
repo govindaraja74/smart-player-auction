@@ -2129,26 +2129,45 @@
         // --- SEARCH & RANDOM FUNCTIONS RESTORED ---
 // --- SEARCH & RANDOM FUNCTIONS RESTORED (WITH STRICT LOCKS) ---
         function nextRandomPlayer() {
-            // STRICT LOCK: Check if a player is already on the board
-            if (livePlayerActive) {
-                return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
+                // STRICT LOCK: Check if a player is already on the board
+                if (livePlayerActive) {
+                    return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
+                }
+
+                if (!window.allPlayers || window.allPlayers.length === 0) {
+                    return alert("No players found! Please add players in the Roster first.");
+                }
+
+                // 1. Get the currently active categories
+                let activeCategories = [];
+                if (typeof getAvailableCategories === 'function') {
+                    activeCategories = getAvailableCategories();
+                }
+
+                // 2. Filter for players who are BOTH 'available' AND in the allowed categories
+                const availablePlayers = window.allPlayers.filter(p => {
+                    const status = String(p.status || 'available').toLowerCase();
+                    const isAvailable = (status === 'available' || status === '');
+                    
+                    if (!isAvailable) return false;
+                    
+                    // If a category filter is active, enforce the check!
+                    if (activeCategories && activeCategories.length > 0) {
+                        const pCat = String(p.category || '').trim().toLowerCase();
+                        return activeCategories.includes(pCat);
+                    }
+                    return true;
+                });
+
+                // 3. Show warning if no players match the category
+                if(availablePlayers.length === 0) {
+                    return alert("⚠️ WARNING: No available players found in the active categories! Please change your category filter or check the roster.");
+                }
+
+                // 4. Pick a random player and push to screen
+                const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+                pushPlayerToScreen(randomPlayer);
             }
-
-            if (!window.allPlayers || window.allPlayers.length === 0) {
-                return alert("No players found! Please add players in the Roster first.");
-            }
-
-            // Find players who haven't been sold yet
-            const availablePlayers = window.allPlayers.filter(p => !p.status || String(p.status).toLowerCase() === 'available');
-
-            if(availablePlayers.length === 0) {
-                return alert("Auction Complete! No available players left.");
-            }
-
-            // Pick a random player and push to screen
-            const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-            pushPlayerToScreen(randomPlayer);
-        }
 
         function manualSearchPlayer() {
             // STRICT LOCK: Check if a player is already on the board
