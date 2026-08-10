@@ -167,6 +167,11 @@
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
                 <h1 class="dash-title">DASHBOARD (v13.0)</h1>
 
+                <div style="margin-bottom: 25px;">
+    <button onclick="resetAllPlayersForSecondRound()" class="btn btn-warning" style="background-color: #f59e0b; color: white; padding: 10px 20px; font-weight: bold; border-radius: 5px; border: none; cursor: pointer;">
+        🔄 Reset All for 2nd Round
+    </button>
+</div>
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-auction-detail')"><div><h3>My</h3><p>Auction</p></div></div>
@@ -2114,7 +2119,34 @@
                 dropdown.value = 'all';
             }
         }
+// --- MASTER RESET FOR 2ND ROUND ---
+        function resetAllPlayersForSecondRound() {
+            const confirmReset = confirm("⚠️ Start 2nd Round? This will move ALL players (Sold, Unsold, and Completed) back to the Available list for a new auction round.");
+            if (!confirmReset) return;
 
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            
+            localPlayers = localPlayers.map(p => {
+                p.status = 'available';
+                delete p.soldTo;
+                delete p.soldPrice;
+                return p;
+            });
+
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+            
+            // Clear current live board state
+            safeSetStorage('savedLivePlayer', null);
+            livePlayerActive = null;
+
+            alert("🔄 Success! All players have been moved back to the Available pool for Round 2.");
+            
+            if (typeof loadDashboard === 'function') {
+                loadDashboard().catch(e => console.log(e));
+            }
+            location.reload();
+        }
         async function submitSetup() {
             const reqFields = ['setupName', 'setupDate', 'setupBudget', 'setupMinBid', 'setupBidIncrease', 'setupMaxPlayers'];
             for (let id of reqFields) {
