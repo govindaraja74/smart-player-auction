@@ -1988,7 +1988,13 @@
             }, 100);
         }
         // --- SEARCH & RANDOM FUNCTIONS RESTORED ---
+// --- SEARCH & RANDOM FUNCTIONS RESTORED (WITH STRICT LOCKS) ---
         function nextRandomPlayer() {
+            // STRICT LOCK: Check if a player is already on the board
+            if (livePlayerActive) {
+                return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
+            }
+
             if (!window.allPlayers || window.allPlayers.length === 0) {
                 return alert("No players found! Please add players in the Roster first.");
             }
@@ -2006,6 +2012,11 @@
         }
 
         function manualSearchPlayer() {
+            // STRICT LOCK: Check if a player is already on the board
+            if (livePlayerActive) {
+                return alert("⚠️ Player should SOLD or UNSOLD \n\nYou must mark the current player as SOLD or UNSOLD before searching for a new player.");
+            }
+
             const term = document.getElementById('la-search-input').value.trim().toLowerCase();
             if(!term) return alert("Please enter a player name or Serial Number to search.");
 
@@ -2029,7 +2040,6 @@
 
             pushPlayerToScreen(found);
         }
-
         function updateRosterCategoryDropdown() {
             const dropdown = document.getElementById('rosterCategoryFilter');
             if (!dropdown) return;
