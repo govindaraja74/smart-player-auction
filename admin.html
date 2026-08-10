@@ -2119,17 +2119,21 @@
                 dropdown.value = 'all';
             }
         }
-// --- MASTER RESET FOR 2ND ROUND ---
+// --- RESET ONLY UNSOLD PLAYERS FOR 2ND ROUND ---
         function resetAllPlayersForSecondRound() {
-            const confirmReset = confirm("⚠️ Start 2nd Round? This will move ALL players (Sold, Unsold, and Completed) back to the Available list for a new auction round.");
+            const confirmReset = confirm("⚠️ Start 2nd Round? This will move only the UNSOLD players back to the Available list. All SOLD players will remain untouched.");
             if (!confirmReset) return;
 
             let localPlayers = safeGetStorage('auctionPlayers', []);
             
             localPlayers = localPlayers.map(p => {
-                p.status = 'available';
-                delete p.soldTo;
-                delete p.soldPrice;
+                const status = String(p.status || '').toLowerCase();
+                // Only reset players who are marked as unsold (leave sold players completely alone)
+                if (status === 'unsold' || status === '') {
+                    p.status = 'available';
+                    delete p.soldTo;
+                    delete p.soldPrice;
+                }
                 return p;
             });
 
@@ -2140,7 +2144,7 @@
             safeSetStorage('savedLivePlayer', null);
             livePlayerActive = null;
 
-            alert("🔄 Success! All players have been moved back to the Available pool for Round 2.");
+            alert("🔄 Success! Unsold players have been moved back to the Available pool for Round 2. Sold players are safely locked.");
             
             if (typeof loadDashboard === 'function') {
                 loadDashboard().catch(e => console.log(e));
