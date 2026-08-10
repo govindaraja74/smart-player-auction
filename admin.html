@@ -1967,7 +1967,7 @@
 
             // Small delay so the stamp visually appears before the browser alert blocks the screen
             setTimeout(() => {
-                alert(alertMessage);
+               
                 const activeCategories = getAvailableCategories();
                 const availablePlayers = window.allPlayers.filter(p => {
                     const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
@@ -1985,7 +1985,7 @@
                 }
 
                 loadDashboard().catch(e => console.log(e));
-            }, 100);
+            }, 1500);
         }
         // --- SEARCH & RANDOM FUNCTIONS RESTORED ---
 // --- SEARCH & RANDOM FUNCTIONS RESTORED (WITH STRICT LOCKS) ---
