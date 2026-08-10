@@ -132,17 +132,32 @@
         
         .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
-  /* --- LIVE AUCTION ROOM UI ENHANCEMENTS --- */
+/* --- LIVE AUCTION ROOM UI ENHANCEMENTS --- */
 #view-live-room {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
     height: 100vh !important;
+    background-color: #0d1b2a !important; /* Dark background to completely fill the white gap */
     overflow: hidden !important;
     display: flex;
     flex-direction: column;
+    align-items: center !important;     /* Centers everything horizontally */
+    justify-content: center !important; /* Centers everything vertically */
+    z-index: 500;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-/* This shrinks the entire live room to fit 80% size so it never falls off the screen! */
-#view-live-room > div:not(.dash-sidebar) {
-    zoom: 0.80; 
+/* Make the content wider and centered */
+#view-live-room > div {
+    width: 100% !important;
+    max-width: 1200px !important; /* Allows the red card and buttons to stretch wider */
+    zoom: 0.85; /* Scales it so it doesn't fall off the top/bottom */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Make franchise logos auto-resize into a single line, pinned to the bottom */
@@ -151,12 +166,13 @@
     flex-wrap: nowrap !important;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    width: 100% !important;
+    max-width: 1200px !important;
     gap: 8px;
     padding: 15px 5px;
     min-height: 80px;
-    margin-top: auto !important; /* Pushes the logos up into view */
-    background: rgba(0,0,0,0.1);
+    margin-top: 25px !important; 
+    background: rgba(0,0,0,0.2);
     border-radius: 10px;
 }
 #la-franchise-strip .franchise-btn {
@@ -185,7 +201,7 @@
     left: -260px !important; 
     height: 100vh;
     transition: left 0.3s ease !important;
-    z-index: 1000;
+    z-index: 1000 !important;
 }
 .live-mode-sidebar:hover {
     left: 0 !important; 
@@ -202,6 +218,7 @@
     border-radius: 0 5px 5px 0;
     cursor: pointer;
     font-size: 18px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.4);
 }
         
     </style>
