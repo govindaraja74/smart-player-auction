@@ -2119,6 +2119,25 @@
                 dropdown.value = 'all';
             }
         }
+        // --- FILTER PLAYERS BY ACTIVE CATEGORIES ONLY ---
+        function getFilteredAvailablePlayers() {
+            const activeCategories = getAvailableCategories();
+            let allPlayers = safeGetStorage('auctionPlayers', window.allPlayers || []);
+            
+            return allPlayers.filter(p => {
+                const status = String(p.status || 'available').toLowerCase();
+                const isAvailable = (status === 'available' || status === '');
+                
+                if (!isAvailable) return false;
+                
+                // If activeCategories is null or empty, allow all
+                if (activeCategories === null || activeCategories === undefined) return true;
+                
+                const pCat = String(p.category || '').trim().toLowerCase();
+                // Ensure player's category matches one of the explicitly allowed active categories
+                return activeCategories.includes(pCat);
+            });
+        }
 // --- RESET ONLY UNSOLD PLAYERS FOR 2ND ROUND ---
         function resetAllPlayersForSecondRound() {
             const confirmReset = confirm("⚠️ Start 2nd Round? This will move only the UNSOLD players back to the Available list. All SOLD players will remain untouched.");
