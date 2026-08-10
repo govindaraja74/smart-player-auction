@@ -89,23 +89,52 @@
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #94a3b8; cursor: pointer; background: none; border: none; font-weight: bold; line-height: 1; }
         .close-btn:hover { color: white; }
 
-        /* Utility */
+       /* Utility */
         .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 6px 10px; transition: 0.2s; }
         .edit-del-btn:hover { background: #e2e8f0; }
+
+        /* --- PREMIUM LIVE ROOM PRESENTATION UI --- */
+        .live-presentation-board {
+            position: relative;
+            background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%);
+            border: 4px solid #ef4444;
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-family: 'Arial Black', Impact, sans-serif;
+        }
+        
+        .live-header { text-align: center; margin-bottom: 40px; position: relative; z-index: 2; }
+        .live-header h2 { color: #fde047; font-size: 42px; margin: 0; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .live-header .sub-header { display: inline-block; font-size: 38px; font-weight: bold; color: white; margin-top: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .live-header .sub-header span { background: #ef4444; padding: 5px 20px; border-radius: 4px; margin-right: 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        
+        .live-content-area { display: flex; justify-content: space-between; align-items: center; flex: 1; position: relative; z-index: 2; }
+        
+        .live-left-panel { position: relative; width: 320px; }
+        .live-photo-circle { width: 280px; height: 280px; border-radius: 50%; border: 10px solid #ea580c; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; }
+        .live-photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .live-sl-badge { position: absolute; top: 10px; left: -10px; background: #ea580c; color: white; font-size: 36px; padding: 15px 25px; border-radius: 50px; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; z-index: 10; }
+
+        .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 20px; font-family: Arial, sans-serif; }
+        .info-ribbon { border: 3px solid #ea580c; border-left: none; border-radius: 0 40px 40px 0; padding: 15px 30px; font-size: 26px; font-weight: bold; color: white; width: fit-content; min-width: 350px; background: rgba(0,0,0,0.4); box-shadow: inset 0 0 15px rgba(234,88,12,0.3); text-transform: uppercase; }
+
+        .live-right-panel { width: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .live-massive-price { font-size: 130px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); }
+        
+        .live-team-box { width: 240px; height: 240px; background: white; border-radius: 12px; display: none; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
+        .live-team-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .live-team-name-disp { font-size: 32px; color: white; text-transform: uppercase; display: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-family: Arial, sans-serif; font-weight: 900;}
+        
+        .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+        .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
     </style>
-.edit-del-btn:hover { background: #e2e8f0; }
-
-            /* --- PREMIUM LIVE ROOM PRESENTATION UI --- */
-            .live-presentation-board { position: relative; background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%); /* ... rest of your CSS ... */ }
-            .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
-
-        </style>
-    </head>
-    <body onload="setTimeout(safeInit, 500)">
-         
 </head>
 <body onload="setTimeout(safeInit, 500)">
-
     <!-- Login Screen -->
     <div class="box" id="loginSection">
         <h2 style="text-align: center;">Admin Portal</h2>
