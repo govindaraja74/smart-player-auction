@@ -107,8 +107,16 @@
     <!-- UNIVERSAL APP LAYOUT -->
     <div class="app-container hidden" id="appMainUI">
 
-        <!-- Sidebar -->
+      <!-- Sidebar -->
         <div class="dash-sidebar">
+            <!-- NEW LOGO SECTION -->
+            <div style="text-align: center; margin-bottom: 25px; padding: 0 20px;">
+                <img src="spa logo.png" alt="Smart Players Auction" style="width: 85%; max-width: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <div style="font-size: 13px; color: #94a3b8; margin-top: 12px; font-style: italic; line-height: 1.4;">
+                    Performing the ultimate fair and dynamic player auction experience.
+                </div>
+            </div>
+            
             <div class="sidebar-item active" id="nav-dashboard" onclick="navTo('view-dashboard')">Dashboard</div>
             <div class="sidebar-item" id="nav-setup" onclick="navTo('view-setup')">Create Auction</div>
             <div class="sidebar-item" id="nav-detail" onclick="navTo('view-auction-detail')">My Auction</div>
@@ -116,9 +124,6 @@
             <div class="sidebar-item" id="nav-control" onclick="navTo('view-control')">Players Roster</div>
             <div class="sidebar-item" id="nav-standings" onclick="navTo('view-franchise-standings')">Franchise Standings</div>
         </div>
-
-        <div class="dash-main" style="position: relative;">
-
             <!-- VIEW A: DASHBOARD -->
             <div id="view-dashboard">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
@@ -321,6 +326,13 @@
                         </div>
                     </div>
 
+                    <!-- NEW: CENTERED LOGO FOR LIVE ROOM -->
+                    <div style="text-align: center; margin: 5px 0;">
+                        <img src="spa logo.png" alt="Smart Players Auction" style="height: 100px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
+                        <div style="font-size: 15px; color: #cbd5e1; margin-top: 8px; font-style: italic; letter-spacing: 1px;">
+                            Performing the ultimate fair and dynamic player auction experience.
+                        </div>
+                    </div>
                     <div class="live-bottom-panel">
                         <!-- Top Controls: Search / Random / Manual -->
                         <div class="live-controls">
