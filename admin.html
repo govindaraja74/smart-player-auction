@@ -132,6 +132,63 @@
         
         .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
+  /* --- LIVE AUCTION ROOM UI ENHANCEMENTS --- */
+/* Force the Live Room to fit on one screen without scrolling */
+#view-live-room {
+    height: 100vh !important;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Make franchise logos auto-resize into a single line */
+#la-franchise-strip {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    gap: 5px;
+    padding: 5px 0;
+}
+#la-franchise-strip img {
+    flex: 1; 
+    min-width: 30px; 
+    max-width: 80px; 
+    height: auto;
+    object-fit: contain;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+#la-franchise-strip img:hover {
+    transform: scale(1.1);
+}
+
+/* Sidebar Hover Effect (Arrow) */
+.live-mode-sidebar {
+    position: fixed !important;
+    left: -260px !important; 
+    height: 100vh;
+    transition: left 0.3s ease !important;
+    z-index: 1000;
+}
+.live-mode-sidebar:hover {
+    left: 0 !important; 
+}
+/* The Arrow Tab */
+.live-mode-sidebar::after {
+    content: '▶';
+    position: absolute;
+    right: -25px;
+    top: 50%;
+    background: #1e73be;
+    color: white;
+    padding: 15px 5px;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+    font-size: 18px;
+}
+        
     </style>
 </head>
 <body onload="setTimeout(safeInit, 500)">
@@ -1048,6 +1105,14 @@
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
         function navTo(viewId) {
+            const sidebar = document.querySelector('.dash-sidebar');
+    if (sidebar) {
+        if (viewId === 'view-live-room') {
+            sidebar.classList.add('live-mode-sidebar');
+        } else {
+            sidebar.classList.remove('live-mode-sidebar');
+        }
+    }
             ['view-dashboard', 'view-setup', 'view-auction-detail', 'view-live-room', 'view-control', 'view-franchise-standings'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
@@ -1812,90 +1877,59 @@
 
         // --- Bidding Function ---
         function franchiseBidByIndex(index) {
-            if(!livePlayerActive) return alert("Select a player first!");
+            if (!livePlayerActive) {
+                return alert("⚠️ No player is currently on the auction block!");
+            }
+
             const activeTeams = getActiveTeams();
             const team = activeTeams[index];
-            if(!team) return;
+            if (!team) return;
 
-            let currentVal = parseInt(liveCurrentBid);
-            const activeSetup = safeGetStorage('auctionSetup', {}); 
+            // 1. Force the current bid into a strict Number to prevent string concatenation bugs
+            let currentPrice = parseInt(liveCurrentBid) || 0;
             
-            if (isNaN(currentVal) || currentVal === 0) {
-                const fallbackBase = parseInt(activeSetup.minBid) || 0;
-                let rawPrice = livePlayerActive.basePrice || livePlayerActive.BasePrice || livePlayerActive['Base Price'] || fallbackBase;
-                currentVal = parseInt(rawPrice) || fallbackBase;
+            // 2. Fetch the correct increment amount based on your dynamic rules
+            let increment = 0;
+            if (typeof getDynamicIncrement === 'function') {
+                increment = parseInt(getDynamicIncrement(currentPrice)) || 5; 
+            } else {
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                increment = parseInt(activeSetup.bidIncrease) || 5;
             }
-
-            // USE TIERED INCREMENT
-            let exactIncrement = getDynamicIncrement();
-            if (isNaN(exactIncrement) || exactIncrement <= 0) exactIncrement = 100; 
             
-            let proposedBid = isFirstBid ? currentVal : currentVal + exactIncrement;
+            // 3. Calculate the new bid: Keep base price on 1st bid, add increment on subsequent bids
+            let proposedBid = isFirstBid ? currentPrice : (currentPrice + increment);
 
+            // 4. Validate if the franchise can legally afford this bid
             const check = canTeamBid(team._id || team.id, proposedBid, livePlayerActive.category);
+            
             if (!check.allowed) {
-                if (check.reason === 'category_full') return alert(`${team.name} has reached the max limit for category: ${livePlayerActive.category}`);
-                if (check.reason === 'team_full') return alert(`${team.name} roster is fully complete!`);
-                if (check.reason === 'insufficient_funds') return alert(`Insufficient Funds! ${team.name} must keep ₹${check.reserve} in reserve for remaining players. Max possible bid is ₹${check.maxBid}.`);
-                return;
+                let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
+                return alert("🛑 " + team.name + " cannot bid: " + formattedReason);
             }
 
-            liveBidHistory.push({
-                bid: liveCurrentBid,
-                teamId: liveCurrentTeamId,
-                isFirst: isFirstBid,
-                logoUrl: document.getElementById('la-bidder-logo').src,
-                teamName: document.getElementById('la-bidder-name').innerText,
-                displayState: document.getElementById('la-bidder-box').style.display
-            });
-
+            // 5. Apply the fully calculated bid to the live board variables
             liveCurrentBid = proposedBid;
+            liveCurrentTeamId = team._id || team.id;
             isFirstBid = false;
 
-            liveCurrentTeamId = team._id || team.id;
-            const logoUrl = getTeamLogo(team, 'Team ' + (index + 1));
-            const safeTeamName = team.name ? String(team.name) : ('Team ' + (index + 1));
+            // 6. Save it to history so the Undo button works perfectly
+            liveBidHistory.push({
+                teamId: liveCurrentTeamId,
+                teamName: team.name,
+                amount: liveCurrentBid
+            });
 
-            const bidDisplay = document.getElementById('la-current-bid');
-            if (bidDisplay) bidDisplay.innerText = liveCurrentBid;
-
-            const bigLogo = document.getElementById('la-bidder-logo');
-            const bigBox = document.getElementById('la-bidder-box');
-            if (bigLogo && bigBox) {
-                bigLogo.src = logoUrl;
-                bigBox.style.display = 'flex';
-            }
-
-            const bigName = document.getElementById('la-bidder-name');
-            if (bigName) {
-                bigName.innerText = safeTeamName;
-                bigName.style.display = 'block';
-            }
-
-            updateLiveControls();
+            // 7. Push the new numbers to the big screen instantly!
+            const currentBidDisplay = document.getElementById('la-current-bid');
+            if (currentBidDisplay) currentBidDisplay.innerText = liveCurrentBid;
+            
+            const bidderBox = document.getElementById('la-bidder-box');
+            if (bidderBox) bidderBox.style.display = 'block';
+            
+            const bidderName = document.getElementById('la-bidder-name');
+            if (bidderName) bidderName.innerText = team.name;
         }
-        function applyManualBid() {
-            if(!livePlayerActive) return alert("Select a player first!");
-            if(!liveCurrentTeamId) return alert("A franchise must click their logo to claim the bid before you can apply a custom price!");
-
-            const manBid = parseInt(document.getElementById('la-manual-bid').value);
-            let currentVal = parseInt(liveCurrentBid) || 0;
-
-            if(manBid > currentVal) {
-                const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
-                if (!check.allowed && check.reason === 'insufficient_funds') {
-                    return alert(`Insufficient Funds! Team must keep ₹${check.reserve} in reserve. Max possible bid is ₹${check.maxBid}.`);
-                }
-
-                liveBidHistory.push({
-                    bid: liveCurrentBid,
-                    teamId: liveCurrentTeamId,
-                    isFirst: isFirstBid,
-                    logoUrl: document.getElementById('la-bidder-logo').src,
-                    teamName: document.getElementById('la-bidder-name').innerText,
-                    displayState: document.getElementById('la-bidder-box').style.display
-                });
-
                 liveCurrentBid = manBid;
                 isFirstBid = false; 
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
@@ -2138,7 +2172,19 @@
                 return activeCategories.includes(pCat);
             });
         }
-// --- RESET ONLY UNSOLD PLAYERS FOR 2ND ROUND ---
+// --- FULL SCREEN TOGGLE ---
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
+        // --- RESET ONLY UNSOLD PLAYERS FOR 2ND ROUND ---
         function resetAllPlayersForSecondRound() {
             const confirmReset = confirm("⚠️ Start 2nd Round? This will move only the UNSOLD players back to the Available list. All SOLD players will remain untouched.");
             if (!confirmReset) return;
