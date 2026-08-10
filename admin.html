@@ -93,6 +93,45 @@
         .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 6px 10px; transition: 0.2s; }
         .edit-del-btn:hover { background: #e2e8f0; }
     </style>
+ /* --- PREMIUM LIVE ROOM PRESENTATION UI --- */
+        .live-presentation-board {
+            position: relative;
+            background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%);
+            border: 4px solid #ef4444;
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-family: 'Arial Black', Impact, sans-serif;
+        }
+        
+        .live-header { text-align: center; margin-bottom: 40px; position: relative; z-index: 2; }
+        .live-header h2 { color: #fde047; font-size: 42px; margin: 0; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .live-header .sub-header { display: inline-block; font-size: 38px; font-weight: bold; color: white; margin-top: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .live-header .sub-header span { background: #ef4444; padding: 5px 20px; border-radius: 4px; margin-right: 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        
+        .live-content-area { display: flex; justify-content: space-between; align-items: center; flex: 1; position: relative; z-index: 2; }
+        
+        .live-left-panel { position: relative; width: 320px; }
+        .live-photo-circle { width: 280px; height: 280px; border-radius: 50%; border: 10px solid #ea580c; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; }
+        .live-photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .live-sl-badge { position: absolute; top: 10px; left: -10px; background: #ea580c; color: white; font-size: 36px; padding: 15px 25px; border-radius: 50px; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; z-index: 10; }
+
+        .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 20px; font-family: Arial, sans-serif; }
+        .info-ribbon { border: 3px solid #ea580c; border-left: none; border-radius: 0 40px 40px 0; padding: 15px 30px; font-size: 26px; font-weight: bold; color: white; width: fit-content; min-width: 350px; background: rgba(0,0,0,0.4); box-shadow: inset 0 0 15px rgba(234,88,12,0.3); text-transform: uppercase; }
+
+        .live-right-panel { width: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .live-massive-price { font-size: 130px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); }
+        
+        .live-team-box { width: 240px; height: 240px; background: white; border-radius: 12px; display: none; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
+        .live-team-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .live-team-name-disp { font-size: 32px; color: white; text-transform: uppercase; display: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-family: Arial, sans-serif; font-weight: 900;}
+        
+        .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+        .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }   
 </head>
 <body onload="setTimeout(safeInit, 500)">
 
@@ -292,58 +331,70 @@
                 </div>
             </div>
 
-            <!-- VIEW D: LIVE AUCTION ROOM -->
+<!-- VIEW D: LIVE AUCTION ROOM -->
             <div id="view-live-room" class="hidden" style="height: 100%;">
-                <div class="live-room">
-
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h1 style="margin: 0; color: white;">LIVE AUCTION ROOM</h1>
+                <div class="live-room" style="background: #0f172a; padding: 15px;">
+                    
+                    <!-- Admin Top Bar -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h1 style="margin: 0; color: white; font-size: 20px;">ADMIN CONTROL PANEL</h1>
                         <div>
-                            <button class="btn-primary" style="background: #3b82f6; margin-right: 10px;" onclick="navTo('view-franchise-standings')">📊 Franchise Standings</button>
+                            <button class="btn-primary" style="background: #3b82f6; margin-right: 10px;" onclick="navTo('view-franchise-standings')">📊 Standings</button>
                             <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
                         </div>
                     </div>
 
-                    <div class="live-top-section">
-                        <div class="live-player-card">
-                            <div class="live-photo-box">
-                                <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
-                            </div>
-                            <div class="live-player-info" style="display: flex; flex-direction: column; justify-content: center;">
-                                <h1 id="la-name">WAITING FOR PLAYER...</h1>
-                                <h2 id="la-cat">Category: ---</h2>
-                                <h3 id="la-club">Club: ---</h3>
-                                <div class="live-base-price">Base Price: ₹<span id="la-base">0</span></div>
-                            </div>
+                    <!-- PREMIUM PRESENTATION BOARD -->
+                    <div class="live-presentation-board">
+                        <!-- Association Logo -->
+                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 20px; left: 20px; width: 140px; height: 140px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
+
+                        <div class="live-header">
+                            <h2 id="la-assoc-name">KARKALA BADMINTON ASSOCIATION</h2>
+                            <div class="sub-header"><span>PLAYERS</span> AUCTION</div>
                         </div>
 
-                        <div class="live-bidding-panel">
-                            <h2 style="margin: 0; color: #cbd5e1; text-transform: uppercase; letter-spacing: 2px;">Current Bid</h2>
-                            <div class="live-current-bid">₹<span id="la-current-bid">0</span></div>
-                            <img id="la-bidder-logo" class="live-bidder-logo" src="">
-                            <div id="la-bidder-name" class="live-bidder-name">Team Name</div>
+                        <div class="live-content-area">
+                            <!-- Left: Photo & Sl No -->
+                            <div class="live-left-panel">
+                                <div class="live-sl-badge" id="la-sl-no">#0</div>
+                                <div class="live-photo-circle">
+                                    <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
+                                </div>
+                            </div>
+
+                            <!-- Center: Player Details -->
+                            <div class="live-center-panel">
+                                <div class="info-ribbon" id="la-name">WAITING FOR PLAYER</div>
+                                <div class="info-ribbon" id="la-club">LOCATION: ---</div>
+                                <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
+                            </div>
+
+                            <!-- Right: Price & Team Logo -->
+                            <div class="live-right-panel">
+                                <div class="live-massive-price" id="la-current-bid">0</div>
+                                <div class="live-team-box" id="la-bidder-box">
+                                    <img id="la-bidder-logo" src="">
+                                </div>
+                                <div class="live-team-name-disp" id="la-bidder-name">Team Name</div>
+                            </div>
                         </div>
+                        
+                        <!-- Center Stamp Animation -->
+                        <div id="la-sold-stamp" class="sold-stamp-overlay">SOLD</div>
                     </div>
 
-                    <!-- NEW: CENTERED LOGO FOR LIVE ROOM -->
-                    <div style="text-align: center; margin: 5px 0;">
-                        <img src="/spa-logo.png.png" alt="Smart Players Auction" style="height: 100px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.5);">
-                        <div style="font-size: 15px; color: #cbd5e1; margin-top: 8px; font-style: italic; letter-spacing: 1px;">
-                            Performing the ultimate fair and dynamic player auction experience.
-                        </div>
-                    </div>
-                    <div class="live-bottom-panel">
-                        <!-- Top Controls: Search / Random / Manual -->
+                    <!-- Bottom Control Panel -->
+                    <div class="live-bottom-panel" style="margin-top: 20px;">
                         <div class="live-controls">
                             <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button id="la-search-btn" class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
-                            <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random Player</button>
+                            <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random</button>
                             <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
                             <input type="number" id="la-manual-bid" placeholder="Custom Bid ₹" style="width: 120px; padding: 12px; color:black;">
                             <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6;" onclick="applyManualBid()">Apply Bid</button>
                         </div>
                         
-                        <!-- Core Auction Actions: Left / Center / Right -->
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px;">
                             <button id="la-unsold-btn" class="btn-danger" style="font-size: 18px; padding: 12px 30px; width: 25%;" onclick="finalizeSale('unsold')">UNSOLD</button>
                             <button id="la-undo-btn" class="btn-primary" style="background: #f97316; font-size: 16px; padding: 12px 30px; width: 25%;" onclick="undoLastBid()">Undo Last Bid</button>
@@ -1656,22 +1707,27 @@
             evaluateFranchiseStripForPlayer();
         }
 
-        function resetLiveBoard() {
+       function resetLiveBoard() {
             livePlayerActive = null;
             liveCurrentBid = 0;
             liveCurrentTeamId = null;
             isFirstBid = true;
             liveBidHistory = [];
 
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
+
+            document.getElementById('la-sl-no').innerText = "0";
             document.getElementById('la-name').innerText = "WAITING FOR PLAYER...";
-            document.getElementById('la-cat').innerText = "Category: ---";
-            document.getElementById('la-club').innerText = "Club: ---";
-            document.getElementById('la-base').innerText = "0";
+            document.getElementById('la-cat').innerText = "---";
+            document.getElementById('la-club').innerText = "---";
             document.getElementById('la-current-bid').innerText = "0";
             document.getElementById('la-photo').src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
 
-            document.getElementById('la-bidder-logo').style.display = 'none';
+            document.getElementById('la-bidder-box').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
+            document.getElementById('la-sold-stamp').classList.remove('active');
+            
             document.getElementById('la-search-input').value = '';
             document.getElementById('la-manual-bid').value = '';
 
@@ -1697,12 +1753,11 @@
             isFirstBid = true; 
             liveBidHistory = []; 
 
-            const slNoDisplay = p.serialNumber ? `#${p.serialNumber} - ` : '';
-            document.getElementById('la-name').innerText = slNoDisplay + p.name;
-            document.getElementById('la-cat').innerText = `Category: ${p.category || 'N/A'}`;
-            document.getElementById('la-club').innerText = `Club: ${p.club || p.team || 'N/A'}`;
+            document.getElementById('la-sl-no').innerText = p.serialNumber || '0';
+            document.getElementById('la-name').innerText = p.name;
+            document.getElementById('la-cat').innerText = p.category || 'N/A';
+            document.getElementById('la-club').innerText = p.club || p.team || 'N/A';
             
-            document.getElementById('la-base').innerText = liveCurrentBid;
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
             const photoEl = document.getElementById('la-photo');
@@ -1712,149 +1767,12 @@
                 photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             }, 50); 
 
-            document.getElementById('la-bidder-logo').style.display = 'none';
+            document.getElementById('la-bidder-box').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
+            document.getElementById('la-sold-stamp').classList.remove('active');
 
             updateLiveControls();
             evaluateFranchiseStripForPlayer();
-        }
-
-        function nextRandomPlayer() {
-            const activeCategories = getAvailableCategories();
-
-            const availablePlayers = window.allPlayers.filter(p => {
-                const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
-                if (activeCategories === null) return isAvailable;
-                const pCat = String(p.category || '').trim().toLowerCase();
-                return isAvailable && activeCategories.includes(pCat);
-            });
-
-            if(availablePlayers.length === 0) return alert("No available players left for the remaining open categories!");
-            
-            const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-            pushPlayerToScreen(random);
-        }
-
-        function manualSearchPlayer() {
-            const term = document.getElementById('la-search-input').value.toLowerCase().trim();
-            if(!term) return;
-
-            const rawCats = safeGetStorage('auctionCats', []);
-            const validCategories = rawCats.map(c => typeof c === 'object' ? String(c.name || '').trim().toLowerCase() : String(c).trim().toLowerCase()).filter(Boolean);
-
-            const found = window.allPlayers.find(p => {
-                const nameMatch = (String(p.name).toLowerCase() === term || String(p.serialNumber).toLowerCase() === term);
-                const isAvailable = (!p.status || String(p.status).toLowerCase() !== 'sold');
-                
-                if (validCategories.length === 0) return nameMatch && isAvailable;
-                
-                const pCat = String(p.category || '').trim().toLowerCase();
-                return nameMatch && isAvailable && validCategories.includes(pCat);
-            });
-
-            if(found) pushPlayerToScreen(found);
-            else alert("Player not found, already sold, or doesn't belong to a valid category.");
-        }
-
-        function saveAuctionProgress(status) {
-            let currentSetup = safeGetStorage('auctionSetup', null);
-            if (!currentSetup || !currentSetup.id) return alert("No active auction to save. Please create one first.");
-
-            currentSetup.status = status;
-            safeSetStorage('auctionSetup', currentSetup);
-
-            let archive = {
-                setup: currentSetup,
-                teams: safeGetStorage('auctionTeams', []),
-                players: safeGetStorage('auctionPlayers', []),
-                cats: safeGetStorage('auctionCats', []),
-                tiers: safeGetStorage('auctionBidTiers', [])
-            };
-
-            let history = safeGetStorage('auctionHistory', []);
-            let existingIndex = history.findIndex(a => {
-                if(!a) return false;
-                if(a.setup && a.setup.id === currentSetup.id) return true;
-                if(a.id === currentSetup.id) return true;
-                return false;
-            });
-
-            if (existingIndex >= 0) {
-                history[existingIndex] = archive;
-            } else {
-                history.push(archive);
-            }
-
-            safeSetStorage('auctionHistory', history);
-            renderAuctionLibrary();
-            alert(`Auction progress saved securely as ${status}!`);
-        }
-
-        function loadHistoricalAuction(index) {
-            if(!confirm("Are you sure you want to load this auction? Any unsaved progress on your current active auction will be lost!")) return;
-            
-            let history = safeGetStorage('auctionHistory', []);
-            let archive = history[index];
-            
-            if(archive) {
-                let setup = archive.setup || archive;
-                let teams = archive.teams || [];
-                let players = archive.players || [];
-                let cats = archive.cats || [];
-                let tiers = archive.tiers || [];
-
-                safeSetStorage('auctionSetup', setup);
-                safeSetStorage('auctionTeams', teams);
-                safeSetStorage('auctionPlayers', players);
-                safeSetStorage('auctionCats', cats);
-                safeSetStorage('auctionBidTiers', tiers);
-                
-                window.allTeams = teams;
-                window.allPlayers = players;
-                window.currentCategories = cats;
-
-                try { populateAuctionDetails(); loadDashboard(); renderPlayersDatabase('all'); } catch(e){}
-                alert("Auction Loaded Successfully!");
-            }
-        }
-
-        function getDynamicIncrement() {
-            const setup = safeGetStorage('auctionSetup', {});
-            let baseInc = parseInt(setup.bidInc);
-            if (isNaN(baseInc) || baseInc <= 0) baseInc = 100; 
-
-            const container = document.getElementById('bidIncrementContainer');
-            let tiers = [];
-
-            if (container) {
-                const rows = container.querySelectorAll('.bid-tier-row');
-                rows.forEach(row => {
-                    const inputs = row.querySelectorAll('input');
-                    if (inputs.length >= 2) {
-                        const incVal = parseInt(inputs[0].value);
-                        const afterVal = parseInt(inputs[1].value);
-                        if (incVal > 0 && afterVal > 0) tiers.push({ incVal, afterVal });
-                    }
-                });
-            }
-            if (tiers.length === 0) {
-                tiers = safeGetStorage('auctionBidTiers', []);
-            }
-
-            let calculatedInc = baseInc;
-            let highestMetTier = -1;
-            let currentBidNum = parseInt(liveCurrentBid) || 0;
-
-            tiers.forEach(tier => {
-                let tInc = parseInt(tier.incVal) || 0;
-                let tAfter = parseInt(tier.afterVal) || 0;
-                if (tInc > 0 && tAfter > 0 && currentBidNum >= tAfter && tAfter > highestMetTier) {
-                    highestMetTier = tAfter;
-                    calculatedInc = tInc;
-                }
-            });
-
-            return calculatedInc > 0 ? calculatedInc : baseInc;
         }
 
         function franchiseBidByIndex(index) {
@@ -1890,7 +1808,7 @@
                 isFirst: isFirstBid,
                 logoUrl: document.getElementById('la-bidder-logo').src,
                 teamName: document.getElementById('la-bidder-name').innerText,
-                displayState: document.getElementById('la-bidder-logo').style.display
+                displayState: document.getElementById('la-bidder-box').style.display
             });
 
             liveCurrentBid = proposedBid;
@@ -1904,9 +1822,10 @@
             if (bidDisplay) bidDisplay.innerText = liveCurrentBid;
 
             const bigLogo = document.getElementById('la-bidder-logo');
-            if (bigLogo) {
+            const bigBox = document.getElementById('la-bidder-box');
+            if (bigLogo && bigBox) {
                 bigLogo.src = logoUrl;
-                bigLogo.style.display = 'inline-block';
+                bigBox.style.display = 'flex';
             }
 
             const bigName = document.getElementById('la-bidder-name');
@@ -1915,7 +1834,6 @@
                 bigName.style.display = 'block';
             }
 
-            applyLiveLogoSize();
             updateLiveControls();
         }
 
@@ -1927,7 +1845,6 @@
             let currentVal = parseInt(liveCurrentBid) || 0;
 
             if(manBid > currentVal) {
-                
                 const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
                 if (!check.allowed && check.reason === 'insufficient_funds') {
                     return alert(`Insufficient Funds! Team must keep ₹${check.reserve} in reserve. Max possible bid is ₹${check.maxBid}.`);
@@ -1939,7 +1856,7 @@
                     isFirst: isFirstBid,
                     logoUrl: document.getElementById('la-bidder-logo').src,
                     teamName: document.getElementById('la-bidder-name').innerText,
-                    displayState: document.getElementById('la-bidder-logo').style.display
+                    displayState: document.getElementById('la-bidder-box').style.display
                 });
 
                 liveCurrentBid = manBid;
@@ -1966,10 +1883,9 @@
             document.getElementById('la-bidder-logo').src = lastState.logoUrl;
             document.getElementById('la-bidder-name').innerText = lastState.teamName;
 
-            document.getElementById('la-bidder-logo').style.display = lastState.displayState;
+            document.getElementById('la-bidder-box').style.display = lastState.displayState;
             document.getElementById('la-bidder-name').style.display = lastState.displayState;
 
-            applyLiveLogoSize();
             updateLiveControls();
         }
 
@@ -2015,6 +1931,11 @@
                 const activeTourneyId = activeSetup.id || 'KBL2026';
                 try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: activeTourneyId }); } catch(e){}
 
+                document.getElementById('la-sold-stamp').innerText = "SOLD";
+                document.getElementById('la-sold-stamp').style.borderColor = "white";
+                document.getElementById('la-sold-stamp').style.color = "white";
+                document.getElementById('la-sold-stamp').classList.add('active');
+
                 alertMessage = `SOLD! \n\n${livePlayerActive.name} was sold to ${winningName} for ₹${liveCurrentBid}.`;
 
             } else if(resultType === 'unsold') {
@@ -2035,28 +1956,35 @@
                 const activeTourneyId = activeSetup.id || 'KBL2026';
                 try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: activeTourneyId, statusOverride: 'unsold' }); } catch(e){}
 
+                document.getElementById('la-sold-stamp').innerText = "UNSOLD";
+                document.getElementById('la-sold-stamp').style.borderColor = "#ef4444";
+                document.getElementById('la-sold-stamp').style.color = "#ef4444";
+                document.getElementById('la-sold-stamp').classList.add('active');
+
                 alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
             }
 
-            alert(alertMessage);
+            // Small delay so the stamp visually appears before the browser alert blocks the screen
+            setTimeout(() => {
+                alert(alertMessage);
+                const activeCategories = getAvailableCategories();
+                const availablePlayers = window.allPlayers.filter(p => {
+                    const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
+                    if (activeCategories === null) return isAvailable;
+                    const pCat = String(p.category || '').trim().toLowerCase();
+                    return isAvailable && activeCategories.includes(pCat);
+                });
+                
+                if(availablePlayers.length > 0) {
+                    const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+                    pushPlayerToScreen(random);
+                } else {
+                    resetLiveBoard();
+                    alert("Auction Complete! No more available players left for the open categories.");
+                }
 
-            const activeCategories = getAvailableCategories();
-            const availablePlayers = window.allPlayers.filter(p => {
-                const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
-                if (activeCategories === null) return isAvailable;
-                const pCat = String(p.category || '').trim().toLowerCase();
-                return isAvailable && activeCategories.includes(pCat);
-            });
-            
-            if(availablePlayers.length > 0) {
-                const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-                pushPlayerToScreen(random);
-            } else {
-                resetLiveBoard();
-                alert("Auction Complete! No more available players left for the open categories.");
-            }
-
-            loadDashboard().catch(e => console.log(e));
+                loadDashboard().catch(e => console.log(e));
+            }, 100);
         }
 
         function updateRosterCategoryDropdown() {
