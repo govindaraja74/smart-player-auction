@@ -1908,6 +1908,7 @@
         }
 
         // --- Bidding Function ---
+      // --- FRANCHISE BID ACTION (FIXED WITH EXACT TIERED INCREMENTS) ---
         function franchiseBidByIndex(index) {
             if (!livePlayerActive) {
                 return alert("⚠️ No player is currently on the auction block!");
@@ -1917,42 +1918,50 @@
             const team = activeTeams[index];
             if (!team) return;
 
-            // 1. Force the current bid into a strict Number to prevent string concatenation bugs
-            let currentPrice = parseInt(liveCurrentBid) || 0;
-            
-            // 2. Fetch the correct increment amount based on your dynamic rules
-            let increment = 0;
-            if (typeof getDynamicIncrement === 'function') {
-                increment = parseInt(getDynamicIncrement(currentPrice)) || 5; 
-            } else {
-                const activeSetup = safeGetStorage('auctionSetup', {});
-                increment = parseInt(activeSetup.bidIncrease) || 5;
-            }
-            
-            // 3. Calculate the new bid: Keep base price on 1st bid, add increment on subsequent bids
-            let proposedBid = isFirstBid ? currentPrice : (currentPrice + increment);
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            let currentVal = parseInt(liveCurrentBid) || 0;
 
-            // 4. Validate if the franchise can legally afford this bid
+            // 1. Get the Player's Base Price for the 1st Bid!
+            if (isNaN(currentVal) || currentVal === 0) {
+                const fallbackBase = parseInt(activeSetup.minBid) || 0;
+                let rawPrice = livePlayerActive.basePrice || livePlayerActive.BasePrice || livePlayerActive['Base Price'] || fallbackBase;
+                currentVal = parseInt(rawPrice) || fallbackBase;
+            }
+
+            // 2. Get EXACT Tiered Increment from your dynamic settings function
+            let exactIncrement = 100;
+            if (typeof getDynamicIncrement === 'function') {
+                exactIncrement = parseInt(getDynamicIncrement(currentVal)) || 100;
+            } else {
+                exactIncrement = parseInt(activeSetup.bidIncrease) || parseInt(activeSetup.bidIncrement) || 100;
+            }
+
+            // 3. Calculate Proposed Bid (First bid = base price. After that = current + exact tier increment)
+            let proposedBid = isFirstBid ? currentVal : (currentVal + exactIncrement);
+
+            // 4. Validate if the franchise has the funds
             const check = canTeamBid(team._id || team.id, proposedBid, livePlayerActive.category);
-            
             if (!check.allowed) {
                 let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
                 return alert("🛑 " + team.name + " cannot bid: " + formattedReason);
             }
 
-            // 5. Apply the fully calculated bid to the live board variables
+            // 5. Save exactly what the board looks like BEFORE the change (so the Undo button works flawlessly)
+            liveBidHistory.push({
+                bid: liveCurrentBid, 
+                teamId: liveCurrentTeamId,
+                isFirst: isFirstBid,
+                logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
+                teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
+                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none'
+            });
+
+            // 6. Apply New Variables to the Live Board
             liveCurrentBid = proposedBid;
             liveCurrentTeamId = team._id || team.id;
             isFirstBid = false;
 
-            // 6. Save it to history so the Undo button works perfectly
-            liveBidHistory.push({
-                teamId: liveCurrentTeamId,
-                teamName: team.name,
-                amount: liveCurrentBid
-            });
-
-            // 7. Push the new numbers to the big screen instantly!
+            // 7. Update all the UI text and logos on the screen
             const currentBidDisplay = document.getElementById('la-current-bid');
             if (currentBidDisplay) currentBidDisplay.innerText = liveCurrentBid;
             
@@ -1961,6 +1970,16 @@
             
             const bidderName = document.getElementById('la-bidder-name');
             if (bidderName) bidderName.innerText = team.name;
+
+            const bidderLogo = document.getElementById('la-bidder-logo');
+            if (bidderLogo) {
+                bidderLogo.src = (typeof getTeamLogo === 'function') ? getTeamLogo(team, team.name) : (team.logo || '');
+            }
+
+            // 8. Refresh the manual input and buttons
+            if (typeof updateLiveControls === 'function') {
+                updateLiveControls();
+            }
         }
                 // --- MANUAL BID FUNCTION ---
         function applyManualBid() {
