@@ -10,6 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
+app.use(express.static(__dirname));
 const server = http.createServer(app);
 const io = new Server(server);
 
