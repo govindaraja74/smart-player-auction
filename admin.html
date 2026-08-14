@@ -2692,24 +2692,26 @@ function toggleFullScreen() {
             }
         }
 
-        function loadAuctionFromLibrary(id) {
+       function loadAuctionFromLibrary(id) {
             let history = safeGetStorage('auctionHistory', []);
             let match = history.find(a => a && a.setup && String(a.setup.id) === String(id));
             if (!match) return alert("Auction archive not found!");
 
-            safeSetStorage('auctionSetup', match.setup);
-            safeSetStorage('auctionTeams', match.teams || []);
-            safeSetStorage('auctionPlayers', match.players || []);
-            safeSetStorage('auctionCats', match.cats || []);
-            safeSetStorage('auctionBidTiers', match.tiers || []);
+            // 1. Aggressively clear the active browser RAM
+            window.spaMemory = {};
 
-            window.allTeams = match.teams || [];
-            window.allPlayers = match.players || [];
-            window.currentCategories = match.cats || [];
+            // 2. Lock the archived data directly into the active database
+            localStorage.setItem('auctionSetup', JSON.stringify(match.setup));
+            localStorage.setItem('auctionTeams', JSON.stringify(match.teams || []));
+            localStorage.setItem('auctionPlayers', JSON.stringify(match.players || []));
+            localStorage.setItem('auctionCats', JSON.stringify(match.cats || []));
+            localStorage.setItem('auctionBidTiers', JSON.stringify(match.tiers || []));
 
-            populateAuctionDetails(match.setup);
-            alert(`📂 Successfully loaded "${match.setup.name}" into your active workspace!`);
-            navTo('view-auction-detail');
+            // 3. Force the page to completely reload to ensure a perfect sync
+            alert(`📂 Successfully loaded "${match.setup.name}"! The dashboard will now refresh to apply your data.`);
+            
+            // 4. Reload the window
+            window.location.reload();
         }
 
         function deleteAuctionFromLibrary(id) {
