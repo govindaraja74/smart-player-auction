@@ -2574,20 +2574,40 @@ function toggleFullScreen() {
             attachSafeListeners();
             try { loadSavedMemory(); } catch(e) {}
         }
-  // --- DYNAMIC BID INCREMENT STEPS ---
+ // --- DYNAMIC BID INCREMENT STEPS ---
 function getDynamicIncrement(currentBid) {
     let bid = parseInt(currentBid) || 0;
+    
+    // Pull the master settings from your saved data
+    let setupData = localStorage.getItem('auctionSetup');
+    let activeSetup = setupData ? JSON.parse(setupData) : {};
 
-    // Example Tiers:
-    if (bid < 5000) {
-        return 100;   // Bids under 5,000 go up by 100
-    } else if (bid < 10000) {
-        return 500;   // Bids between 5,000 and 10,000 go up by 500
-    } else if (bid < 50000) {
-        return 1000;  // Bids between 10,000 and 50,000 go up by 1,000
-    } else {
-        return 5000;  // Bids over 50,000 go up by 5,000
+    // 1. Set the Base Increment (e.g., 1000 from your first screenshot)
+    let currentIncrement = parseInt(activeSetup.bidIncrease) || parseInt(activeSetup.bidIncrement) || parseInt(activeSetup.bidInc) || 100;
+
+    // 2. Look for the custom tiers saved from your UI
+    let tiers = activeSetup.tiers || activeSetup.bidTiers || activeSetup.incrementTiers;
+
+    if (tiers && Array.isArray(tiers)) {
+        // Sort tiers from lowest to highest to ensure the correct step applies
+        tiers.sort((a, b) => {
+            let limitA = parseInt(a.after) || parseInt(a.amount) || parseInt(a.threshold) || 0;
+            let limitB = parseInt(b.after) || parseInt(b.amount) || parseInt(b.threshold) || 0;
+            return limitA - limitB;
+        });
+
+        // Loop through the tiers and apply the highest valid increment
+        tiers.forEach(tier => {
+            let threshold = parseInt(tier.after) || parseInt(tier.amount) || parseInt(tier.threshold) || 0;
+            let incAmount = parseInt(tier.inc) || parseInt(tier.increment) || parseInt(tier.value) || 0;
+
+            if (threshold > 0 && bid >= threshold) {
+                currentIncrement = incAmount;
+            }
+        });
     }
+
+    return currentIncrement;
 }
     </script>
 </body>
