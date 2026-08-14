@@ -491,7 +491,12 @@
                             <button id="la-search-btn" class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
                             <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random</button>
                             <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
-                            <input type="number" id="la-manual-bid" placeholder="Custom Bid ₹" style="width: 120px; padding: 12px; color:black;">
+                            
+                            <!-- SMART CUSTOM BID DROPDOWN -->
+                            <select id="la-manual-bid" style="width: 160px; padding: 11px; color:black; font-weight:bold; border-radius: 4px; cursor: pointer; border: none;">
+                                <option value="">Custom Bid ₹</option>
+                            </select>
+                            
                             <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6;" onclick="applyManualBid()">Apply Bid</button>
                         </div>
                         
@@ -763,6 +768,10 @@ async function uploadImageToCloudinary(file) {
         let isFirstBid = true; 
         let liveBidHistory = []; 
         let livePlayerHistory = [];
+
+        function safeInit() {
+            try { loadSavedMemory(); } catch(e) {}
+        }
 
         function loadSavedMemory() {
             const activeSetup = safeGetStorage('auctionSetup', {});
@@ -1807,6 +1816,48 @@ async function uploadImageToCloudinary(file) {
             }
         }
 
+        // --- CUSTOM BID DROPDOWN GENERATOR ---
+        function populateCustomBidDropdown() {
+            const dropdown = document.getElementById('la-manual-bid');
+            if (!dropdown) return;
+            
+            dropdown.innerHTML = '<option value="">Custom Bid ₹</option>';
+            if (!livePlayerActive) return;
+
+            const activeTeams = getActiveTeams();
+            let maxPurse = 0;
+            activeTeams.forEach(t => {
+                const fin = getFranchiseFinancials(t._id || t.id);
+                if (fin.maxBid > maxPurse) maxPurse = fin.maxBid;
+            });
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const fallbackBase = parseInt(activeSetup.minBid) || 0;
+            let basePrice = parseInt(livePlayerActive.basePrice || fallbackBase);
+
+            let currentVal = parseInt(liveCurrentBid) || basePrice;
+            
+            let simulatedBid = currentVal;
+            let optionsCount = 0;
+
+            // Generate the next 40 valid jumps using your exact slabs
+            while (optionsCount < 40) {
+                let inc = getDynamicIncrement(simulatedBid);
+                if(inc <= 0) inc = 100; // failsafe
+                simulatedBid += inc;
+                
+                // Stop generating options if it exceeds the richest team's budget
+                if (maxPurse > 0 && simulatedBid > maxPurse) break;
+                
+                const opt = document.createElement('option');
+                opt.value = simulatedBid;
+                opt.innerText = '₹' + simulatedBid.toLocaleString('en-IN');
+                dropdown.appendChild(opt);
+                
+                optionsCount++;
+            }
+        }
+
         async function initLiveAuctionRoom() {
             const strip = document.getElementById('la-franchise-strip');
             if (!strip) return;
@@ -1875,7 +1926,7 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-sold-stamp').classList.remove('active');
             
             document.getElementById('la-search-input').value = '';
-            document.getElementById('la-manual-bid').value = '';
+            populateCustomBidDropdown(); // Reset custom bids
 
             applyLiveLogoSize();
             updateLiveControls();
@@ -1929,6 +1980,7 @@ async function uploadImageToCloudinary(file) {
 
             updateLiveControls();
             evaluateFranchiseStripForPlayer();
+            populateCustomBidDropdown(); // Initialize correct custom increments
         }
 
         // --- DYNAMIC BID INCREMENT STEPS ---
@@ -2024,9 +2076,10 @@ async function uploadImageToCloudinary(file) {
             if (typeof updateLiveControls === 'function') {
                 updateLiveControls();
             }
+            populateCustomBidDropdown(); // Refresh custom options
         }
         
-        // --- MANUAL BID FUNCTION (FIXED: VERIFIES FUNDS BEFORE APPLYING) ---
+        // --- MANUAL BID FUNCTION ---
         function applyManualBid() {
             if (!livePlayerActive) {
                 return alert("⚠️ No player is currently on the auction block!");
@@ -2034,11 +2087,11 @@ async function uploadImageToCloudinary(file) {
             
             const manInput = document.getElementById('la-manual-bid');
             if (!manInput || manInput.value === '') {
-                return alert("⚠️ Please enter an amount in the Custom Bid box before clicking Apply Bid.");
+                return alert("⚠️ Please select an amount from the Custom Bid menu before clicking Apply Bid.");
             }
             
             const manBid = parseInt(manInput.value);
-            if (isNaN(manBid)) return alert("Please enter a valid number.");
+            if (isNaN(manBid)) return alert("Please select a valid number.");
             
             let currentPrice = parseInt(liveCurrentBid) || 0;
 
@@ -2067,11 +2120,11 @@ async function uploadImageToCloudinary(file) {
             isFirstBid = false;
 
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
-            document.getElementById('la-manual-bid').value = '';
             
             if (typeof updateLiveControls === 'function') {
                 updateLiveControls();
             }
+            populateCustomBidDropdown(); // Refresh custom options
         }
 
         function undoLastBid() {
@@ -2091,6 +2144,7 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-bidder-name').style.display = lastState.displayState;
 
             updateLiveControls();
+            populateCustomBidDropdown(); // Refresh custom options
         }
 
         function finalizeSale(resultType) {
