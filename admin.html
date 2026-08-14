@@ -764,10 +764,6 @@ async function uploadImageToCloudinary(file) {
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
-        function safeInit() {
-            try { loadSavedMemory(); } catch(e) {}
-        }
-
         function loadSavedMemory() {
             const activeSetup = safeGetStorage('auctionSetup', {});
             const activeTourneyId = activeSetup.id || 'KBL2026';
@@ -801,6 +797,7 @@ async function uploadImageToCloudinary(file) {
             loadBidIncrements();
             updateDashboardHistoryCard();
             updateManualCategoryDropdowns();
+            renderAuctionLibrary(); 
             try { renderFranchiseStandings(); } catch(e){}
 
             const savedSetup = safeGetStorage('auctionSetup', {});
@@ -2049,7 +2046,6 @@ async function uploadImageToCloudinary(file) {
                 return alert("Manual custom bid must be higher than current bid.");
             }
 
-            // If a franchise is currently holding the bid, verify if they have enough funds for this custom jump!
             if (liveCurrentTeamId) {
                 const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
                 if (!check.allowed) {
@@ -2058,7 +2054,6 @@ async function uploadImageToCloudinary(file) {
                 }
             }
 
-            // Save current state for Undo functionality
             liveBidHistory.push({
                 bid: liveCurrentBid, 
                 teamId: liveCurrentTeamId,
@@ -2450,6 +2445,7 @@ function toggleFullScreen() {
                 else history.push(archive);
                 
                 safeSetStorage('auctionHistory', history);
+                renderAuctionLibrary(); 
 
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
 
@@ -2600,14 +2596,20 @@ function toggleFullScreen() {
                 };
             }
         }
-       // --- AUCTION LIBRARY MANAGEMENT ---
+        
+        function safeInit() {
+            attachSafeListeners();
+            try { loadSavedMemory(); } catch(e) {}
+        }
+        
+        // --- AUCTION LIBRARY MANAGEMENT ---
         function saveAuctionProgress(status) {
             let setup = safeGetStorage('auctionSetup', {});
             if (!setup.name) {
                 return alert("⚠️ No active auction details found to save!");
             }
 
-            setup.status = status; // 'incomplete' or 'completed'
+            setup.status = status; 
             safeSetStorage('auctionSetup', setup);
 
             let teams = safeGetStorage('auctionTeams', []);
@@ -2716,10 +2718,6 @@ function toggleFullScreen() {
             history = history.filter(a => a && a.setup && String(a.setup.id) !== String(id));
             safeSetStorage('auctionHistory', history);
             renderAuctionLibrary();
-        } 
-        function safeInit() {
-            attachSafeListeners();
-            try { loadSavedMemory(); } catch(e) {}
         }
     </script>
 </body>
