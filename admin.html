@@ -2574,6 +2574,21 @@ function toggleFullScreen() {
             attachSafeListeners();
             try { loadSavedMemory(); } catch(e) {}
         }
+  // --- DYNAMIC BID INCREMENT STEPS ---
+function getDynamicIncrement(currentBid) {
+    let bid = parseInt(currentBid) || 0;
+
+    // Example Tiers:
+    if (bid < 5000) {
+        return 100;   // Bids under 5,000 go up by 100
+    } else if (bid < 10000) {
+        return 500;   // Bids between 5,000 and 10,000 go up by 500
+    } else if (bid < 50000) {
+        return 1000;  // Bids between 10,000 and 50,000 go up by 1,000
+    } else {
+        return 5000;  // Bids over 50,000 go up by 5,000
+    }
+}
     </script>
 </body>
 </html>
