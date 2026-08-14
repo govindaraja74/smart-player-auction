@@ -1214,14 +1214,15 @@ async function uploadImageToCloudinary(file) {
             const container = document.getElementById('bidIncrementContainer');
             if (!container) return;
             
-            const tiers = safeGetStorage('auctionBidTiers', []);
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const tiers = activeSetup.tiers || [];
             container.innerHTML = '';
             
             if (tiers.length === 0) {
                 container.innerHTML = createBidRowHTML('', '', true);
             } else {
                 tiers.forEach((tier) => {
-                    container.innerHTML += createBidRowHTML(tier.incVal, tier.afterVal, false); 
+                    container.innerHTML += createBidRowHTML(tier.inc, tier.after, false); 
                 });
                 container.innerHTML += createBidRowHTML('', '', true);
             }
@@ -1258,34 +1259,28 @@ async function uploadImageToCloudinary(file) {
         }
 
     function saveBidIncrements() {
-    let tiers = [];
-    
-    // 1. Grab all the tier rows currently on the screen
-    let rows = document.querySelectorAll('#bidIncrementContainer .bid-tier-row');
-    
-    // 2. Loop through each row and extract the "Increment" and "After" numbers
-    rows.forEach(row => {
-        let inputs = row.querySelectorAll('input[type="number"]');
-        if (inputs && inputs.length >= 2) {
-            let incAmount = parseInt(inputs[0].value);
-            let afterAmount = parseInt(inputs[1].value);
-            
-            // Only save if valid numbers are typed in both boxes
-            if (!isNaN(incAmount) && !isNaN(afterAmount) && incAmount > 0 && afterAmount > 0) {
-                tiers.push({ inc: incAmount, after: afterAmount });
+        let tiers = [];
+        let rows = document.querySelectorAll('#bidIncrementContainer .bid-tier-row');
+        
+        rows.forEach(row => {
+            let inputs = row.querySelectorAll('input[type="number"]');
+            if (inputs && inputs.length >= 2) {
+                let incAmount = parseInt(inputs[0].value);
+                let afterAmount = parseInt(inputs[1].value);
+                
+                if (!isNaN(incAmount) && !isNaN(afterAmount) && incAmount > 0 && afterAmount > 0) {
+                    tiers.push({ inc: incAmount, after: afterAmount });
+                }
             }
-        }
-    });
+        });
 
-    // 3. Save these extracted tiers directly into your main auction database
-    let setupData = localStorage.getItem('auctionSetup');
-    let activeSetup = setupData ? JSON.parse(setupData) : {};
-    
-    activeSetup.tiers = tiers; // Attach the tiers to your settings
-    
-    localStorage.setItem('auctionSetup', JSON.stringify(activeSetup));
-    console.log("Custom Bid Tiers successfully saved:", tiers);
-}
+        // FIX: Sync perfectly with your Bulletproof Storage Engine!
+        let activeSetup = safeGetStorage('auctionSetup', {});
+        activeSetup.tiers = tiers;
+        safeSetStorage('auctionSetup', activeSetup);
+        
+        console.log("Custom Bid Tiers successfully saved to memory:", tiers);
+    }
 
         function generateTeamInputs() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
@@ -1928,28 +1923,31 @@ async function uploadImageToCloudinary(file) {
             evaluateFranchiseStripForPlayer();
         }
 
-     // --- CALCULATE DYNAMIC BID TIERS ---
-        function getDynamicIncrement() {
-            let currentVal = parseInt(liveCurrentBid) || 0;
-            const activeSetup = safeGetStorage('auctionSetup', {});
+        // --- DYNAMIC BID INCREMENT STEPS ---
+        function getDynamicIncrement(currentBid) {
+            let bid = parseInt(currentBid) || 0;
             
-            // Check if custom tiers are set up
-            if (activeSetup.tiers && activeSetup.tiers.length > 0) {
-                // Sort highest to lowest to find the right bracket
-                const sortedTiers = [...activeSetup.tiers].sort((a, b) => b.threshold - a.threshold);
-                for (let tier of sortedTiers) {
-                    if (currentVal >= tier.threshold) {
-                        return parseInt(tier.increment);
+            // FIX: Read directly from the Bulletproof Storage Engine!
+            let activeSetup = safeGetStorage('auctionSetup', {});
+            let currentIncrement = parseInt(activeSetup.bidInc) || parseInt(activeSetup.bidIncrease) || parseInt(activeSetup.bidIncrement) || 100;
+
+            let tiers = activeSetup.tiers;
+
+            if (tiers && Array.isArray(tiers) && tiers.length > 0) {
+                tiers.sort((a, b) => parseInt(a.after) - parseInt(b.after));
+
+                tiers.forEach(tier => {
+                    let threshold = parseInt(tier.after) || 0;
+                    let incAmount = parseInt(tier.inc) || 0;
+                    if (threshold > 0 && bid >= threshold) {
+                        currentIncrement = incAmount;
                     }
-                }
+                });
             }
-            
-            // Fallback to default bid increment if no tiers match
-            return parseInt(activeSetup.bidIncrement) || 100;
+            return currentIncrement;
         }
 
-        // --- Bidding Function ---
-      // --- FRANCHISE BID ACTION (FIXED WITH EXACT TIERED INCREMENTS) ---
+        // --- FRANCHISE BID ACTION ---
         function franchiseBidByIndex(index) {
             if (!livePlayerActive) {
                 return alert("⚠️ No player is currently on the auction block!");
@@ -1969,8 +1967,7 @@ async function uploadImageToCloudinary(file) {
                 currentVal = parseInt(rawPrice) || fallbackBase;
             }
 
-           // 2. Get EXACT Tiered Increment from your dynamic settings function
-            // FIX: This now accurately points to your 'bidInc' saved variable
+            // 2. Get EXACT Tiered Increment from your dynamic settings function
             let fallbackInc = parseInt(activeSetup.bidInc) || parseInt(activeSetup.bidIncrement) || 100;
             let exactIncrement = fallbackInc;
             
@@ -2026,7 +2023,8 @@ async function uploadImageToCloudinary(file) {
                 updateLiveControls();
             }
         }
-                // --- MANUAL BID FUNCTION ---
+        
+        // --- MANUAL BID FUNCTION ---
         function applyManualBid() {
             if (!livePlayerActive) {
                 return alert("⚠️ No player is currently on the auction block!");
@@ -2042,10 +2040,18 @@ async function uploadImageToCloudinary(file) {
 
             if (isFirstBid || manBid > currentPrice) {
                 liveCurrentBid = manBid;
-                isFirstBid = false;
+                
+                // FIX: Set this to TRUE! This makes the manual bid an "Asking Price".
+                // The next Franchise clicked will claim this EXACT price without adding an increment!
+                isFirstBid = true;
+                liveCurrentTeamId = null; 
                 
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
                 document.getElementById('la-manual-bid').value = '';
+                
+                // Hide the previous bidder's logo because this new price is un-claimed
+                document.getElementById('la-bidder-box').style.display = 'none';
+                document.getElementById('la-bidder-name').style.display = 'none';
                 
                 if (typeof updateLiveControls === 'function') {
                     updateLiveControls();
@@ -2151,7 +2157,7 @@ async function uploadImageToCloudinary(file) {
 
             // Small delay so the stamp visually appears before the browser alert blocks the screen
             setTimeout(() => {
-               
+                
                 const activeCategories = getAvailableCategories();
                 const availablePlayers = window.allPlayers.filter(p => {
                     const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
@@ -2171,58 +2177,52 @@ async function uploadImageToCloudinary(file) {
                 loadDashboard().catch(e => console.log(e));
             }, 1500);
         }
-        // --- SEARCH & RANDOM FUNCTIONS RESTORED ---
-// --- SEARCH & RANDOM FUNCTIONS RESTORED (WITH STRICT LOCKS) ---
+        
+        // --- SEARCH & RANDOM FUNCTIONS RESTORED (WITH STRICT LOCKS) ---
         function nextRandomPlayer() {
-                // STRICT LOCK: Check if a player is already on the board
-               // STRICT LOCK: Check if an active player is unfinished
-    if (typeof livePlayerActive !== 'undefined' && livePlayerActive) {
-        if (livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
-            return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
-        }
-    }
-
-                if (!window.allPlayers || window.allPlayers.length === 0) {
-                    return alert("No players found! Please add players in the Roster first.");
+            // STRICT LOCK: Check if an active player is unfinished
+            if (typeof livePlayerActive !== 'undefined' && livePlayerActive) {
+                if (livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
+                    return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
                 }
-
-                // 1. Get the currently active categories
-                let activeCategories = [];
-                if (typeof getAvailableCategories === 'function') {
-                    activeCategories = getAvailableCategories();
-                }
-
-                // 2. Filter for players who are BOTH 'available' AND in the allowed categories
-                const availablePlayers = window.allPlayers.filter(p => {
-                    const status = String(p.status || 'available').toLowerCase();
-                    const isAvailable = (status === 'available' || status === '');
-                    
-                    if (!isAvailable) return false;
-                    
-                    // If a category filter is active, enforce the check!
-                    if (activeCategories && activeCategories.length > 0) {
-                        const pCat = String(p.category || '').trim().toLowerCase();
-                        return activeCategories.includes(pCat);
-                    }
-                    return true;
-                });
-
-                // 3. Show warning if no players match the category
-                if(availablePlayers.length === 0) {
-                    return alert("⚠️ WARNING: No available players found in the active categories! Please change your category filter or check the roster.");
-                }
-
-                // 4. Pick a random player and push to screen
-                const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-                pushPlayerToScreen(randomPlayer);
             }
+
+            if (!window.allPlayers || window.allPlayers.length === 0) {
+                return alert("No players found! Please add players in the Roster first.");
+            }
+
+            // 1. Get the currently active categories
+            let activeCategories = [];
+            if (typeof getAvailableCategories === 'function') {
+                activeCategories = getAvailableCategories();
+            }
+
+            // 2. Filter for players who are BOTH 'available' AND in the allowed categories
+            const availablePlayers = window.allPlayers.filter(p => {
+                const status = String(p.status || 'available').toLowerCase();
+                const isAvailable = (status === 'available' || status === '');
+                
+                if (!isAvailable) return false;
+                
+                // If a category filter is active, enforce the check!
+                if (activeCategories && activeCategories.length > 0) {
+                    const pCat = String(p.category || '').trim().toLowerCase();
+                    return activeCategories.includes(pCat);
+                }
+                return true;
+            });
+
+            // 3. Show warning if no players match the category
+            if(availablePlayers.length === 0) {
+                return alert("⚠️ WARNING: No available players found in the active categories! Please change your category filter or check the roster.");
+            }
+
+            // 4. Pick a random player and push to screen
+            const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+            pushPlayerToScreen(randomPlayer);
+        }
 
         function manualSearchPlayer() {
-            // STRICT LOCK: Check if a player is already on the board
-            if (livePlayerActive) {
-                return alert("⚠️ Player should SOLD or UNSOLD \n\nYou must mark the current player as SOLD or UNSOLD before searching for a new player.");
-            }
-
             const term = document.getElementById('la-search-input').value.trim().toLowerCase();
             if(!term) return alert("Please enter a player name or Serial Number to search.");
 
@@ -2246,6 +2246,7 @@ async function uploadImageToCloudinary(file) {
 
             pushPlayerToScreen(found);
         }
+        
         // --- RESET PLAYER STATUS TO AVAILABLE UPON REMOVAL ---
         function resetPlayerToAvailable(playerId) {
             let localPlayers = safeGetStorage('auctionPlayers', []);
@@ -2587,41 +2588,6 @@ function toggleFullScreen() {
             attachSafeListeners();
             try { loadSavedMemory(); } catch(e) {}
         }
- // --- DYNAMIC BID INCREMENT STEPS ---
-function getDynamicIncrement(currentBid) {
-    let bid = parseInt(currentBid) || 0;
-    
-    // Pull the master settings from your saved data
-    let setupData = localStorage.getItem('auctionSetup');
-    let activeSetup = setupData ? JSON.parse(setupData) : {};
-
-    // 1. Set the Base Increment (e.g., 1000 from your first screenshot)
-    let currentIncrement = parseInt(activeSetup.bidIncrease) || parseInt(activeSetup.bidIncrement) || parseInt(activeSetup.bidInc) || 100;
-
-    // 2. Look for the custom tiers saved from your UI
-    let tiers = activeSetup.tiers || activeSetup.bidTiers || activeSetup.incrementTiers;
-
-    if (tiers && Array.isArray(tiers)) {
-        // Sort tiers from lowest to highest to ensure the correct step applies
-        tiers.sort((a, b) => {
-            let limitA = parseInt(a.after) || parseInt(a.amount) || parseInt(a.threshold) || 0;
-            let limitB = parseInt(b.after) || parseInt(b.amount) || parseInt(b.threshold) || 0;
-            return limitA - limitB;
-        });
-
-        // Loop through the tiers and apply the highest valid increment
-        tiers.forEach(tier => {
-            let threshold = parseInt(tier.after) || parseInt(tier.amount) || parseInt(tier.threshold) || 0;
-            let incAmount = parseInt(tier.inc) || parseInt(tier.increment) || parseInt(tier.value) || 0;
-
-            if (threshold > 0 && bid >= threshold) {
-                currentIncrement = incAmount;
-            }
-        });
-    }
-
-    return currentIncrement;
-}
     </script>
 </body>
 </html>
