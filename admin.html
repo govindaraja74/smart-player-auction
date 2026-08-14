@@ -1257,25 +1257,36 @@ async function uploadImageToCloudinary(file) {
             saveBidIncrements();
         }
 
-        function saveBidIncrements() {
-            const container = document.getElementById('bidIncrementContainer');
-            if (!container) return;
+       function saveBidIncrements() {
+    let tiers = [];
+    
+    // 1. Grab all the tier rows currently on the screen
+    let rows = document.querySelectorAll('#bidIncrementContainer .bid-tier-row');
+    
+    // 2. Loop through each row and extract the "Increment" and "After" numbers
+    rows.forEach(row => {
+        let inputs = row.querySelectorAll('input');
+        if (inputs && inputs.length >= 2) {
+            let incAmount = parseInt(inputs[0].value);
+            let afterAmount = parseInt(inputs[1].value);
             
-            const rows = container.querySelectorAll('.bid-tier-row');
-            let tiers = [];
-            
-            rows.forEach(row => {
-                const inputs = row.querySelectorAll('input');
-                if (inputs.length >= 2) {
-                    const incVal = parseInt(inputs[0].value);
-                    const afterVal = parseInt(inputs[1].value);
-                    if (incVal > 0 && afterVal > 0) {
-                        tiers.push({ incVal, afterVal });
-                    }
-                }
-            });
-            safeSetStorage('auctionBidTiers', tiers);
+            // Only save if valid numbers are typed in both boxes
+            if (!isNaN(incAmount) && !isNaN(afterAmount) && incAmount > 0 && afterAmount > 0) {
+                // Ensure the keys match exactly what the bidding function looks for
+                tiers.push({ inc: incAmount, after: afterAmount });
+            }
         }
+    });
+
+    // 3. Save these extracted tiers directly into your main auction database
+    let setupData = localStorage.getItem('auctionSetup');
+    let activeSetup = setupData ? JSON.parse(setupData) : {};
+    
+    activeSetup.tiers = tiers; // Attach the tiers to your settings
+    
+    localStorage.setItem('auctionSetup', JSON.stringify(activeSetup));
+    console.log("Custom Bid Tiers successfully saved to main setup:", tiers);
+}
 
         function generateTeamInputs() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
@@ -2165,9 +2176,12 @@ async function uploadImageToCloudinary(file) {
 // --- SEARCH & RANDOM FUNCTIONS RESTORED (WITH STRICT LOCKS) ---
         function nextRandomPlayer() {
                 // STRICT LOCK: Check if a player is already on the board
-                if (livePlayerActive) {
-                    return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
-                }
+               // STRICT LOCK: Check if an active player is unfinished
+    if (typeof livePlayerActive !== 'undefined' && livePlayerActive) {
+        if (livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
+            return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
+        }
+    }
 
                 if (!window.allPlayers || window.allPlayers.length === 0) {
                     return alert("No players found! Please add players in the Roster first.");
