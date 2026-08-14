@@ -2262,6 +2262,8 @@ async function uploadImageToCloudinary(file) {
         
         // --- RESET PLAYER STATUS TO AVAILABLE UPON REMOVAL ---
         function resetPlayerToAvailable(playerId) {
+            if(!confirm("⚠️ Move this player back to the Available list?\n\nIf they were SOLD, they will be removed from the franchise roster and funds will be restored.")) return;
+
             let localPlayers = safeGetStorage('auctionPlayers', []);
             
             localPlayers = localPlayers.map(p => {
@@ -2270,6 +2272,9 @@ async function uploadImageToCloudinary(file) {
                     p.status = 'available'; 
                     delete p.soldTo;
                     delete p.soldPrice;
+                    delete p.teamId;
+                    delete p.teamName;
+                    delete p.teamLogo;
                 }
                 return p;
             });
@@ -2277,10 +2282,15 @@ async function uploadImageToCloudinary(file) {
             safeSetStorage('auctionPlayers', localPlayers);
             window.allPlayers = localPlayers;
             
-            if (typeof loadDashboard === 'function') {
-                loadDashboard().catch(e => console.log(e));
-            }
+            const currentFilterDrop = document.getElementById('rosterCategoryFilter');
+            const filterValue = currentFilterDrop ? currentFilterDrop.value : 'all';
+            
+            renderPlayersDatabase(filterValue.includes('category:') ? filterValue : 'all');
+            
+            try { renderFranchiseStandings(); } catch(e) {}
+            try { renderAuctionDetailLists(); } catch(e) {}
         }
+        
         function updateRosterCategoryDropdown() {
             const dropdown = document.getElementById('rosterCategoryFilter');
             if (!dropdown) return;
@@ -2545,14 +2555,17 @@ function toggleFullScreen() {
 
                 let statusBox = '';
                 let teamLogoOverlay = '';
+                let resetBtnHtml = '';
 
                 if (p.status === 'sold') {
                     statusBox = `<div style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">SOLD: ₹${p.soldPrice || p.basePrice}</div>`;
+                    resetBtnHtml = `<button class="edit-del-btn" style="color:#f59e0b; font-size:14px;" onclick="resetPlayerToAvailable('${p._id}')" title="Move to Available">🔄</button>`;
                     if (p.teamLogo && p.teamLogo.length > 5) {
                         teamLogoOverlay = `<img src="${p.teamLogo}" style="position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`;
                     }
                 } else if (p.status === 'unsold') {
                     statusBox = `<div style="background: #ef4444; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">UNSOLD</div>`;
+                    resetBtnHtml = `<button class="edit-del-btn" style="color:#f59e0b; font-size:14px;" onclick="resetPlayerToAvailable('${p._id}')" title="Move to Available">🔄</button>`;
                 } else {
                     statusBox = `<div style="background: #3b82f6; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">AVAILABLE</div>`;
                 }
@@ -2562,6 +2575,7 @@ function toggleFullScreen() {
                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">#${p.serialNumber || '-'}</span>
                         <div style="display: flex; gap: 5px;">
+                            ${resetBtnHtml}
                             <button class="edit-del-btn" onclick="openEditPlayerModal('${p._id}')">✏️</button>
                             <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${p._id}')">🗑️</button>
                         </div>
@@ -2692,25 +2706,21 @@ function toggleFullScreen() {
             }
         }
 
-       function loadAuctionFromLibrary(id) {
+        function loadAuctionFromLibrary(id) {
             let history = safeGetStorage('auctionHistory', []);
             let match = history.find(a => a && a.setup && String(a.setup.id) === String(id));
             if (!match) return alert("Auction archive not found!");
 
-            // 1. Aggressively clear the active browser RAM
             window.spaMemory = {};
 
-            // 2. Lock the archived data directly into the active database
             localStorage.setItem('auctionSetup', JSON.stringify(match.setup));
             localStorage.setItem('auctionTeams', JSON.stringify(match.teams || []));
             localStorage.setItem('auctionPlayers', JSON.stringify(match.players || []));
             localStorage.setItem('auctionCats', JSON.stringify(match.cats || []));
             localStorage.setItem('auctionBidTiers', JSON.stringify(match.tiers || []));
 
-            // 3. Force the page to completely reload to ensure a perfect sync
             alert(`📂 Successfully loaded "${match.setup.name}"! The dashboard will now refresh to apply your data.`);
             
-            // 4. Reload the window
             window.location.reload();
         }
 
