@@ -126,9 +126,9 @@
         .live-right-panel { width: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .live-massive-price { font-size: 110px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); white-space: nowrap; }
         
-        .live-team-box { width: 240px; height: 240px; background: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
+        .live-team-box { width: 200px; height: 200px; background: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
         .live-team-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        .live-team-name-disp { font-size: 32px; color: white; text-transform: uppercase; display: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-family: Arial, sans-serif; font-weight: 900;}
+        .live-team-name-disp { font-size: 28px; color: white; text-transform: uppercase; display: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-family: Arial, sans-serif; font-weight: 900;}
         
         .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
@@ -440,7 +440,9 @@
 
                     <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
-                        
+                        <!-- Auction Logo restored to top-left corner -->
+                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 20px; left: 20px; width: 140px; height: 140px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
+
                         <div class="live-header">
                             <h2 id="la-assoc-name">KARKALA BADMINTON ASSOCIATION</h2>
                             <div class="sub-header"><span>PLAYERS</span> AUCTION</div>
@@ -462,10 +464,10 @@
                                 <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
                             </div>
 
-                            <!-- Right: Price & Team Logo -->
+                            <!-- Right: Price & Franchise/Bidder Logo Spot -->
                             <div class="live-right-panel">
                                 <div class="live-massive-price" id="la-current-bid">0</div>
-                                <div class="live-team-box" id="la-bidder-box">
+                                <div class="live-team-box" id="la-bidder-box" style="display: none;">
                                     <img id="la-bidder-logo" src="">
                                 </div>
                                 <div class="live-team-name-disp" id="la-bidder-name">Team Name</div>
@@ -477,8 +479,8 @@
 
                         <!-- Bottom Blended SPA Logo & Tagline -->
                         <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5;">
-                            <img src="/spa-logo.png.png" style="height: 70px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
-                            <div style="font-size: 13px; color: #f8fafc; margin-top: 5px; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">Performing the ultimate fair and dynamic player auction experience.</div>
+                            <img src="/spa-logo.png.png" style="height: 60px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
+                            <div style="font-size: 12px; color: #f8fafc; margin-top: 3px; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">Performing the ultimate fair and dynamic player auction experience.</div>
                         </div>
                     </div>
 
@@ -1278,7 +1280,7 @@ async function uploadImageToCloudinary(file) {
             }
         });
 
-        // FIX: Sync perfectly with your Bulletproof Storage Engine!
+        // Sync perfectly with your Bulletproof Storage Engine!
         let activeSetup = safeGetStorage('auctionSetup', {});
         activeSetup.tiers = tiers;
         safeSetStorage('auctionSetup', activeSetup);
@@ -1859,6 +1861,12 @@ async function uploadImageToCloudinary(file) {
             const activeSetup = safeGetStorage('auctionSetup', {});
             document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
 
+            // Ensure auction logo is restored on top-left
+            const assocLogo = document.getElementById('la-assoc-logo');
+            if (assocLogo) {
+                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
+            }
+
             document.getElementById('la-sl-no').innerText = "0";
             document.getElementById('la-name').innerText = "WAITING FOR PLAYER...";
             document.getElementById('la-cat').innerText = "---";
@@ -1866,18 +1874,8 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-current-bid').innerText = "0";
             document.getElementById('la-photo').src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
 
-            // Show Auction Logo on the right side by default
-            const bidderBox = document.getElementById('la-bidder-box');
-            bidderBox.style.display = 'flex';
-            bidderBox.style.background = 'transparent';
-            bidderBox.style.boxShadow = 'none';
-            
-            const bidderLogo = document.getElementById('la-bidder-logo');
-            bidderLogo.src = activeSetup.logoUrl || '/spa-logo.png.png';
-            bidderLogo.style.border = 'none';
-            bidderLogo.style.borderRadius = '0';
-            bidderLogo.style.background = 'transparent';
-
+            // Hide right-side bidder box until a bid happens
+            document.getElementById('la-bidder-box').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
             document.getElementById('la-sold-stamp').classList.remove('active');
             
@@ -1919,24 +1917,18 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-club').innerText = p.club || p.team || 'N/A';
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
+            const assocLogo = document.getElementById('la-assoc-logo');
+            if (assocLogo) {
+                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
+            }
+
             const photoEl = document.getElementById('la-photo');
             photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; 
             setTimeout(() => {
                 photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             }, 50); 
 
-            // Show Auction Logo on right side by default
-            const bidderBox = document.getElementById('la-bidder-box');
-            bidderBox.style.display = 'flex';
-            bidderBox.style.background = 'transparent';
-            bidderBox.style.boxShadow = 'none';
-            
-            const bidderLogo = document.getElementById('la-bidder-logo');
-            bidderLogo.src = activeSetup.logoUrl || '/spa-logo.png.png';
-            bidderLogo.style.border = 'none';
-            bidderLogo.style.borderRadius = '0';
-            bidderLogo.style.background = 'transparent';
-
+            document.getElementById('la-bidder-box').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
             document.getElementById('la-sold-stamp').classList.remove('active');
 
@@ -2010,12 +2002,7 @@ async function uploadImageToCloudinary(file) {
                 isFirst: isFirstBid,
                 logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
                 teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
-                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none',
-                boxBg: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.background : 'transparent',
-                boxShadow: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.boxShadow : 'none',
-                logoBorder: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.border : '',
-                logoRadius: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.borderRadius : '',
-                logoBg: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.background : ''
+                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none'
             });
 
             liveCurrentBid = proposedBid;
@@ -2025,13 +2012,9 @@ async function uploadImageToCloudinary(file) {
             const currentBidDisplay = document.getElementById('la-current-bid');
             if (currentBidDisplay) currentBidDisplay.innerText = liveCurrentBid;
             
-            // Convert right box into the Franchise Box
+            // Show Franchise Logo on the right side spot
             const bidderBox = document.getElementById('la-bidder-box');
-            if (bidderBox) {
-                bidderBox.style.display = 'flex';
-                bidderBox.style.background = 'white';
-                bidderBox.style.boxShadow = '0 10px 25px rgba(0,0,0,0.6)';
-            }
+            if (bidderBox) bidderBox.style.display = 'flex';
             
             const bidderName = document.getElementById('la-bidder-name');
             if (bidderName) {
@@ -2042,9 +2025,6 @@ async function uploadImageToCloudinary(file) {
             const bidderLogo = document.getElementById('la-bidder-logo');
             if (bidderLogo) {
                 bidderLogo.src = (typeof getTeamLogo === 'function') ? getTeamLogo(team, team.name) : (team.logo || '');
-                bidderLogo.style.border = '5px solid #38bdf8';
-                bidderLogo.style.borderRadius = '50%';
-                bidderLogo.style.background = 'white';
             }
 
             if (typeof updateLiveControls === 'function') {
@@ -2074,18 +2054,7 @@ async function uploadImageToCloudinary(file) {
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
                 document.getElementById('la-manual-bid').value = '';
                 
-                // Revert right side to Auction Logo since it's un-claimed
-                const bidderBox = document.getElementById('la-bidder-box');
-                bidderBox.style.background = 'transparent';
-                bidderBox.style.boxShadow = 'none';
-                
-                const bidderLogo = document.getElementById('la-bidder-logo');
-                const activeSetup = safeGetStorage('auctionSetup', {});
-                bidderLogo.src = activeSetup.logoUrl || '/spa-logo.png.png';
-                bidderLogo.style.border = 'none';
-                bidderLogo.style.borderRadius = '0';
-                bidderLogo.style.background = 'transparent';
-
+                document.getElementById('la-bidder-box').style.display = 'none';
                 document.getElementById('la-bidder-name').style.display = 'none';
                 
                 if (typeof updateLiveControls === 'function') {
@@ -2106,20 +2075,11 @@ async function uploadImageToCloudinary(file) {
             isFirstBid = lastState.isFirst;
 
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
-            
-            const bidderBox = document.getElementById('la-bidder-box');
-            const bidderLogo = document.getElementById('la-bidder-logo');
-            const bidderName = document.getElementById('la-bidder-name');
+            document.getElementById('la-bidder-logo').src = lastState.logoUrl;
+            document.getElementById('la-bidder-name').innerText = lastState.teamName;
 
-            bidderBox.style.display = 'flex';
-            bidderBox.style.background = lastState.boxBg;
-            bidderBox.style.boxShadow = lastState.boxShadow;
-            bidderLogo.src = lastState.logoUrl;
-            bidderLogo.style.border = lastState.logoBorder;
-            bidderLogo.style.borderRadius = lastState.logoRadius;
-            bidderLogo.style.background = lastState.logoBg;
-            bidderName.innerText = lastState.teamName;
-            bidderName.style.display = lastState.teamId ? 'block' : 'none';
+            document.getElementById('la-bidder-box').style.display = lastState.displayState;
+            document.getElementById('la-bidder-name').style.display = lastState.displayState;
 
             updateLiveControls();
         }
