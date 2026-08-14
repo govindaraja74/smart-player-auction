@@ -1257,7 +1257,7 @@ async function uploadImageToCloudinary(file) {
             saveBidIncrements();
         }
 
-       function saveBidIncrements() {
+    function saveBidIncrements() {
     let tiers = [];
     
     // 1. Grab all the tier rows currently on the screen
@@ -1265,14 +1265,13 @@ async function uploadImageToCloudinary(file) {
     
     // 2. Loop through each row and extract the "Increment" and "After" numbers
     rows.forEach(row => {
-        let inputs = row.querySelectorAll('input');
+        let inputs = row.querySelectorAll('input[type="number"]');
         if (inputs && inputs.length >= 2) {
             let incAmount = parseInt(inputs[0].value);
             let afterAmount = parseInt(inputs[1].value);
             
             // Only save if valid numbers are typed in both boxes
             if (!isNaN(incAmount) && !isNaN(afterAmount) && incAmount > 0 && afterAmount > 0) {
-                // Ensure the keys match exactly what the bidding function looks for
                 tiers.push({ inc: incAmount, after: afterAmount });
             }
         }
@@ -1285,7 +1284,7 @@ async function uploadImageToCloudinary(file) {
     activeSetup.tiers = tiers; // Attach the tiers to your settings
     
     localStorage.setItem('auctionSetup', JSON.stringify(activeSetup));
-    console.log("Custom Bid Tiers successfully saved to main setup:", tiers);
+    console.log("Custom Bid Tiers successfully saved:", tiers);
 }
 
         function generateTeamInputs() {
