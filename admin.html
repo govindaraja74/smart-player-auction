@@ -115,18 +115,18 @@
         
         .live-content-area { display: flex; justify-content: space-between; align-items: center; flex: 1; position: relative; z-index: 2; }
         
-        .live-left-panel { position: relative; width: 320px; }
+        .live-left-panel { position: relative; width: 350px; }
         .live-photo-circle { width: 280px; height: 280px; border-radius: 50%; border: 10px solid #ea580c; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; }
         .live-photo-circle img { width: 100%; height: 100%; object-fit: cover; }
         .live-sl-badge { position: absolute; top: 10px; left: -10px; background: #ea580c; color: white; font-size: 36px; padding: 15px 25px; border-radius: 50px; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; z-index: 10; }
 
-        .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 20px; font-family: Arial, sans-serif; }
+        .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 20px; font-family: Arial, sans-serif; margin-top: -60px; }
         .info-ribbon { border: 3px solid #ea580c; border-left: none; border-radius: 0 40px 40px 0; padding: 15px 30px; font-size: 26px; font-weight: bold; color: white; width: fit-content; min-width: 350px; background: rgba(0,0,0,0.4); box-shadow: inset 0 0 15px rgba(234,88,12,0.3); text-transform: uppercase; }
 
-        .live-right-panel { width: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .live-massive-price { font-size: 130px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); }
+        .live-right-panel { width: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .live-massive-price { font-size: 110px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); white-space: nowrap; }
         
-        .live-team-box { width: 240px; height: 240px; background: white; border-radius: 12px; display: none; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
+        .live-team-box { width: 240px; height: 240px; background: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
         .live-team-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
         .live-team-name-disp { font-size: 32px; color: white; text-transform: uppercase; display: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-family: Arial, sans-serif; font-weight: 900;}
         
@@ -153,7 +153,7 @@
 /* Make the content wider and centered */
 #view-live-room > div {
     width: 100% !important;
-    max-width: 1200px !important; /* Allows the red card and buttons to stretch wider */
+    max-width: 98% !important; /* Stretches the red box almost to the screen edges */
     zoom: 0.85; /* Scales it so it doesn't fall off the top/bottom */
     display: flex;
     flex-direction: column;
@@ -440,9 +440,7 @@
 
                     <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
-                        <!-- Association Logo -->
-                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 20px; left: 20px; width: 140px; height: 140px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">
-
+                        
                         <div class="live-header">
                             <h2 id="la-assoc-name">KARKALA BADMINTON ASSOCIATION</h2>
                             <div class="sub-header"><span>PLAYERS</span> AUCTION</div>
@@ -476,6 +474,12 @@
                         
                         <!-- Center Stamp Animation -->
                         <div id="la-sold-stamp" class="sold-stamp-overlay">SOLD</div>
+
+                        <!-- Bottom Blended SPA Logo & Tagline -->
+                        <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5;">
+                            <img src="/spa-logo.png.png" style="height: 70px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
+                            <div style="font-size: 13px; color: #f8fafc; margin-top: 5px; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">Performing the ultimate fair and dynamic player auction experience.</div>
+                        </div>
                     </div>
 
                     <!-- Bottom Control Panel -->
@@ -1862,7 +1866,18 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-current-bid').innerText = "0";
             document.getElementById('la-photo').src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
 
-            document.getElementById('la-bidder-box').style.display = 'none';
+            // Show Auction Logo on the right side by default
+            const bidderBox = document.getElementById('la-bidder-box');
+            bidderBox.style.display = 'flex';
+            bidderBox.style.background = 'transparent';
+            bidderBox.style.boxShadow = 'none';
+            
+            const bidderLogo = document.getElementById('la-bidder-logo');
+            bidderLogo.src = activeSetup.logoUrl || '/spa-logo.png.png';
+            bidderLogo.style.border = 'none';
+            bidderLogo.style.borderRadius = '0';
+            bidderLogo.style.background = 'transparent';
+
             document.getElementById('la-bidder-name').style.display = 'none';
             document.getElementById('la-sold-stamp').classList.remove('active');
             
@@ -1886,10 +1901,7 @@ async function uploadImageToCloudinary(file) {
             if(livePlayerActive && !isGoingBack) {
                 livePlayerHistory.push(livePlayerActive);
             }
-            
             livePlayerActive = p;
-            
-            // THE MAGIC SAVE COMMAND: Remembers the player even if you switch tabs!
             safeSetStorage('savedLivePlayer', p);
 
             const activeSetup = safeGetStorage('auctionSetup', {});
@@ -1905,17 +1917,26 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-name').innerText = p.name;
             document.getElementById('la-cat').innerText = p.category || 'N/A';
             document.getElementById('la-club').innerText = p.club || p.team || 'N/A';
-            
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
             const photoEl = document.getElementById('la-photo');
             photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; 
-
             setTimeout(() => {
                 photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
             }, 50); 
 
-            document.getElementById('la-bidder-box').style.display = 'none';
+            // Show Auction Logo on right side by default
+            const bidderBox = document.getElementById('la-bidder-box');
+            bidderBox.style.display = 'flex';
+            bidderBox.style.background = 'transparent';
+            bidderBox.style.boxShadow = 'none';
+            
+            const bidderLogo = document.getElementById('la-bidder-logo');
+            bidderLogo.src = activeSetup.logoUrl || '/spa-logo.png.png';
+            bidderLogo.style.border = 'none';
+            bidderLogo.style.borderRadius = '0';
+            bidderLogo.style.background = 'transparent';
+
             document.getElementById('la-bidder-name').style.display = 'none';
             document.getElementById('la-sold-stamp').classList.remove('active');
 
@@ -1927,7 +1948,6 @@ async function uploadImageToCloudinary(file) {
         function getDynamicIncrement(currentBid) {
             let bid = parseInt(currentBid) || 0;
             
-            // FIX: Read directly from the Bulletproof Storage Engine!
             let activeSetup = safeGetStorage('auctionSetup', {});
             let currentIncrement = parseInt(activeSetup.bidInc) || parseInt(activeSetup.bidIncrease) || parseInt(activeSetup.bidIncrement) || 100;
 
@@ -1960,14 +1980,12 @@ async function uploadImageToCloudinary(file) {
             const activeSetup = safeGetStorage('auctionSetup', {});
             let currentVal = parseInt(liveCurrentBid) || 0;
 
-            // 1. Get the Player's Base Price for the 1st Bid!
             if (isNaN(currentVal) || currentVal === 0) {
                 const fallbackBase = parseInt(activeSetup.minBid) || 0;
                 let rawPrice = livePlayerActive.basePrice || livePlayerActive.BasePrice || livePlayerActive['Base Price'] || fallbackBase;
                 currentVal = parseInt(rawPrice) || fallbackBase;
             }
 
-            // 2. Get EXACT Tiered Increment from your dynamic settings function
             let fallbackInc = parseInt(activeSetup.bidInc) || parseInt(activeSetup.bidIncrement) || 100;
             let exactIncrement = fallbackInc;
             
@@ -1978,47 +1996,57 @@ async function uploadImageToCloudinary(file) {
                 }
             }
 
-            // 3. Calculate Proposed Bid (First bid = base price. After that = current + exact tier increment)
             let proposedBid = isFirstBid ? currentVal : (currentVal + exactIncrement);
 
-            // 4. Validate if the franchise has the funds
             const check = canTeamBid(team._id || team.id, proposedBid, livePlayerActive.category);
             if (!check.allowed) {
                 let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
                 return alert("🛑 " + team.name + " cannot bid: " + formattedReason);
             }
 
-            // 5. Save exactly what the board looks like BEFORE the change (so the Undo button works flawlessly)
             liveBidHistory.push({
                 bid: liveCurrentBid, 
                 teamId: liveCurrentTeamId,
                 isFirst: isFirstBid,
                 logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
                 teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
-                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none'
+                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none',
+                boxBg: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.background : 'transparent',
+                boxShadow: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.boxShadow : 'none',
+                logoBorder: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.border : '',
+                logoRadius: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.borderRadius : '',
+                logoBg: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.background : ''
             });
 
-            // 6. Apply New Variables to the Live Board
             liveCurrentBid = proposedBid;
             liveCurrentTeamId = team._id || team.id;
             isFirstBid = false;
 
-            // 7. Update all the UI text and logos on the screen
             const currentBidDisplay = document.getElementById('la-current-bid');
             if (currentBidDisplay) currentBidDisplay.innerText = liveCurrentBid;
             
+            // Convert right box into the Franchise Box
             const bidderBox = document.getElementById('la-bidder-box');
-            if (bidderBox) bidderBox.style.display = 'block';
+            if (bidderBox) {
+                bidderBox.style.display = 'flex';
+                bidderBox.style.background = 'white';
+                bidderBox.style.boxShadow = '0 10px 25px rgba(0,0,0,0.6)';
+            }
             
             const bidderName = document.getElementById('la-bidder-name');
-            if (bidderName) bidderName.innerText = team.name;
+            if (bidderName) {
+                bidderName.innerText = team.name;
+                bidderName.style.display = 'block';
+            }
 
             const bidderLogo = document.getElementById('la-bidder-logo');
             if (bidderLogo) {
                 bidderLogo.src = (typeof getTeamLogo === 'function') ? getTeamLogo(team, team.name) : (team.logo || '');
+                bidderLogo.style.border = '5px solid #38bdf8';
+                bidderLogo.style.borderRadius = '50%';
+                bidderLogo.style.background = 'white';
             }
 
-            // 8. Refresh the manual input and buttons
             if (typeof updateLiveControls === 'function') {
                 updateLiveControls();
             }
@@ -2040,17 +2068,24 @@ async function uploadImageToCloudinary(file) {
 
             if (isFirstBid || manBid > currentPrice) {
                 liveCurrentBid = manBid;
-                
-                // FIX: Set this to TRUE! This makes the manual bid an "Asking Price".
-                // The next Franchise clicked will claim this EXACT price without adding an increment!
                 isFirstBid = true;
                 liveCurrentTeamId = null; 
                 
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
                 document.getElementById('la-manual-bid').value = '';
                 
-                // Hide the previous bidder's logo because this new price is un-claimed
-                document.getElementById('la-bidder-box').style.display = 'none';
+                // Revert right side to Auction Logo since it's un-claimed
+                const bidderBox = document.getElementById('la-bidder-box');
+                bidderBox.style.background = 'transparent';
+                bidderBox.style.boxShadow = 'none';
+                
+                const bidderLogo = document.getElementById('la-bidder-logo');
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                bidderLogo.src = activeSetup.logoUrl || '/spa-logo.png.png';
+                bidderLogo.style.border = 'none';
+                bidderLogo.style.borderRadius = '0';
+                bidderLogo.style.background = 'transparent';
+
                 document.getElementById('la-bidder-name').style.display = 'none';
                 
                 if (typeof updateLiveControls === 'function') {
@@ -2071,11 +2106,20 @@ async function uploadImageToCloudinary(file) {
             isFirstBid = lastState.isFirst;
 
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
-            document.getElementById('la-bidder-logo').src = lastState.logoUrl;
-            document.getElementById('la-bidder-name').innerText = lastState.teamName;
+            
+            const bidderBox = document.getElementById('la-bidder-box');
+            const bidderLogo = document.getElementById('la-bidder-logo');
+            const bidderName = document.getElementById('la-bidder-name');
 
-            document.getElementById('la-bidder-box').style.display = lastState.displayState;
-            document.getElementById('la-bidder-name').style.display = lastState.displayState;
+            bidderBox.style.display = 'flex';
+            bidderBox.style.background = lastState.boxBg;
+            bidderBox.style.boxShadow = lastState.boxShadow;
+            bidderLogo.src = lastState.logoUrl;
+            bidderLogo.style.border = lastState.logoBorder;
+            bidderLogo.style.borderRadius = lastState.logoRadius;
+            bidderLogo.style.background = lastState.logoBg;
+            bidderName.innerText = lastState.teamName;
+            bidderName.style.display = lastState.teamId ? 'block' : 'none';
 
             updateLiveControls();
         }
