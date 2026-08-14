@@ -440,7 +440,7 @@
 
                     <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
-                        <!-- Auction Logo restored to top-left corner -->
+                        <!-- Auction Logo Restored to Top-Left -->
                         <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 20px; left: 20px; width: 140px; height: 140px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
 
                         <div class="live-header">
@@ -464,7 +464,7 @@
                                 <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
                             </div>
 
-                            <!-- Right: Price & Franchise/Bidder Logo Spot -->
+                            <!-- Right: Price & Bidding Franchise Logo -->
                             <div class="live-right-panel">
                                 <div class="live-massive-price" id="la-current-bid">0</div>
                                 <div class="live-team-box" id="la-bidder-box" style="display: none;">
@@ -1861,7 +1861,6 @@ async function uploadImageToCloudinary(file) {
             const activeSetup = safeGetStorage('auctionSetup', {});
             document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
 
-            // Ensure auction logo is restored on top-left
             const assocLogo = document.getElementById('la-assoc-logo');
             if (assocLogo) {
                 assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
@@ -1874,7 +1873,6 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-current-bid').innerText = "0";
             document.getElementById('la-photo').src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
 
-            // Hide right-side bidder box until a bid happens
             document.getElementById('la-bidder-box').style.display = 'none';
             document.getElementById('la-bidder-name').style.display = 'none';
             document.getElementById('la-sold-stamp').classList.remove('active');
@@ -2012,7 +2010,6 @@ async function uploadImageToCloudinary(file) {
             const currentBidDisplay = document.getElementById('la-current-bid');
             if (currentBidDisplay) currentBidDisplay.innerText = liveCurrentBid;
             
-            // Show Franchise Logo on the right side spot
             const bidderBox = document.getElementById('la-bidder-box');
             if (bidderBox) bidderBox.style.display = 'flex';
             
@@ -2032,14 +2029,16 @@ async function uploadImageToCloudinary(file) {
             }
         }
         
-        // --- MANUAL BID FUNCTION ---
+        // --- MANUAL BID FUNCTION (FIXED: REQUIRES CLICKING "APPLY BID") ---
         function applyManualBid() {
             if (!livePlayerActive) {
                 return alert("⚠️ No player is currently on the auction block!");
             }
             
             const manInput = document.getElementById('la-manual-bid');
-            if (!manInput || manInput.value === '') return;
+            if (!manInput || manInput.value === '') {
+                return alert("⚠️ Please enter an amount in the Custom Bid box before clicking Apply Bid.");
+            }
             
             const manBid = parseInt(manInput.value);
             if (isNaN(manBid)) return alert("Please enter a valid number.");
@@ -2047,13 +2046,24 @@ async function uploadImageToCloudinary(file) {
             let currentPrice = parseInt(liveCurrentBid) || 0;
 
             if (isFirstBid || manBid > currentPrice) {
+                // Save current state for Undo functionality
+                liveBidHistory.push({
+                    bid: liveCurrentBid, 
+                    teamId: liveCurrentTeamId,
+                    isFirst: isFirstBid,
+                    logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
+                    teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
+                    displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none'
+                });
+
                 liveCurrentBid = manBid;
-                isFirstBid = true;
-                liveCurrentTeamId = null; 
-                
+                isFirstBid = false;
+                liveCurrentTeamId = null; // Unclaimed until a franchise logo is clicked
+
                 document.getElementById('la-current-bid').innerText = liveCurrentBid;
                 document.getElementById('la-manual-bid').value = '';
                 
+                // Hide franchise bidder box since custom bid is manual/unclaimed
                 document.getElementById('la-bidder-box').style.display = 'none';
                 document.getElementById('la-bidder-name').style.display = 'none';
                 
@@ -2061,7 +2071,7 @@ async function uploadImageToCloudinary(file) {
                     updateLiveControls();
                 }
             } else {
-                alert("Manual bid must be higher than current bid.");
+                alert("Manual custom bid must be higher than current bid.");
             }
         }
 
@@ -2473,7 +2483,6 @@ function toggleFullScreen() {
                 const codeEl = document.getElementById('adCode'); 
                 if (codeEl) codeEl.innerText = data.id ? 'AUC-' + String(data.id).slice(-6) : 'KBL-2026';
                 
-                // FIX: These are now inputs, so we set their .value
                 const balEl = document.getElementById('adBalance'); 
                 if (balEl) balEl.value = data.budget || 0;
                 
