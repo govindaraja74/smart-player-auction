@@ -479,7 +479,7 @@
                     </div>
 
                     <!-- Bottom Control Panel -->
-                    <div class="live-bottom-panel" style="margin-top: 20px;">
+                  <div class="live-bottom-panel" style="margin-top: 20px; max-width: 100%; width: 100%;">
                         <div class="live-controls">
                             <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button id="la-search-btn" class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
@@ -1959,12 +1959,16 @@ async function uploadImageToCloudinary(file) {
                 currentVal = parseInt(rawPrice) || fallbackBase;
             }
 
-            // 2. Get EXACT Tiered Increment from your dynamic settings function
-            let exactIncrement = 100;
+           // 2. Get EXACT Tiered Increment from your dynamic settings function
+            // FIX: This now accurately points to your 'bidInc' saved variable
+            let fallbackInc = parseInt(activeSetup.bidInc) || parseInt(activeSetup.bidIncrement) || 100;
+            let exactIncrement = fallbackInc;
+            
             if (typeof getDynamicIncrement === 'function') {
-                exactIncrement = parseInt(getDynamicIncrement(currentVal)) || 100;
-            } else {
-                exactIncrement = parseInt(activeSetup.bidIncrease) || parseInt(activeSetup.bidIncrement) || 100;
+                let dynamicInc = parseInt(getDynamicIncrement(currentVal));
+                if (!isNaN(dynamicInc) && dynamicInc > 0) {
+                    exactIncrement = dynamicInc;
+                }
             }
 
             // 3. Calculate Proposed Bid (First bid = base price. After that = current + exact tier increment)
