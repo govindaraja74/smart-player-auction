@@ -492,10 +492,9 @@
                             <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random</button>
                             <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
                             
-                            <!-- SMART CUSTOM BID DROPDOWN -->
-                            <select id="la-manual-bid" style="width: 160px; padding: 11px; color:black; font-weight:bold; border-radius: 4px; cursor: pointer; border: none;">
-                                <option value="">Custom Bid ₹</option>
-                            </select>
+                            <!-- SMART CUSTOM BID INPUT + DATALIST -->
+                            <input type="number" id="la-manual-bid" list="custom-bid-options" placeholder="Custom Bid ₹" style="width: 130px; padding: 12px; color:black; border-radius: 4px; border: none;">
+                            <datalist id="custom-bid-options"></datalist>
                             
                             <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6;" onclick="applyManualBid()">Apply Bid</button>
                         </div>
@@ -768,10 +767,6 @@ async function uploadImageToCloudinary(file) {
         let isFirstBid = true; 
         let liveBidHistory = []; 
         let livePlayerHistory = [];
-
-        function safeInit() {
-            try { loadSavedMemory(); } catch(e) {}
-        }
 
         function loadSavedMemory() {
             const activeSetup = safeGetStorage('auctionSetup', {});
@@ -1818,10 +1813,10 @@ async function uploadImageToCloudinary(file) {
 
         // --- CUSTOM BID DROPDOWN GENERATOR ---
         function populateCustomBidDropdown() {
-            const dropdown = document.getElementById('la-manual-bid');
-            if (!dropdown) return;
+            const datalist = document.getElementById('custom-bid-options');
+            if (!datalist) return;
             
-            dropdown.innerHTML = '<option value="">Custom Bid ₹</option>';
+            datalist.innerHTML = '';
             if (!livePlayerActive) return;
 
             const activeTeams = getActiveTeams();
@@ -1851,8 +1846,7 @@ async function uploadImageToCloudinary(file) {
                 
                 const opt = document.createElement('option');
                 opt.value = simulatedBid;
-                opt.innerText = '₹' + simulatedBid.toLocaleString('en-IN');
-                dropdown.appendChild(opt);
+                datalist.appendChild(opt);
                 
                 optionsCount++;
             }
@@ -1926,6 +1920,7 @@ async function uploadImageToCloudinary(file) {
             document.getElementById('la-sold-stamp').classList.remove('active');
             
             document.getElementById('la-search-input').value = '';
+            document.getElementById('la-manual-bid').value = '';
             populateCustomBidDropdown(); // Reset custom bids
 
             applyLiveLogoSize();
@@ -2087,11 +2082,11 @@ async function uploadImageToCloudinary(file) {
             
             const manInput = document.getElementById('la-manual-bid');
             if (!manInput || manInput.value === '') {
-                return alert("⚠️ Please select an amount from the Custom Bid menu before clicking Apply Bid.");
+                return alert("⚠️ Please enter or select an amount in the Custom Bid box before clicking Apply Bid.");
             }
             
             const manBid = parseInt(manInput.value);
-            if (isNaN(manBid)) return alert("Please select a valid number.");
+            if (isNaN(manBid)) return alert("Please enter a valid number.");
             
             let currentPrice = parseInt(liveCurrentBid) || 0;
 
@@ -2120,6 +2115,7 @@ async function uploadImageToCloudinary(file) {
             isFirstBid = false;
 
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
+            document.getElementById('la-manual-bid').value = '';
             
             if (typeof updateLiveControls === 'function') {
                 updateLiveControls();
