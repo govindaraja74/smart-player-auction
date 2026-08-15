@@ -282,8 +282,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Native HTML validation form -->
-                <form id="createAuctionForm">
+                <!-- FIX: Native HTML validation form that strictly prevents page reload -->
+                <form id="createAuctionForm" onsubmit="event.preventDefault(); submitSetup(); return false;">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -1883,309 +1883,113 @@ async function uploadImageToCloudinary(file) {
             if(slider) slider.value = size;
         }
 
-        function updateLiveControls() {
-            const hasBid = (liveCurrentTeamId !== null);
-            const isFinalized = (livePlayerActive && (livePlayerActive.status === 'sold' || livePlayerActive.status === 'unsold'));
-            const noPlayer = !livePlayerActive;
-
-            const lockButtons = {
-                searchBtn: document.getElementById('la-search-btn'),
-                nextBtn: document.getElementById('la-next-btn'),
-                searchInput: document.getElementById('la-search-input'),
-                unsoldBtn: document.getElementById('la-unsold-btn'),
-                soldBtn: document.getElementById('la-sold-btn'),
-                undoBtn: document.getElementById('la-undo-btn'),
-                customBtn: document.getElementById('la-custom-btn'),
-                customInput: document.getElementById('la-manual-bid'),
-                strip: document.getElementById('la-franchise-strip')
-            };
-
-            const toggle = (el, isActive) => {
-                if(!el) return;
-                if (el.tagName === 'DIV') {
-                    el.style.pointerEvents = isActive ? 'auto' : 'none';
-                    el.style.opacity = isActive ? '1' : '0.4';
-                } else if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
-                    el.disabled = !isActive;
-                    el.style.opacity = isActive ? '1' : '0.4';
-                } else {
-                    el.disabled = !isActive;
-                    el.style.opacity = isActive ? '1' : '0.4';
-                    el.style.cursor = isActive ? 'pointer' : 'not-allowed';
-                }
-            };
-
-            if (noPlayer || isFinalized) {
-                toggle(lockButtons.searchBtn, true);
-                toggle(lockButtons.nextBtn, true);
-                toggle(lockButtons.searchInput, true);
-                
-                toggle(lockButtons.unsoldBtn, false);
-                toggle(lockButtons.soldBtn, false);
-                toggle(lockButtons.undoBtn, false);
-                toggle(lockButtons.customBtn, false);
-                toggle(lockButtons.customInput, false);
-                toggle(lockButtons.strip, false);
-            } else {
-                toggle(lockButtons.strip, true);
-                toggle(lockButtons.customBtn, true);
-                toggle(lockButtons.customInput, true);
-                
-                toggle(lockButtons.searchBtn, !hasBid);
-                toggle(lockButtons.nextBtn, !hasBid);
-                toggle(lockButtons.searchInput, !hasBid);
-                
-                toggle(lockButtons.unsoldBtn, !hasBid);
-                toggle(lockButtons.soldBtn, hasBid);
-                toggle(lockButtons.undoBtn, hasBid);
+        // --- NEW: Attach Event Listener Safely ---
+        function attachSafeListeners() {
+            const form = document.getElementById('createAuctionForm');
+            if (form) {
+                form.onsubmit = function(event) {
+                    event.preventDefault();
+                    submitSetup();
+                    return false;
+                };
             }
-        }
-
-        // --- CUSTOM BID DROPDOWN GENERATOR ---
-        function populateCustomBidDropdown() {
-            const datalist = document.getElementById('custom-bid-options');
-            if (!datalist) return;
-            
-            datalist.innerHTML = '';
-            if (!livePlayerActive) return;
-
-            const activeTeams = getActiveTeams();
-            let maxPurse = 0;
-            activeTeams.forEach(t => {
-                const fin = getFranchiseFinancials(t._id || t.id);
-                if (fin.maxBid > maxPurse) maxPurse = fin.maxBid;
-            });
-
-            const activeSetup = safeGetStorage('auctionSetup', {});
-            const fallbackBase = parseInt(activeSetup.minBid) || 0;
-            let basePrice = parseInt(livePlayerActive.basePrice || fallbackBase);
-
-            let currentVal = parseInt(liveCurrentBid) || basePrice;
-            
-            let simulatedBid = currentVal;
-            let optionsCount = 0;
-
-            // Generate the next 40 valid jumps using your exact slabs
-            while (optionsCount < 40) {
-                let inc = getDynamicIncrement(simulatedBid);
-                if(inc <= 0) inc = 100; // failsafe
-                simulatedBid += inc;
-                
-                // Stop generating options if it exceeds the richest team's budget
-                if (maxPurse > 0 && simulatedBid > maxPurse) break;
-                
-                const opt = document.createElement('option');
-                opt.value = simulatedBid;
-                datalist.appendChild(opt);
-                
-                optionsCount++;
-            }
-        }
-
-        async function initLiveAuctionRoom() {
-            const strip = document.getElementById('la-franchise-strip');
-            if (!strip) return;
-
-            let activeTeams = getActiveTeams();
-            renderFranchiseStrip(activeTeams);
-
-            try {
-                await loadDashboard();
-                activeTeams = getActiveTeams();
-                renderFranchiseStrip(activeTeams);
-            } catch(e) {}
-
-            const state = safeGetStorage('liveAuctionState', null);
-            if (state && state.player) {
-                restoreLiveState(state);
-            } else {
-                resetLiveBoard();
-            }
-            
-            applyLiveLogoSize();
-        }
-
-        function renderFranchiseStrip(teams) {
-            const strip = document.getElementById('la-franchise-strip');
-            if (!strip) return;
-            strip.innerHTML = '';
-
-            if (!teams || teams.length === 0) {
-                strip.innerHTML = '<span style="color:#64748b; padding:10px;">No franchises found. Add teams in My Auction.</span>';
-                return;
-            }
-
-            teams.forEach((t, index) => {
-                try {
-                    const logo = getTeamLogo(t, 'Team ' + (index + 1));
-                    const safeName = t.name ? String(t.name).substring(0, 12) : ('Team ' + (index + 1));
-                    strip.innerHTML += `
-                        <div id="franchise-btn-${index}" class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px; cursor: pointer;">
-                            <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
-                            <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block; color: white;">${safeName}</span>
-                        </div>`;
-                } catch(err) {}
-            });
-            evaluateFranchiseStripForPlayer();
-        }
-
-       function resetLiveBoard() {
-            livePlayerActive = null;
-            liveCurrentBid = 0;
-            liveCurrentTeamId = null;
-            isFirstBid = true;
-            liveBidHistory = [];
-
-            const activeSetup = safeGetStorage('auctionSetup', {});
-            document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
-
-            const assocLogo = document.getElementById('la-assoc-logo');
-            if (assocLogo) {
-                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
-            }
-
-            document.getElementById('la-sl-no').innerText = "0";
-            document.getElementById('la-name').innerText = "WAITING FOR PLAYER...";
-            document.getElementById('la-cat').innerText = "---";
-            document.getElementById('la-club').innerText = "---";
-            document.getElementById('la-current-bid').innerText = "0";
-            document.getElementById('la-photo').src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
-
-            document.getElementById('la-bidder-box').style.display = 'none';
-            document.getElementById('la-bidder-name').style.display = 'none';
-            document.getElementById('la-sold-stamp').classList.remove('active');
-            
-            document.getElementById('la-search-input').value = '';
-            document.getElementById('la-manual-bid').value = '';
-            populateCustomBidDropdown(); // Reset custom bids
-
-            applyLiveLogoSize();
-            updateLiveControls();
-            evaluateFranchiseStripForPlayer(); 
-            saveLiveState();
-        }
-
-        function animateSoldPhoto() {
-            const photo = document.getElementById('la-photo');
-            const target = document.getElementById('la-bidder-logo');
-            if(!photo || !target) return;
-
-            const photoRect = photo.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-
-            const clone = photo.cloneNode(true);
-            clone.style.position = 'fixed'; 
-            clone.style.top = photoRect.top + 'px';
-            clone.style.left = photoRect.left + 'px';
-            clone.style.width = photoRect.width + 'px';
-            clone.style.height = photoRect.height + 'px';
-            clone.style.zIndex = '9999';
-            clone.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
-            clone.style.borderRadius = '50%';
-            clone.style.border = '4px solid #10b981';
-            clone.style.opacity = '1';
-            clone.style.margin = '0';
-            clone.style.transformOrigin = 'center center';
-            
-            document.body.appendChild(clone);
-
-            // Force browser layout reflow
-            clone.getBoundingClientRect();
-
-            // Calculate destination
-            clone.style.top = targetRect.top + 'px';
-            clone.style.left = targetRect.left + 'px';
-            clone.style.width = targetRect.width + 'px';
-            clone.style.height = targetRect.height + 'px';
-            clone.style.opacity = '0.3';
-            clone.style.transform = 'scale(0.5) rotate(720deg)';
-
-            setTimeout(() => {
-                if(clone.parentNode) clone.parentNode.removeChild(clone);
-            }, 850);
-        }
-
-        function finalizeSale(resultType) {
-            if(!livePlayerActive) return alert("No player on screen!");
-
-            let localPlayers = safeGetStorage('auctionPlayers', []);
-            let pIndex = localPlayers.findIndex(p => 
-                (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
-                (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
-            );
-
-            let alertMessage = "";
-
-            if(resultType === 'sold') {
-                if(!liveCurrentTeamId) return alert("A franchise must bid to sell!");
-
-                const activeTeams = getActiveTeams();
-                let winningTeam = activeTeams.find(t => (t._id === liveCurrentTeamId || t.id === liveCurrentTeamId));
-
-                const winningName = winningTeam ? (winningTeam.name || 'Team') : 'Team';
-                const winningLogo = winningTeam ? getTeamLogo(winningTeam) : '';
-
-                livePlayerActive.status = 'sold';
-                livePlayerActive.soldPrice = liveCurrentBid;
-                livePlayerActive.teamId = liveCurrentTeamId;
-                livePlayerActive.teamName = winningName;
-                livePlayerActive.teamLogo = winningLogo;
-
-                if(pIndex > -1) { localPlayers[pIndex] = { ...localPlayers[pIndex], ...livePlayerActive }; } 
-                else { localPlayers.push(livePlayerActive); }
-
-                let globalIndex = window.allPlayers.findIndex(p => 
-                    (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
-                    (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
-                );
-                if(globalIndex > -1) { window.allPlayers[globalIndex] = { ...window.allPlayers[globalIndex], ...livePlayerActive }; } 
-                else { window.allPlayers.push(livePlayerActive); }
-
-                safeSetStorage('auctionPlayers', localPlayers);
-                
-                const activeSetup = safeGetStorage('auctionSetup', {});
-                const activeTourneyId = activeSetup.id || 'KBL2026';
-                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: activeTourneyId }); } catch(e){}
-
-                document.getElementById('la-sold-stamp').innerText = "SOLD";
-                document.getElementById('la-sold-stamp').style.borderColor = "white";
-                document.getElementById('la-sold-stamp').style.color = "white";
-                document.getElementById('la-sold-stamp').classList.add('active');
-
-                alertMessage = `SOLD! \n\n${livePlayerActive.name} was sold to ${winningName} for ₹${liveCurrentBid}.`;
-                
-                animateSoldPhoto(); 
-
-            } else if(resultType === 'unsold') {
-                livePlayerActive.status = 'unsold';
-
-                if(pIndex > -1) { localPlayers[pIndex].status = 'unsold'; } 
-                else { localPlayers.push(livePlayerActive); }
-
-                let globalIndex = window.allPlayers.findIndex(p => 
-                    (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || 
-                    (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase())
-                );
-                if(globalIndex > -1) { window.allPlayers[globalIndex].status = 'unsold'; }
-
-                safeSetStorage('auctionPlayers', localPlayers);
-                
-                const activeSetup = safeGetStorage('auctionSetup', {});
-                const activeTourneyId = activeSetup.id || 'KBL2026';
-                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: activeTourneyId, statusOverride: 'unsold' }); } catch(e){}
-
-                document.getElementById('la-sold-stamp').innerText = "UNSOLD";
-                document.getElementById('la-sold-stamp').style.borderColor = "#ef4444";
-                document.getElementById('la-sold-stamp').style.color = "#ef4444";
-                document.getElementById('la-sold-stamp').classList.add('active');
-
-                alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
-            }
-
-            updateLiveControls(); 
-            saveLiveState(); 
         }
         
+        function safeInit() {
+            attachSafeListeners();
+            try { loadSavedMemory(); } catch(e) {}
+        }
+        
+        // --- AUCTION LIBRARY MANAGEMENT ---
+        function saveAuctionProgress(status) {
+            let setup = safeGetStorage('auctionSetup', {});
+            if (!setup.name) {
+                return alert("⚠️ No active auction details found to save!");
+            }
+
+            setup.status = status; 
+            safeSetStorage('auctionSetup', setup);
+
+            let teams = safeGetStorage('auctionTeams', []);
+            let players = safeGetStorage('auctionPlayers', []);
+            let cats = safeGetStorage('auctionCats', []);
+            let tiers = safeGetStorage('auctionBidTiers', []);
+
+            let archive = {
+                setup: setup,
+                teams: teams,
+                players: players,
+                cats: cats,
+                tiers: tiers
+            };
+
+            let history = safeGetStorage('auctionHistory', []);
+            if (!Array.isArray(history)) history = [];
+
+            let existingIndex = history.findIndex(a => {
+                if (!a) return false;
+                let aId = a.setup ? a.setup.id : a.id;
+                return String(aId) === String(setup.id);
+            });
+
+            if (existingIndex >= 0) {
+                history[existingIndex] = archive;
+            } else {
+                history.push(archive);
+            }
+
+            safeSetStorage('auctionHistory', history);
+            renderAuctionLibrary();
+            
+            alert(`✅ Success! Auction saved as "${status.toUpperCase()}".`);
+        }
+
+        function renderAuctionLibrary() {
+            let history = safeGetStorage('auctionHistory', []);
+            if (!Array.isArray(history)) history = [];
+
+            let incompleteContainer = document.getElementById('incomplete-auctions-list');
+            let completedContainer = document.getElementById('completed-auctions-list');
+
+            let incompleteHtml = '';
+            let completedHtml = '';
+
+            history.forEach(item => {
+                if (!item || !item.setup) return;
+                let setup = item.setup;
+                let name = setup.name || 'Unnamed Auction';
+                let date = setup.date || 'No Date';
+                let status = setup.status || 'incomplete';
+                let id = setup.id;
+                let logo = (setup.logoUrl && setup.logoUrl.length > 5) ? setup.logoUrl : getTeamLogo(setup, name);
+
+                let cardHtml = `
+                <div class="auction-history-card" style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1;" onclick="loadAuctionFromLibrary('${id}')">
+                        <img src="${logo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;">
+                        <div>
+                            <div style="font-weight: bold; color: #334155; font-size: 15px;">${name}</div>
+                            <div style="color: #94a3b8; font-size: 12px;">Date: ${date}</div>
+                        </div>
+                    </div>
+                    <button class="edit-del-btn" style="color: red;" onclick="deleteAuctionFromLibrary('${id}')">🗑️</button>
+                </div>`;
+
+                if (status === 'completed') {
+                    completedHtml += cardHtml;
+                } else {
+                    incompleteHtml += cardHtml;
+                }
+            });
+
+            if (incompleteContainer) {
+                incompleteContainer.innerHTML = incompleteHtml || '<span style="color: #94a3b8; font-size: 13px;">No incomplete auctions.</span>';
+            }
+            if (completedContainer) {
+                completedContainer.innerHTML = completedHtml || '<span style="color: #94a3b8; font-size: 13px;">No completed auctions.</span>';
+            }
+        }
+
         function loadAuctionFromLibrary(id) {
             let history = safeGetStorage('auctionHistory', []);
             let match = history.find(a => a && a.setup && String(a.setup.id) === String(id));
