@@ -282,8 +282,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Native form submit disabled. Button calls JS explicitly -->
-                <form id="createAuctionForm" onsubmit="return false;">
+                <!-- FIX: Native HTML validation form -->
+                <form id="createAuctionForm">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -310,8 +310,8 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- FIX: type="button" physically prevents the browser from reloading the page -->
-                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
+                        <!-- FIX: Submit button cleanly triggers required field tooltips -->
+                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
                     </div>
                 </form>
             </div>
