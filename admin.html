@@ -768,6 +768,99 @@ async function uploadImageToCloudinary(file) {
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
+        // --- NEW: PERSISTENT LIVE ROOM STATE ---
+        function saveLiveState() {
+            if (!livePlayerActive) {
+                safeSetStorage('liveAuctionState', null);
+                return;
+            }
+            safeSetStorage('liveAuctionState', {
+                player: livePlayerActive,
+                currentBid: liveCurrentBid,
+                teamId: liveCurrentTeamId,
+                isFirstBid: isFirstBid,
+                history: liveBidHistory,
+                boxDisplay: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none',
+                boxBg: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.background : 'transparent',
+                boxShadow: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.boxShadow : 'none',
+                logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
+                logoBorder: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.border : '',
+                logoRadius: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.borderRadius : '',
+                logoBg: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.background : '',
+                teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
+                nameDisplay: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').style.display : 'none'
+            });
+        }
+
+        function restoreLiveState(state) {
+            livePlayerActive = state.player;
+            liveCurrentBid = state.currentBid;
+            liveCurrentTeamId = state.teamId;
+            isFirstBid = state.isFirstBid;
+            liveBidHistory = state.history || [];
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
+
+            const assocLogo = document.getElementById('la-assoc-logo');
+            if (assocLogo) {
+                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
+            }
+
+            document.getElementById('la-sl-no').innerText = livePlayerActive.serialNumber || '0';
+            document.getElementById('la-name').innerText = livePlayerActive.name;
+            document.getElementById('la-cat').innerText = livePlayerActive.category || 'N/A';
+            document.getElementById('la-club').innerText = livePlayerActive.club || livePlayerActive.team || 'N/A';
+            document.getElementById('la-current-bid').innerText = liveCurrentBid;
+
+            const photoEl = document.getElementById('la-photo');
+            photoEl.src = (livePlayerActive.photoUrl && livePlayerActive.photoUrl.length > 5) ? livePlayerActive.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+
+            const bidderBox = document.getElementById('la-bidder-box');
+            const bidderLogo = document.getElementById('la-bidder-logo');
+            const bidderName = document.getElementById('la-bidder-name');
+
+            if (bidderBox) {
+                bidderBox.style.display = state.boxDisplay || 'none';
+                bidderBox.style.background = state.boxBg || 'transparent';
+                bidderBox.style.boxShadow = state.boxShadow || 'none';
+            }
+            if (bidderLogo) {
+                bidderLogo.src = state.logoUrl || (activeSetup.logoUrl || '/spa-logo.png.png');
+                bidderLogo.style.border = state.logoBorder || 'none';
+                bidderLogo.style.borderRadius = state.logoRadius || '0';
+                bidderLogo.style.background = state.logoBg || 'transparent';
+            }
+            if (bidderName) {
+                bidderName.innerText = state.teamName || 'Team Name';
+                bidderName.style.display = state.nameDisplay || 'none';
+            }
+
+            const stamp = document.getElementById('la-sold-stamp');
+            if (livePlayerActive.status === 'sold') {
+                stamp.innerText = "SOLD";
+                stamp.style.borderColor = "white";
+                stamp.style.color = "white";
+                stamp.classList.add('active');
+            } else if (livePlayerActive.status === 'unsold') {
+                stamp.innerText = "UNSOLD";
+                stamp.style.borderColor = "#ef4444";
+                stamp.style.color = "#ef4444";
+                stamp.classList.add('active');
+            } else {
+                stamp.classList.remove('active');
+            }
+
+            updateLiveControls();
+            evaluateFranchiseStripForPlayer();
+            populateCustomBidDropdown();
+        }
+
+        function safeInit() {
+            attachSafeListeners();
+            try { loadSavedMemory(); } catch(e) {}
+        }
+
         function loadSavedMemory() {
             const activeSetup = safeGetStorage('auctionSetup', {});
             const activeTourneyId = activeSetup.id || 'KBL2026';
@@ -1865,7 +1958,13 @@ async function uploadImageToCloudinary(file) {
                 renderFranchiseStrip(activeTeams);
             } catch(e) {}
 
-            resetLiveBoard();
+            const state = safeGetStorage('liveAuctionState', null);
+            if (state && state.player) {
+                restoreLiveState(state);
+            } else {
+                resetLiveBoard();
+            }
+            
             applyLiveLogoSize();
         }
 
@@ -1926,22 +2025,14 @@ async function uploadImageToCloudinary(file) {
             applyLiveLogoSize();
             updateLiveControls();
             evaluateFranchiseStripForPlayer(); 
+            saveLiveState();
         }
-
-       // --- AUTO-RESTORE CURRENT PLAYER ---
-        setTimeout(() => {
-            const saved = safeGetStorage('savedLivePlayer', null);
-            if (saved && !livePlayerActive) {
-                pushPlayerToScreen(saved);
-            }
-        }, 800);
 
         function pushPlayerToScreen(p, isGoingBack = false) {
             if(livePlayerActive && !isGoingBack) {
                 livePlayerHistory.push(livePlayerActive);
             }
             livePlayerActive = p;
-            safeSetStorage('savedLivePlayer', p);
 
             const activeSetup = safeGetStorage('auctionSetup', {});
             const fallbackBase = parseInt(activeSetup.minBid) || 0;
@@ -1976,6 +2067,7 @@ async function uploadImageToCloudinary(file) {
             updateLiveControls();
             evaluateFranchiseStripForPlayer();
             populateCustomBidDropdown(); // Initialize correct custom increments
+            saveLiveState();
         }
 
         // --- DYNAMIC BID INCREMENT STEPS ---
@@ -2072,9 +2164,10 @@ async function uploadImageToCloudinary(file) {
                 updateLiveControls();
             }
             populateCustomBidDropdown(); // Refresh custom options
+            saveLiveState();
         }
         
-        // --- MANUAL BID FUNCTION ---
+        // --- MANUAL BID FUNCTION (FIXED: VERIFIES FUNDS BEFORE APPLYING) ---
         function applyManualBid() {
             if (!livePlayerActive) {
                 return alert("⚠️ No player is currently on the auction block!");
@@ -2121,6 +2214,7 @@ async function uploadImageToCloudinary(file) {
                 updateLiveControls();
             }
             populateCustomBidDropdown(); // Refresh custom options
+            saveLiveState();
         }
 
         function undoLastBid() {
@@ -2141,6 +2235,47 @@ async function uploadImageToCloudinary(file) {
 
             updateLiveControls();
             populateCustomBidDropdown(); // Refresh custom options
+            saveLiveState();
+        }
+
+        function animateSoldPhoto() {
+            const photo = document.getElementById('la-photo');
+            const target = document.getElementById('la-bidder-logo');
+            if(!photo || !target) return;
+
+            const photoRect = photo.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+
+            const clone = photo.cloneNode(true);
+            clone.style.position = 'fixed'; 
+            clone.style.top = photoRect.top + 'px';
+            clone.style.left = photoRect.left + 'px';
+            clone.style.width = photoRect.width + 'px';
+            clone.style.height = photoRect.height + 'px';
+            clone.style.zIndex = '9999';
+            clone.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+            clone.style.borderRadius = '50%';
+            clone.style.border = '4px solid #10b981';
+            clone.style.opacity = '1';
+            clone.style.margin = '0';
+            clone.style.transformOrigin = 'center center';
+            
+            document.body.appendChild(clone);
+
+            // Force browser layout reflow
+            clone.getBoundingClientRect();
+
+            // Calculate destination
+            clone.style.top = targetRect.top + 'px';
+            clone.style.left = targetRect.left + 'px';
+            clone.style.width = targetRect.width + 'px';
+            clone.style.height = targetRect.height + 'px';
+            clone.style.opacity = '0.3';
+            clone.style.transform = 'scale(0.5) rotate(720deg)';
+
+            setTimeout(() => {
+                if(clone.parentNode) clone.parentNode.removeChild(clone);
+            }, 850);
         }
 
         function finalizeSale(resultType) {
@@ -2191,6 +2326,8 @@ async function uploadImageToCloudinary(file) {
                 document.getElementById('la-sold-stamp').classList.add('active');
 
                 alertMessage = `SOLD! \n\n${livePlayerActive.name} was sold to ${winningName} for ₹${liveCurrentBid}.`;
+                
+                animateSoldPhoto(); // Trigger visually stunning animation!
 
             } else if(resultType === 'unsold') {
                 livePlayerActive.status = 'unsold';
@@ -2218,25 +2355,9 @@ async function uploadImageToCloudinary(file) {
                 alertMessage = `UNSOLD! \n\n${livePlayerActive.name} remains unsold.`;
             }
 
-            // Small delay so the stamp visually appears before the browser alert blocks the screen
-            setTimeout(() => {
-                
-                const activeCategories = getAvailableCategories();
-                const availablePlayers = window.allPlayers.filter(p => {
-                    const isAvailable = !p.status || String(p.status).toLowerCase() === 'available';
-                    if (activeCategories === null) return isAvailable;
-                    const pCat = String(p.category || '').trim().toLowerCase();
-                    return isAvailable && activeCategories.includes(pCat);
-                });
-                
-                if(availablePlayers.length > 0) {
-                    const random = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
-                    pushPlayerToScreen(random);
-                } else {
-                    resetLiveBoard();
-                    alert("Auction Complete! No more available players left for the open categories.");
-                }
+            saveLiveState(); // Keeps the screen persistently frozen on this sold player!
 
+            setTimeout(() => {
                 loadDashboard().catch(e => console.log(e));
             }, 1500);
         }
@@ -2286,6 +2407,13 @@ async function uploadImageToCloudinary(file) {
         }
 
         function manualSearchPlayer() {
+            // STRICT LOCK: Check if an active player is unfinished
+            if (typeof livePlayerActive !== 'undefined' && livePlayerActive) {
+                if (livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
+                    return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before searching for a new player.");
+                }
+            }
+
             const term = document.getElementById('la-search-input').value.trim().toLowerCase();
             if(!term) return alert("Please enter a player name or Serial Number to search.");
 
@@ -2417,6 +2545,7 @@ function toggleFullScreen() {
             
             // Clear current live board state
             safeSetStorage('savedLivePlayer', null);
+            safeSetStorage('liveAuctionState', null);
             livePlayerActive = null;
 
             alert("🔄 Success! Unsold players have been moved back to the Available pool for Round 2. Sold players are safely locked.");
@@ -2475,6 +2604,8 @@ function toggleFullScreen() {
                 safeSetStorage('auctionBidTiers', []);
                 safeSetStorage('deletedTeams', []);
                 safeSetStorage('deletedPlayers', []);
+                safeSetStorage('savedLivePlayer', null);
+                safeSetStorage('liveAuctionState', null);
                 
                 window.allTeams = [];
                 window.allPlayers = [];
@@ -2762,6 +2893,8 @@ function toggleFullScreen() {
             if (!match) return alert("Auction archive not found!");
 
             window.spaMemory = {};
+            safeSetStorage('liveAuctionState', null);
+            safeSetStorage('savedLivePlayer', null);
 
             localStorage.setItem('auctionSetup', JSON.stringify(match.setup));
             localStorage.setItem('auctionTeams', JSON.stringify(match.teams || []));
