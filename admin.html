@@ -1187,14 +1187,37 @@
             container.innerHTML = html;
         }
 
-        function showFranchiseRoster(teamId) {
+    function showFranchiseRoster(teamId) {
             const team = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
             if (!team) return;
-            document.getElementById('fr-team-name').innerText = team.name + " - Roster";
+
+            // Add the Download PDF button dynamically to the header
+            document.getElementById('fr-team-name').innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${team.name} - Roster</span>
+                    <button class="btn-primary" style="background: #a855f7; font-size: 13px; padding: 6px 12px; cursor: pointer;" onclick="downloadFranchiseRosterPDF('${team.name.replace(/'/g, "\\'")}')">📥 Download PDF</button>
+                </div>
+            `;
+            
             const fin = getFranchiseFinancials(teamId);
             const rosterContainer = document.getElementById('fr-roster-list');
             const allCats = safeGetStorage('auctionCats', []);
-            let html = '';
+            
+            // Wrap the content inside a div specifically targeted for the PDF generator
+            let html = '<div id="franchise-roster-pdf-content" style="background: #0f172a; padding: 15px; border-radius: 8px; color: white;">';
+
+            // Helper function to draw a player card with an image
+            const getPlayerCardHTML = (p) => {
+                const photoSrc = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                return `
+                <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
+                    <img src="${photoSrc}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid white; margin-bottom: 8px; background: #e2e8f0;">
+                    <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${p.name}">${p.name}</div>
+                    <div style="font-size: 12px; margin-top: 4px; font-weight: bold; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 12px;">₹${p.soldPrice}</div>
+                </div>`;
+            };
+
+            // Build the visual grid grouped by Category
             if (allCats.length > 0) {
                 const rosterByCat = {};
                 fin.roster.forEach(p => {
@@ -1202,34 +1225,78 @@
                     if(!rosterByCat[c]) rosterByCat[c] = [];
                     rosterByCat[c].push(p);
                 });
+
                 allCats.forEach(cat => {
                     const catName = typeof cat === 'object' ? cat.name : cat;
                     const normalizedCatName = String(catName).trim().toLowerCase();
                     const limit = typeof cat === 'object' ? parseInt(cat.maxPlayers) || 0 : 0;
+                    
                     const boughtPlayers = rosterByCat[normalizedCatName] || [];
                     const totalSlots = limit > 0 ? limit : Math.max(boughtPlayers.length, 1);
 
-                    html += `<h4 style="color: #38bdf8; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">${catName}</h4><div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    html += `<h4 style="color: #38bdf8; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">${catName}</h4>`;
+                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    
                     for(let i = 0; i < totalSlots; i++) {
                         if (i < boughtPlayers.length) {
-                            const p = boughtPlayers[i];
-                            html += `<div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;"><div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div><div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div></div>`;
+                            html += getPlayerCardHTML(boughtPlayers[i]);
                         } else {
-                            html += `<div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 55px; box-sizing: border-box;"><span style="font-size: 12px; font-style: italic;">Empty Slot</span></div>`;
+                            // EMPTY BOX
+                            html += `
+                            <div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
+                                <span style="font-size: 12px; font-style: italic;">Empty Slot</span>
+                            </div>`;
                         }
                     }
                     html += `</div>`;
                 });
+
+                // Failsafe: Unmatched players
+                const matchedCats = allCats.map(c => String(typeof c === 'object' ? c.name : c).trim().toLowerCase());
+                const unmatchedPlayers = fin.roster.filter(p => !matchedCats.includes(String(p.category || '').trim().toLowerCase()));
+                
+                if (unmatchedPlayers.length > 0) {
+                    html += `<h4 style="color: #ef4444; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">Other / Uncategorized</h4>`;
+                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    unmatchedPlayers.forEach(p => { html += getPlayerCardHTML(p); });
+                    html += `</div>`;
+                }
+
             } else {
-                html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
-                fin.roster.forEach(p => {
-                    html += `<div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;"><div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div><div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div></div>`;
-                });
-                html += `</div>`;
+                // Fallback if no categories exist at all
+                if (fin.roster.length === 0) {
+                    html += '<p style="color: #94a3b8;">No players bought yet.</p>';
+                } else {
+                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                    fin.roster.forEach(p => { html += getPlayerCardHTML(p); });
+                    html += `</div>`;
+                }
             }
-            html += `<div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;"><span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span><span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span></div>`;
+            
+            // Append Financial Summary Footer and close the PDF wrapper
+            html += `
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">
+                    <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
+                    <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
+                </div>
+            </div>`;
+
             rosterContainer.innerHTML = html;
             openModal('modal-franchise-roster');
+        }
+
+        function downloadFranchiseRosterPDF(teamName) {
+            const element = document.getElementById('franchise-roster-pdf-content');
+            if (typeof html2pdf !== 'undefined') {
+                const safeName = teamName.replace(/[^a-zA-Z0-9]/g, '_'); // Safe filename
+                html2pdf().set({ 
+                    margin: 0.5, 
+                    filename: safeName + '_Roster.pdf', 
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } 
+                }).from(element).save();
+            } else {
+                alert("PDF library failed to load. Please try refreshing the page.");
+            }
         }
 
         function getTeamLogo(team, defaultName = 'Team') {
