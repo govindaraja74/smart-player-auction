@@ -282,8 +282,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Form perfectly stops browser refresh but keeps red validation tooltips -->
-                <form id="createAuctionForm" onsubmit="event.preventDefault(); handleAuctionCreation(); return false;">
+                <!-- FIX: The form container securely prevents ALL page reloading while retaining exact field validation -->
+                <div id="createAuctionFormWrapper">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -310,10 +310,10 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- FIX: Submit button securely triggers the onsubmit above -->
-                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
+                        <!-- Button triggers the safe validation and creation process -->
+                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="handleAuctionCreation()">SUBMIT</button>
                     </div>
-                </form>
+                </div>
             </div>
 
             <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
@@ -667,7 +667,7 @@ async function uploadImageToCloudinary(file) {
         
         const data = await response.json();
         if (data.secure_url) {
-            return data.secure_url; 
+            return data.secure_url; // Returns the permanent CDN link for the big screen
         } else {
             console.error("Cloudinary error:", data);
             alert("Image upload failed. Please check your connection.");
@@ -693,6 +693,7 @@ async function uploadImageToCloudinary(file) {
 
             safeSetStorage('auctionSetup', data);
 
+            // If budget changed, sync the new budget to all teams currently in this auction
             if (data.budget !== oldBudget) {
                 let localTeams = safeGetStorage('auctionTeams', []);
                 localTeams.forEach(t => {
@@ -706,7 +707,6 @@ async function uploadImageToCloudinary(file) {
 
             alert("Auction Details & Financials updated securely!");
         }
-
         // --- BULLETPROOF STORAGE ENGINE ---
         window.spaMemory = {}; 
 
@@ -1874,7 +1874,9 @@ async function uploadImageToCloudinary(file) {
                     safeSetStorage('auctionPlayers', localPlayers);
                     window.allPlayers = localPlayers;
                     
-                    renderPlayersDatabase('all');
+                    if (typeof renderPlayersDatabase === 'function') {
+                        renderPlayersDatabase('all');
+                    }
                     updatePlayerCounterBtn();
                     
                     alert(`✅ Successfully imported ${addedCount} players!`);
@@ -1925,7 +1927,7 @@ async function uploadImageToCloudinary(file) {
             safeSetStorage('auctionPlayers', localPlayers);
             window.allPlayers = localPlayers;
 
-            renderPlayersDatabase('all');
+            if (typeof renderPlayersDatabase === 'function') renderPlayersDatabase('all');
             updatePlayerCounterBtn();
 
             document.getElementById('playerName').value = '';
@@ -1950,7 +1952,7 @@ async function uploadImageToCloudinary(file) {
             
             try { fetch('/api/players/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
 
-            renderPlayersDatabase('all');
+            if (typeof renderPlayersDatabase === 'function') renderPlayersDatabase('all');
             updatePlayerCounterBtn();
             try { renderFranchiseStandings(); } catch(e) {}
         }
@@ -1987,7 +1989,7 @@ async function uploadImageToCloudinary(file) {
                 }
                 
                 safeSetStorage('auctionPlayers', window.allPlayers);
-                renderPlayersDatabase('all');
+                if (typeof renderPlayersDatabase === 'function') renderPlayersDatabase('all');
                 closeModal('modal-edit-player');
                 try { renderFranchiseStandings(); } catch(e) {}
             }
@@ -2090,7 +2092,7 @@ async function uploadImageToCloudinary(file) {
             }
 
             safeSetStorage('auctionHistory', history);
-            renderAuctionLibrary();
+            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
             
             alert(`✅ Success! Auction saved as "${status.toUpperCase()}".`);
         }
@@ -2166,7 +2168,7 @@ async function uploadImageToCloudinary(file) {
             let history = safeGetStorage('auctionHistory', []);
             history = history.filter(a => a && a.setup && String(a.setup.id) !== String(id));
             safeSetStorage('auctionHistory', history);
-            renderAuctionLibrary();
+            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
         }
     </script>
 </body>
