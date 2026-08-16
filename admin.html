@@ -283,7 +283,7 @@
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
                 <!-- FIX: Form perfectly stops browser refresh but keeps red validation tooltips -->
-                <form id="createAuctionForm" onsubmit="handleAuctionSubmit(event)">
+                <form id="createAuctionForm" onsubmit="event.preventDefault(); submitSetup(); return false;">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
