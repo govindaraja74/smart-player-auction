@@ -667,7 +667,7 @@ async function uploadImageToCloudinary(file) {
         
         const data = await response.json();
         if (data.secure_url) {
-            return data.secure_url; // Returns the permanent CDN link for the big screen
+            return data.secure_url; 
         } else {
             console.error("Cloudinary error:", data);
             alert("Image upload failed. Please check your connection.");
@@ -693,7 +693,6 @@ async function uploadImageToCloudinary(file) {
 
             safeSetStorage('auctionSetup', data);
 
-            // If budget changed, sync the new budget to all teams currently in this auction
             if (data.budget !== oldBudget) {
                 let localTeams = safeGetStorage('auctionTeams', []);
                 localTeams.forEach(t => {
@@ -707,6 +706,7 @@ async function uploadImageToCloudinary(file) {
 
             alert("Auction Details & Financials updated securely!");
         }
+
         // --- BULLETPROOF STORAGE ENGINE ---
         window.spaMemory = {}; 
 
@@ -971,6 +971,42 @@ async function uploadImageToCloudinary(file) {
                 alert("Error saving auction. Reason: " + e.message);
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+            }
+        }
+
+        function populateAuctionDetails(forcedData = null) {
+            try {
+                let data = forcedData || safeGetStorage('auctionSetup', {});
+                if (!data || Object.keys(data).length === 0) return; 
+
+                const nameEl = document.getElementById('adName'); 
+                if (nameEl) nameEl.innerText = data.name || 'No Auction Loaded';
+                
+                const codeEl = document.getElementById('adCode'); 
+                if (codeEl) codeEl.innerText = data.id ? 'AUC-' + String(data.id).slice(-6) : 'KBL-2026';
+                
+                const balEl = document.getElementById('adBalance'); 
+                if (balEl) balEl.value = data.budget || 0;
+                
+                const baseEl = document.getElementById('adBaseBid'); 
+                if (baseEl) baseEl.value = data.minBid || 0;
+                
+                const incEl = document.getElementById('adBidInc'); 
+                if (incEl) incEl.value = data.bidInc || 0;
+                
+                const playEl = document.getElementById('adPlayers'); 
+                if (playEl) playEl.value = data.maxPlayers || 0;
+                
+                const logoEl = document.getElementById('adLogoImage'); 
+                if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
+
+                applyLiveLogoSize();
+                updatePlayerCounterBtn();
+                loadBidIncrements();
+                if (typeof renderAuctionDetailLists === 'function') renderAuctionDetailLists();
+                if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
+            } catch (err) {
+                console.error("Populate Failed", err);
             }
         }
 
