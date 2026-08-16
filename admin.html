@@ -282,7 +282,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Form container securely prevents ALL page reloading while retaining exact field validation -->
+                <!-- FIX: The form container is just a simple div. Prevents page reloading completely. -->
                 <div id="createAuctionFormWrapper">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
@@ -310,8 +310,7 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        
-                        <!-- FIX: Secure submit button tied directly to our smart handler function -->
+                        <!-- Button triggers the safe validation and creation process -->
                         <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="handleAuctionCreation()">SUBMIT</button>
                     </div>
                 </div>
@@ -668,7 +667,7 @@ async function uploadImageToCloudinary(file) {
         
         const data = await response.json();
         if (data.secure_url) {
-            return data.secure_url; // Returns the permanent CDN link for the big screen
+            return data.secure_url; 
         } else {
             console.error("Cloudinary error:", data);
             alert("Image upload failed. Please check your connection.");
@@ -694,7 +693,6 @@ async function uploadImageToCloudinary(file) {
 
             safeSetStorage('auctionSetup', data);
 
-            // If budget changed, sync the new budget to all teams currently in this auction
             if (data.budget !== oldBudget) {
                 let localTeams = safeGetStorage('auctionTeams', []);
                 localTeams.forEach(t => {
@@ -708,6 +706,7 @@ async function uploadImageToCloudinary(file) {
 
             alert("Auction Details & Financials updated securely!");
         }
+
         // --- BULLETPROOF STORAGE ENGINE ---
         window.spaMemory = {}; 
 
@@ -857,10 +856,10 @@ async function uploadImageToCloudinary(file) {
             populateCustomBidDropdown();
         }
 
-        // --- NEW: SECURE AUCTION CREATION HANDLER ---
+        // --- FULLY SECURE SETUP FUNCTION ---
         async function handleAuctionCreation() {
             try {
-                // 1. Strict Validation Check
+                // Check all required fields first and throw browser alert
                 const reqFields = [
                     { id: 'setupName', name: 'Auction Name' },
                     { id: 'setupDate', name: 'Auction Date' },
@@ -875,16 +874,14 @@ async function uploadImageToCloudinary(file) {
                     if (!el || !el.value || String(el.value).trim() === '') {
                         alert(`Missing or invalid field: ${field.name}\n\nPlease check your entry and try again.`);
                         if (el && el.focus) el.focus();
-                        return false; // Safely stop and wait for the user to fix it
+                        return false; 
                     }
                 }
 
-                // 2. Double Check
                 if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
                     return false;
                 }
 
-                // 3. Process the Save
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "Saving..."; btn.disabled = true; }
 
@@ -950,10 +947,10 @@ async function uploadImageToCloudinary(file) {
                 else history.push(archive);
                 
                 safeSetStorage('auctionHistory', history);
-                renderAuctionLibrary(); 
+                if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary(); 
 
-                // 4. Success Reset
                 populateAuctionDetails(newAuction);
+                
                 try {
                     document.querySelectorAll('.ca-input').forEach(el => {
                         if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
@@ -972,6 +969,43 @@ async function uploadImageToCloudinary(file) {
                 alert("Error saving auction. Reason: " + e.message);
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+            }
+        }
+
+        // --- MISSING POPULATE FUNCTION ADDED BACK ---
+        function populateAuctionDetails(forcedData = null) {
+            try {
+                let data = forcedData || safeGetStorage('auctionSetup', {});
+                if (!data || Object.keys(data).length === 0) return; 
+
+                const nameEl = document.getElementById('adName'); 
+                if (nameEl) nameEl.innerText = data.name || 'No Auction Loaded';
+                
+                const codeEl = document.getElementById('adCode'); 
+                if (codeEl) codeEl.innerText = data.id ? 'AUC-' + String(data.id).slice(-6) : 'KBL-2026';
+                
+                const balEl = document.getElementById('adBalance'); 
+                if (balEl) balEl.value = data.budget || 0;
+                
+                const baseEl = document.getElementById('adBaseBid'); 
+                if (baseEl) baseEl.value = data.minBid || 0;
+                
+                const incEl = document.getElementById('adBidInc'); 
+                if (incEl) incEl.value = data.bidInc || 0;
+                
+                const playEl = document.getElementById('adPlayers'); 
+                if (playEl) playEl.value = data.maxPlayers || 0;
+                
+                const logoEl = document.getElementById('adLogoImage'); 
+                if (logoEl) logoEl.src = getTeamLogo(data, data.name || 'Auction');
+
+                applyLiveLogoSize();
+                updatePlayerCounterBtn();
+                loadBidIncrements();
+                renderAuctionDetailLists();
+                if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
+            } catch (err) {
+                console.error("Populate Failed", err);
             }
         }
 
@@ -1012,7 +1046,7 @@ async function uploadImageToCloudinary(file) {
             loadBidIncrements();
             updateDashboardHistoryCard();
             updateManualCategoryDropdowns();
-            renderAuctionLibrary(); 
+            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary(); 
             try { renderFranchiseStandings(); } catch(e){}
 
             const savedSetup = safeGetStorage('auctionSetup', {});
@@ -2040,7 +2074,7 @@ async function uploadImageToCloudinary(file) {
             }
 
             safeSetStorage('auctionHistory', history);
-            renderAuctionLibrary();
+            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
             
             alert(`✅ Success! Auction saved as "${status.toUpperCase()}".`);
         }
@@ -2116,7 +2150,7 @@ async function uploadImageToCloudinary(file) {
             let history = safeGetStorage('auctionHistory', []);
             history = history.filter(a => a && a.setup && String(a.setup.id) !== String(id));
             safeSetStorage('auctionHistory', history);
-            renderAuctionLibrary();
+            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
         }
     </script>
 </body>
