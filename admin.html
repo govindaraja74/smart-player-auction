@@ -282,7 +282,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Removed the FORM tag entirely. A browser physically cannot refresh the page without a form tag. -->
+                <!-- FIX: Form container securely prevents ALL page reloading while retaining exact field validation -->
                 <div id="createAuctionFormWrapper">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
@@ -310,8 +310,9 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- FIX: Regular button securely triggers the manual javascript function -->
-                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="submitSetup()">SUBMIT</button>
+                        
+                        <!-- FIX: Secure submit button tied directly to our smart handler function -->
+                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="handleAuctionCreation()">SUBMIT</button>
                     </div>
                 </div>
             </div>
@@ -854,6 +855,124 @@ async function uploadImageToCloudinary(file) {
             updateLiveControls();
             evaluateFranchiseStripForPlayer();
             populateCustomBidDropdown();
+        }
+
+        // --- NEW: SECURE AUCTION CREATION HANDLER ---
+        async function handleAuctionCreation() {
+            try {
+                // 1. Strict Validation Check
+                const reqFields = [
+                    { id: 'setupName', name: 'Auction Name' },
+                    { id: 'setupDate', name: 'Auction Date' },
+                    { id: 'setupBudget', name: 'Points Per Team' },
+                    { id: 'setupMinBid', name: 'Base Bid' },
+                    { id: 'setupBidIncrease', name: 'Bid Increase' },
+                    { id: 'setupMaxPlayers', name: 'Player Per Team' }
+                ];
+
+                for (let field of reqFields) {
+                    const el = document.getElementById(field.id);
+                    if (!el || !el.value || String(el.value).trim() === '') {
+                        alert(`Missing or invalid field: ${field.name}\n\nPlease check your entry and try again.`);
+                        if (el && el.focus) el.focus();
+                        return false; // Safely stop and wait for the user to fix it
+                    }
+                }
+
+                // 2. Double Check
+                if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
+                    return false;
+                }
+
+                // 3. Process the Save
+                const btn = document.getElementById('setupSubmitBtn');
+                if (btn) { btn.innerText = "Saving..."; btn.disabled = true; }
+
+                let auctionLogoUrl = "";
+                const logoInput = document.getElementById('setupLogo');
+                if (logoInput && logoInput.files && logoInput.files.length > 0) {
+                    try {
+                        auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+                    } catch (imgErr) {
+                        console.error("Image compression error", imgErr);
+                    }
+                }
+
+                const newAuction = {
+                    id: Date.now().toString(),
+                    logoUrl: auctionLogoUrl || "",
+                    sportsType: document.getElementById('setupSportsType') ? document.getElementById('setupSportsType').value : '',
+                    name: document.getElementById('setupName').value,
+                    budget: parseInt(document.getElementById('setupBudget').value) || 0,
+                    minBid: parseInt(document.getElementById('setupMinBid').value) || 0,
+                    bidInc: parseInt(document.getElementById('setupBidIncrease').value) || 0,
+                    maxPlayers: parseInt(document.getElementById('setupMaxPlayers').value) || 0,
+                    date: document.getElementById('setupDate').value,
+                    time: document.getElementById('setupTime') ? document.getElementById('setupTime').value : '',
+                    status: 'incomplete'
+                };
+
+                safeSetStorage('auctionTeams', []);
+                safeSetStorage('auctionPlayers', []);
+                safeSetStorage('auctionCats', []);
+                safeSetStorage('auctionBidTiers', []);
+                safeSetStorage('deletedTeams', []);
+                safeSetStorage('deletedPlayers', []);
+                safeSetStorage('savedLivePlayer', null);
+                safeSetStorage('liveAuctionState', null);
+                
+                window.allTeams = [];
+                window.allPlayers = [];
+                window.currentCategories = [];
+
+                safeSetStorage('auctionSetup', newAuction);
+                currentBidIncrease = parseInt(newAuction.bidInc) || 0;
+
+                let archive = {
+                    setup: newAuction,
+                    teams: [],
+                    players: [],
+                    cats: [],
+                    tiers: []
+                };
+
+                let history = safeGetStorage('auctionHistory', []);
+                if (!Array.isArray(history)) history = [];
+                
+                let existingIndex = history.findIndex(a => {
+                    if(!a) return false;
+                    if(a.setup && a.setup.id === newAuction.id) return true;
+                    if(a.id === newAuction.id) return true;
+                    return false;
+                });
+                
+                if(existingIndex >= 0) history[existingIndex] = archive;
+                else history.push(archive);
+                
+                safeSetStorage('auctionHistory', history);
+                renderAuctionLibrary(); 
+
+                // 4. Success Reset
+                populateAuctionDetails(newAuction);
+                try {
+                    document.querySelectorAll('.ca-input').forEach(el => {
+                        if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
+                    });
+                    const logoInp = document.getElementById('setupLogo');
+                    if(logoInp) logoInp.value = '';
+                } catch(e) {}
+
+                navTo('view-auction-detail');
+                alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
+
+                if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+                
+            } catch(e) {
+                console.error("FATAL Submit Error:", e);
+                alert("Error saving auction. Reason: " + e.message);
+                const btn = document.getElementById('setupSubmitBtn');
+                if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
+            }
         }
 
         function safeInit() {
@@ -1882,15 +2001,6 @@ async function uploadImageToCloudinary(file) {
             if(slider) slider.value = size;
         }
 
-        // --- NEW: Attach Event Listener Safely ---
-        function attachSafeListeners() {
-            // No longer overriding the form onsubmit. We rely on the button onclick.
-        }
-        
-        function safeInit() {
-            try { loadSavedMemory(); } catch(e) {}
-        }
-        
         // --- AUCTION LIBRARY MANAGEMENT ---
         function saveAuctionProgress(status) {
             let setup = safeGetStorage('auctionSetup', {});
