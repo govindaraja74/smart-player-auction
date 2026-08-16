@@ -69,7 +69,7 @@
             border-color: red !important;
             background-color: #3f1515 !important;
             opacity: 0.5;
-            pointer-events: none; /* Physically prevents click */
+            pointer-events: none;
         }
 
         /* Setup/Detail Classes */
@@ -89,11 +89,11 @@
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #94a3b8; cursor: pointer; background: none; border: none; font-weight: bold; line-height: 1; }
         .close-btn:hover { color: white; }
 
-       /* Utility */
+        /* Utility */
         .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 6px 10px; transition: 0.2s; }
         .edit-del-btn:hover { background: #e2e8f0; }
 
-        /* --- PREMIUM LIVE ROOM PRESENTATION UI --- */
+        /* PREMIUM LIVE ROOM PRESENTATION UI */
         .live-presentation-board {
             position: relative;
             background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%);
@@ -132,114 +132,109 @@
         
         .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
-/* --- LIVE AUCTION ROOM UI ENHANCEMENTS --- */
-#view-live-room {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    background-color: #0d1b2a !important; /* Dark background to completely fill the white gap */
-    overflow: hidden !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center !important;     /* Centers everything horizontally */
-    justify-content: center !important; /* Centers everything vertically */
-    z-index: 500;
-    padding: 20px;
-    box-sizing: border-box;
-}
 
-/* Make the content wider and centered */
-#view-live-room > div {
-    width: 100% !important;
-    max-width: 98% !important; /* Stretches the red box almost to the screen edges */
-    zoom: 0.85; /* Scales it so it doesn't fall off the top/bottom */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        /* LIVE AUCTION ROOM UI ENHANCEMENTS */
+        #view-live-room {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: #0d1b2a !important;
+            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 500;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-/* Make franchise logos auto-resize into a single line, pinned to the bottom */
-#la-franchise-strip {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    justify-content: center;
-    align-items: center;
-    width: 100% !important;
-    max-width: 1200px !important;
-    gap: 8px;
-    padding: 15px 5px;
-    min-height: 80px;
-    margin-top: 25px !important; 
-    background: rgba(0,0,0,0.2);
-    border-radius: 10px;
-}
-#la-franchise-strip .franchise-btn {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: transform 0.2s;
-}
-#la-franchise-strip .franchise-btn:hover {
-    transform: scale(1.15);
-}
-#la-franchise-strip img {
-    min-width: 40px; 
-    max-width: 90px; 
-    height: auto;
-    object-fit: contain;
-    border-radius: 50%;
-    border: 3px solid #fff;
-}
+        #view-live-room > div {
+            width: 100% !important;
+            max-width: 98% !important;
+            zoom: 0.85;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-/* Sidebar Hover Effect (Arrow) */
-.live-mode-sidebar {
-    position: fixed !important;
-    left: -260px !important; 
-    height: 100vh;
-    transition: left 0.3s ease !important;
-    z-index: 1000 !important;
-}
-.live-mode-sidebar:hover {
-    left: 0 !important; 
-}
-/* The Arrow Tab */
-.live-mode-sidebar::after {
-    content: '▶';
-    position: absolute;
-    right: -25px;
-    top: 50%;
-    background: #1e73be;
-    color: white;
-    padding: 15px 5px;
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
-    font-size: 18px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.4);
-}
-        
+        #la-franchise-strip {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: center;
+            align-items: center;
+            width: 100% !important;
+            max-width: 1200px !important;
+            gap: 8px;
+            padding: 15px 5px;
+            min-height: 80px;
+            margin-top: 25px !important; 
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        #la-franchise-strip .franchise-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #la-franchise-strip .franchise-btn:hover {
+            transform: scale(1.15);
+        }
+        #la-franchise-strip img {
+            min-width: 40px; 
+            max-width: 90px; 
+            height: auto;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 3px solid #fff;
+        }
+
+        .live-mode-sidebar {
+            position: fixed !important;
+            left: -260px !important; 
+            height: 100vh;
+            transition: left 0.3s ease !important;
+            z-index: 1000 !important;
+        }
+        .live-mode-sidebar:hover {
+            left: 0 !important; 
+        }
+        .live-mode-sidebar::after {
+            content: '▶';
+            position: absolute;
+            right: -25px;
+            top: 50%;
+            background: #1e73be;
+            color: white;
+            padding: 15px 5px;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 18px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.4);
+        }
     </style>
 </head>
-<body onload="setTimeout(safeInit, 500)">
+<body onload="setTimeout(safeInit, 300)">
     <!-- Login Screen -->
     <div class="box" id="loginSection">
         <h2 style="text-align: center;">Admin Portal</h2>
-        <input type="password" id="adminPassword" placeholder="Enter Password" style="margin-bottom: 15px;">
+        <input type="password" id="adminPassword" placeholder="Enter Password" style="margin-bottom: 15px;" onkeyup="if(event.key==='Enter') checkPassword()">
         <button class="btn-primary" style="width:100%" onclick="checkPassword()">Login</button>
         <p id="errorMessage" style="color: #ff4d4d; display: none; text-align: center;">Incorrect password.</p>
     </div>
 
     <!-- UNIVERSAL APP LAYOUT -->
     <div class="app-container hidden" id="appMainUI">
-
-      <!-- Sidebar -->
+        <!-- Sidebar -->
         <div class="dash-sidebar">
-            <!-- NEW LOGO SECTION -->
             <div style="text-align: center; margin-bottom: 25px; padding: 0 20px;">
-                     <img src="/spa-logo.png.png" alt="Smart Players Auction" style="width: 85%; max-width: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">               <div style="font-size: 13px; color: #94a3b8; margin-top: 12px; font-style: italic; line-height: 1.4;">
+                <img src="/spa-logo.png.png" alt="Smart Players Auction" style="width: 85%; max-width: 180px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <div style="font-size: 13px; color: #94a3b8; margin-top: 12px; font-style: italic; line-height: 1.4;">
                     Performing the ultimate fair and dynamic player auction experience.
                 </div>
             </div>
@@ -251,16 +246,18 @@
             <div class="sidebar-item" id="nav-control" onclick="navTo('view-control')">Players Roster</div>
             <div class="sidebar-item" id="nav-standings" onclick="navTo('view-franchise-standings')">Franchise Standings</div>
         </div>
+
+        <div class="dash-main">
             <!-- VIEW A: DASHBOARD -->
             <div id="view-dashboard">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; DASHBOARD</div>
                 <h1 class="dash-title">DASHBOARD (v13.0)</h1>
 
                 <div style="margin-bottom: 25px;">
-    <button onclick="resetAllPlayersForSecondRound()" class="btn btn-warning" style="background-color: #f59e0b; color: white; padding: 10px 20px; font-weight: bold; border-radius: 5px; border: none; cursor: pointer;">
-        🔄 Reset All for 2nd Round
-    </button>
-</div>
+                    <button onclick="resetAllPlayersForSecondRound()" class="btn-primary" style="background-color: #f59e0b; color: white; padding: 10px 20px; font-weight: bold; border-radius: 5px; cursor: pointer;">
+                        🔄 Reset All for 2nd Round
+                    </button>
+                </div>
                 <div class="dash-cards">
                     <div class="dash-card" onclick="navTo('view-setup')"><div><h3>Create</h3><p>Auction</p></div></div>
                     <div class="dash-card" onclick="navTo('view-auction-detail')"><div><h3>My</h3><p>Auction</p></div></div>
@@ -282,7 +279,7 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <form id="createAuctionForm" onsubmit="event.preventDefault(); handleAuctionCreation(); return false;">
+                <div id="createAuctionFormWrapper">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -309,9 +306,9 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
+                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="handleAuctionCreation()">SUBMIT</button>
                     </div>
-                </form>
+                </div>
             </div>
 
             <!-- VIEW C: AUCTION DETAIL (MY AUCTION) -->
@@ -321,7 +318,6 @@
                     <a href="javascript:void(0)" onclick="navTo('view-live-room')" style="color: #10b981; font-weight: bold; font-size: 18px; text-decoration: underline;">Go to Live Auction Room →</a>
                 </div>
 
-                <!-- Header -->
                 <div class="ad-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div style="display: flex; align-items: center; gap: 20px;">
                         <img id="adLogoImage" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1;">
@@ -337,9 +333,7 @@
                     </div>
                 </div>
 
-                <!-- 3-Column Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 20px; margin-bottom: 20px;">
-                    <!-- Editable Auction Details & Financials -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #ef4444; border-bottom: 2px solid #ef4444; padding-bottom: 8px; margin-bottom: 15px;">Auction Details & Financials</div>
                         
@@ -361,16 +355,12 @@
                         </div>
                     </div>
 
-                    <!-- Bid Increments -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Bid Increment Tiers</div>
-                        <div id="bidIncrementContainer">
-                            <!-- Populated by JS -->
-                        </div>
+                        <div id="bidIncrementContainer"></div>
                         <div style="color: #94a3b8; font-size: 12px; margin-top: 10px;">* Live room defaults to standard Base Increment if blank.</div>
                     </div>
 
-                    <!-- Live Control -->
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Live Control & Roster</div>
                         <button id="adPlayerCounterBtn" class="btn-success" onclick="navTo('view-control')" style="width: 100%; padding: 12px; font-size: 14px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">0 Players Added (View Roster)</button>
@@ -380,7 +370,6 @@
                     </div>
                 </div>
 
-                <!-- Teams and Categories -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
                     <div class="ad-card">
                         <div style="font-size: 15px; font-weight: bold; color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 8px; margin-bottom: 15px;">Teams Added</div>
@@ -396,7 +385,6 @@
                     </div>
                 </div>
 
-                <!-- SAVE PROGRESS MODULE -->
                 <div class="ad-card" style="background: #1e293b; color: white; display: flex; justify-content: space-between; align-items: center; border: 2px solid #38bdf8;">
                     <div>
                         <h3 style="margin: 0 0 5px 0; color: #38bdf8;">Save Your Progress</h3>
@@ -408,7 +396,6 @@
                     </div>
                 </div>
 
-                <!-- AUCTION LIBRARY -->
                 <div class="ad-card" style="margin-top: 20px; border-top: 4px solid #1e73be; background: #ffffff;">
                     <h2 style="color: #0f172a; margin-top: 0;">My Auctions Library</h2>
                     <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Load or manage your completed and incomplete auctions below.</p>
@@ -423,11 +410,9 @@
                 </div>
             </div>
 
-<!-- VIEW D: LIVE AUCTION ROOM -->
+            <!-- VIEW D: LIVE AUCTION ROOM -->
             <div id="view-live-room" class="hidden" style="height: 100%;">
                 <div class="live-room" style="background: #0f172a; padding: 15px;">
-                    
-                    <!-- Admin Top Bar -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <h1 style="margin: 0; color: white; font-size: 20px;">ADMIN CONTROL PANEL</h1>
                         <div>
@@ -436,9 +421,7 @@
                         </div>
                     </div>
 
-                    <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
-                        <!-- Auction Logo Restored to Top-Left -->
                         <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 20px; left: 20px; width: 140px; height: 140px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
 
                         <div class="live-header">
@@ -447,7 +430,6 @@
                         </div>
 
                         <div class="live-content-area">
-                            <!-- Left: Photo & Sl No -->
                             <div class="live-left-panel">
                                 <div class="live-sl-badge" id="la-sl-no">#0</div>
                                 <div class="live-photo-circle">
@@ -455,14 +437,12 @@
                                 </div>
                             </div>
 
-                            <!-- Center: Player Details -->
                             <div class="live-center-panel">
                                 <div class="info-ribbon" id="la-name">WAITING FOR PLAYER</div>
                                 <div class="info-ribbon" id="la-club">LOCATION: ---</div>
                                 <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
                             </div>
 
-                            <!-- Right: Price & Bidding Franchise Logo -->
                             <div class="live-right-panel">
                                 <div class="live-massive-price" id="la-current-bid">0</div>
                                 <div class="live-team-box" id="la-bidder-box" style="display: none;">
@@ -472,25 +452,21 @@
                             </div>
                         </div>
                         
-                        <!-- Center Stamp Animation -->
                         <div id="la-sold-stamp" class="sold-stamp-overlay">SOLD</div>
 
-                        <!-- Bottom Blended SPA Logo & Tagline -->
                         <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5;">
                             <img src="/spa-logo.png.png" style="height: 60px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
                             <div style="font-size: 12px; color: #f8fafc; margin-top: 3px; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">Performing the ultimate fair and dynamic player auction experience.</div>
                         </div>
                     </div>
 
-                    <!-- Bottom Control Panel -->
-                  <div class="live-bottom-panel" style="margin-top: 20px; max-width: 100%; width: 100%;">
+                    <div class="live-bottom-panel" style="margin-top: 20px; max-width: 100%; width: 100%;">
                         <div class="live-controls">
                             <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
                             <button id="la-search-btn" class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
                             <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random</button>
                             <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
                             
-                            <!-- SMART CUSTOM BID INPUT + DATALIST -->
                             <input type="number" id="la-manual-bid" list="custom-bid-options" placeholder="Custom Bid ₹" style="width: 130px; padding: 12px; color:black; border-radius: 4px; border: none;">
                             <datalist id="custom-bid-options"></datalist>
                             
@@ -513,7 +489,6 @@
             <div id="view-control" class="hidden">
                 <h1 class="dash-title">PLAYERS ROSTER</h1>
 
-                <!-- FIX: Category Dropdown securely prevents duplicate "category:" tags -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
                     <select id="rosterCategoryFilter" class="btn-primary" style="background: #334155; border: 1px solid #475569; outline: none; cursor: pointer; padding: 10px 15px; border-radius: 4px; color: white; font-weight: bold; font-size: 14px;" onchange="renderPlayersDatabase(this.value)">
                         <option value="all">All Categories (All Players)</option>
@@ -539,7 +514,6 @@
                     <span style="color: #94a3b8;">No franchises added yet.</span>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -584,9 +558,7 @@
         <div class="modal-content" style="max-width: 700px;">
             <button class="close-btn" onclick="closeModal('modal-franchise-roster')">&times;</button>
             <h2 id="fr-team-name" style="margin-top: 0; border-bottom: 1px solid #334155; padding-bottom: 10px;">Team Roster</h2>
-            <div id="fr-roster-list" style="margin-top: 15px;">
-                <!-- Dynamically injected table -->
-            </div>
+            <div id="fr-roster-list" style="margin-top: 15px;"></div>
         </div>
     </div>
 
@@ -616,9 +588,7 @@
                 <select id="playerCategoryManual" style="color:black; margin-bottom: 10px;" required><option value="">Select Category *</option></select>
                 <label style="color:#333; font-size:13px; margin: 0 0 5px 0;">Player Photo *</label>
                 <input type="file" id="playerPhoto" accept="image/*" style="background: white; color: black; margin-bottom: 10px;" required>
-
                 <input type="number" id="playerBasePrice" placeholder="Base Price (₹) (Optional)" style="color:black; margin-bottom: 10px;">
-
                 <button class="btn-primary" onclick="addPlayer()">Add Player</button>
             </div>
         </div>
@@ -646,42 +616,30 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // --- CLOUDINARY DIRECT UPLOAD CONFIG ---
-const CLOUD_NAME = "xdbqhbil";       
-const UPLOAD_PRESET = "auction_preset"; 
+        const CLOUD_NAME = "xdbqhbil";       
+        const UPLOAD_PRESET = "auction_preset"; 
 
-async function uploadImageToCloudinary(file) {
-    if (!file) return "";
-    
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
-
-    try {
-        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
-            method: "POST",
-            body: formData
-        });
-        
-        const data = await response.json();
-        if (data.secure_url) {
-            return data.secure_url; 
-        } else {
-            console.error("Cloudinary error:", data);
-            alert("Image upload failed. Please check your connection.");
-            return "";
+        async function uploadImageToCloudinary(file) {
+            if (!file) return "";
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("upload_preset", UPLOAD_PRESET);
+            try {
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+                return data.secure_url || "";
+            } catch (err) {
+                console.error("Upload error:", err);
+                return "";
+            }
         }
-    } catch (err) {
-        console.error("Upload error:", err);
-        alert("Network error while uploading image.");
-        return "";
-    }
-}
-        // --- NEW: UPDATE FINANCIALS DIRECTLY FROM MY AUCTION PAGE ---
+
         function updateAuctionFinancials() {
             let data = safeGetStorage('auctionSetup', {});
             if (!data || !data.id) return alert("No active auction to update.");
-
             const oldBudget = data.budget;
 
             data.budget = parseInt(document.getElementById('adBalance').value) || 0;
@@ -701,11 +659,9 @@ async function uploadImageToCloudinary(file) {
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
             }
-
             alert("Auction Details & Financials updated securely!");
         }
 
-        // --- BULLETPROOF STORAGE ENGINE ---
         window.spaMemory = {}; 
 
         function safeGetStorage(key, defaultVal) {
@@ -728,7 +684,6 @@ async function uploadImageToCloudinary(file) {
             try {
                 localStorage.setItem(key, JSON.stringify(data)); 
             } catch (e) {
-                console.warn(`Storage limit reached for ${key}. Data is temporarily saved in active RAM.`);
                 try {
                     localStorage.removeItem('auctionHistory'); 
                     localStorage.setItem(key, JSON.stringify(data)); 
@@ -736,19 +691,6 @@ async function uploadImageToCloudinary(file) {
             }
         }
 
-        (function autoRepairStorage() {
-            const keys = ['auctionTeams', 'auctionPlayers', 'auctionCats', 'auctionHistory', 'deletedTeams', 'deletedPlayers', 'auctionSetup'];
-            keys.forEach(key => {
-                try {
-                    let data = localStorage.getItem(key);
-                    if (data) JSON.parse(data); 
-                } catch(e) {
-                    localStorage.removeItem(key); 
-                }
-            });
-        })();
-
-        // SAFE SOCKET INITIALIZATION
         let activeSetupForSocket = safeGetStorage('auctionSetup', {});
         let activeTourneyIdForSocket = activeSetupForSocket.id || 'KBL2026';
         let socket = { emit: function(){} };
@@ -766,98 +708,220 @@ async function uploadImageToCloudinary(file) {
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
-        // --- NEW: PERSISTENT LIVE ROOM STATE ---
-        function saveLiveState() {
-            if (!livePlayerActive) {
-                safeSetStorage('liveAuctionState', null);
-                return;
+        function checkPassword() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === "MasterUnlock2026") {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('appMainUI').classList.remove('hidden'); 
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                try { populateAuctionDetails(); } catch(e){}
+                try { updateDashboardHistoryCard(); } catch(e){}
+                try { updateManualCategoryDropdowns(); } catch(e){}
+                try { renderFranchiseStandings(); } catch(e){}
+                try { renderPlayersDatabase('all'); } catch(e){}
+            } else {
+                document.getElementById('errorMessage').style.display = 'block';
             }
-            safeSetStorage('liveAuctionState', {
-                player: livePlayerActive,
-                currentBid: liveCurrentBid,
-                teamId: liveCurrentTeamId,
-                isFirstBid: isFirstBid,
-                history: liveBidHistory,
-                boxDisplay: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none',
-                boxBg: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.background : 'transparent',
-                boxShadow: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.boxShadow : 'none',
-                logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
-                logoBorder: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.border : '',
-                logoRadius: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.borderRadius : '',
-                logoBg: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').style.background : '',
-                teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
-                nameDisplay: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').style.display : 'none'
+        }
+
+        function safeInit() {
+            try { loadSavedMemory(); } catch(e) {}
+        }
+
+        function loadSavedMemory() {
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+
+            const deletedPlayers = safeGetStorage('deletedPlayers', []);
+            const deletedTracker = safeGetStorage('deletedTeams', []);
+
+            let localTeams = safeGetStorage('auctionTeams', []);
+            if (Array.isArray(localTeams)) {
+                let cleanedTeams = localTeams.filter(t => {
+                    if (!t) return false;
+                    let idKey = t._id || t.id;
+                    let nameKey = String(t.name || '').trim().toLowerCase();
+                    if (t.tournamentId && String(t.tournamentId) !== String(activeTourneyId)) return false;
+                    return !deletedTracker.includes(idKey) && !deletedTracker.includes(nameKey);
+                });
+                safeSetStorage('auctionTeams', cleanedTeams);
+                window.allTeams = cleanedTeams;
+            }
+
+            window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => p && typeof p === 'object' && !deletedPlayers.includes(p._id) && (!p.tournamentId || String(p.tournamentId) === String(activeTourneyId)));
+
+            let changed = false;
+            window.allPlayers.forEach(p => {
+                if(!p.status) { p.status = 'available'; changed = true; }
+            });
+            if(changed) safeSetStorage('auctionPlayers', window.allPlayers);
+
+            updatePlayerCounterBtn();
+            applyLiveLogoSize();
+            loadBidIncrements();
+            updateDashboardHistoryCard();
+            updateManualCategoryDropdowns();
+            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary(); 
+            try { renderFranchiseStandings(); } catch(e){}
+
+            const savedSetup = safeGetStorage('auctionSetup', {});
+            if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
+            if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
+            if(savedSetup.budget) document.getElementById('setupBudget').value = savedSetup.budget;
+            if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
+            if(savedSetup.bidInc) {
+                document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
+                currentBidIncrease = parseInt(savedSetup.bidInc);
+            }
+        }
+
+        function updateManualCategoryDropdowns() {
+            const cats = safeGetStorage('auctionCats', []);
+            window.currentCategories = cats;
+            const drop1 = document.getElementById('playerCategoryManual');
+            const drop2 = document.getElementById('editPlayerCategoryManual');
+            if(drop1) drop1.innerHTML = '<option value="">Select Category *</option>';
+            if(drop2) drop2.innerHTML = '<option value="">Select Category</option>';
+            cats.forEach(c => {
+                const name = typeof c === 'object' ? c.name : c;
+                const max = (typeof c === 'object' && c.maxPlayers) ? ` (Limit: ${c.maxPlayers})` : '';
+                if(drop1) drop1.innerHTML += `<option value="${name}">${name}${max}</option>`;
+                if(drop2) drop2.innerHTML += `<option value="${name}">${name}${max}</option>`;
             });
         }
 
-        function restoreLiveState(state) {
-            livePlayerActive = state.player;
-            liveCurrentBid = state.currentBid;
-            liveCurrentTeamId = state.teamId;
-            isFirstBid = state.isFirstBid;
-            liveBidHistory = state.history || [];
+        function renderPlayersDatabase(filter = 'all') {
+            try {
+                window.allPlayers = (window.allPlayers || []).filter(p => p !== null && p !== undefined && typeof p === 'object');
+                updateRosterCategoryDropdown(); 
 
-            const activeSetup = safeGetStorage('auctionSetup', {});
-            document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
+                const container = document.getElementById('playersListContainer');
+                if (!container) return;
 
-            const assocLogo = document.getElementById('la-assoc-logo');
-            if (assocLogo) {
-                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
+                if(window.allPlayers.length === 0) {
+                    container.innerHTML = "<p style='color: #64748b;'>No players registered yet.</p>";
+                    return;
+                }
+
+                let filteredPlayers = window.allPlayers;
+                if (filter.startsWith('category:')) {
+                    const cat = filter.replace('category:', '');
+                    if (cat !== 'all') {
+                        filteredPlayers = window.allPlayers.filter(p => p && String(p.category || '').trim() === cat);
+                    }
+                } else if (filter !== 'all') {
+                    filteredPlayers = window.allPlayers.filter(p => p && p.status === filter);
+                }
+
+                if(filteredPlayers.length === 0) {
+                    container.innerHTML = `<p style='color: #64748b;'>No players found for this filter.</p>`;
+                    return;
+                }
+
+                let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
+                filteredPlayers.forEach(p => {
+                    const photoSrc = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                    const safeName = p.name ? String(p.name).replace(/"/g, '&quot;').replace(/'/g, '&#39;') : 'Unnamed Player';
+                    const safeId = p._id ? String(p._id) : '';
+
+                    let statusBox = '';
+                    let teamLogoOverlay = '';
+                    let resetBtnHtml = '';
+
+                    if (p.status === 'sold') {
+                        statusBox = `<div style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">SOLD: ₹${p.soldPrice || p.basePrice || 0}</div>`;
+                        resetBtnHtml = `<button class="edit-del-btn" style="color:#f59e0b; font-size:14px;" onclick="resetPlayerToAvailable('${safeId}')" title="Move to Available">🔄</button>`;
+                        if (p.teamLogo && typeof p.teamLogo === 'string' && p.teamLogo.length > 5) {
+                            teamLogoOverlay = `<img src="${p.teamLogo}" style="position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`;
+                        }
+                    } else if (p.status === 'unsold') {
+                        statusBox = `<div style="background: #ef4444; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">UNSOLD</div>`;
+                        resetBtnHtml = `<button class="edit-del-btn" style="color:#f59e0b; font-size:14px;" onclick="resetPlayerToAvailable('${safeId}')" title="Move to Available">🔄</button>`;
+                    } else {
+                        statusBox = `<div style="background: #3b82f6; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">AVAILABLE</div>`;
+                    }
+
+                    html += `
+                    <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
+                        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">#${p.serialNumber || '-'}</span>
+                            <div style="display: flex; gap: 5px;">
+                                ${resetBtnHtml}
+                                <button class="edit-del-btn" onclick="openEditPlayerModal('${safeId}')">✏️</button>
+                                <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${safeId}')">🗑️</button>
+                            </div>
+                        </div>
+                        <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
+                            <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+                            ${teamLogoOverlay}
+                        </div>
+                        <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px; word-break: break-word;">${safeName}</div>
+                        <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice || 0}</div>
+                        <div style="width: 100%; margin-top: auto;">${statusBox}</div>
+                    </div>`;
+                });
+                html += `</div>`;
+                container.innerHTML = html;
+            } catch(e) {
+                console.error("Render Roster Error:", e);
             }
-
-            document.getElementById('la-sl-no').innerText = livePlayerActive.serialNumber || '0';
-            document.getElementById('la-name').innerText = livePlayerActive.name;
-            document.getElementById('la-cat').innerText = livePlayerActive.category || 'N/A';
-            document.getElementById('la-club').innerText = livePlayerActive.club || livePlayerActive.team || 'N/A';
-            document.getElementById('la-current-bid').innerText = liveCurrentBid;
-
-            const photoEl = document.getElementById('la-photo');
-            photoEl.src = (livePlayerActive.photoUrl && livePlayerActive.photoUrl.length > 5) ? livePlayerActive.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-
-            const bidderBox = document.getElementById('la-bidder-box');
-            const bidderLogo = document.getElementById('la-bidder-logo');
-            const bidderName = document.getElementById('la-bidder-name');
-
-            if (bidderBox) {
-                bidderBox.style.display = state.boxDisplay || 'none';
-                bidderBox.style.background = state.boxBg || 'transparent';
-                bidderBox.style.boxShadow = state.boxShadow || 'none';
-            }
-            if (bidderLogo) {
-                bidderLogo.src = state.logoUrl || (activeSetup.logoUrl || '/spa-logo.png.png');
-                bidderLogo.style.border = state.logoBorder || 'none';
-                bidderLogo.style.borderRadius = state.logoRadius || '0';
-                bidderLogo.style.background = state.logoBg || 'transparent';
-            }
-            if (bidderName) {
-                bidderName.innerText = state.teamName || 'Team Name';
-                bidderName.style.display = state.nameDisplay || 'none';
-            }
-
-            const stamp = document.getElementById('la-sold-stamp');
-            if (livePlayerActive.status === 'sold') {
-                stamp.innerText = "SOLD";
-                stamp.style.borderColor = "white";
-                stamp.style.color = "white";
-                stamp.classList.add('active');
-            } else if (livePlayerActive.status === 'unsold') {
-                stamp.innerText = "UNSOLD";
-                stamp.style.borderColor = "#ef4444";
-                stamp.style.color = "#ef4444";
-                stamp.classList.add('active');
-            } else {
-                stamp.classList.remove('active');
-            }
-
-            updateLiveControls();
-            evaluateFranchiseStripForPlayer();
-            populateCustomBidDropdown();
         }
 
-        // --- NEW: SECURE AUCTION CREATION HANDLER ---
+        function updateRosterCategoryDropdown() {
+            try {
+                const dropdown = document.getElementById('rosterCategoryFilter');
+                if (!dropdown) return;
+                const uniqueCats = [...new Set(window.allPlayers.filter(p => p && p.category).map(p => String(p.category).trim()).filter(c => c !== ''))].sort();
+                const currentVal = dropdown.value || 'all';
+                dropdown.innerHTML = '<option value="all">All Categories (All Players)</option>';
+                uniqueCats.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = 'category:' + cat; 
+                    opt.innerText = cat;
+                    dropdown.appendChild(opt);
+                });
+                if (currentVal.startsWith('category:') && uniqueCats.includes(currentVal.replace('category:', ''))) {
+                    dropdown.value = currentVal;
+                } else {
+                    dropdown.value = 'all';
+                }
+            } catch (err) {}
+        }
+
+        function downloadPDF() {
+            const element = document.getElementById('pdf-content');
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
+            } else {
+                window.print();
+            }
+        }
+
+        function resetPlayerToAvailable(playerId) {
+            if(!confirm("⚠️ Move this player back to the Available list?\n\nIf they were SOLD, they will be removed from the franchise roster and funds will be restored.")) return;
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            localPlayers = localPlayers.map(p => {
+                const pId = p._id || p.id || p.serialNumber;
+                if (String(pId) === String(playerId)) {
+                    p.status = 'available'; 
+                    delete p.soldTo;
+                    delete p.soldPrice;
+                    delete p.teamId;
+                    delete p.teamName;
+                    delete p.teamLogo;
+                }
+                return p;
+            });
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+            renderPlayersDatabase('all');
+            try { renderFranchiseStandings(); } catch(e) {}
+            try { renderAuctionDetailLists(); } catch(e) {}
+        }
+
         async function handleAuctionCreation() {
             try {
-                // 1. Strict Validation Check
                 const reqFields = [
                     { id: 'setupName', name: 'Auction Name' },
                     { id: 'setupDate', name: 'Auction Date' },
@@ -876,12 +940,10 @@ async function uploadImageToCloudinary(file) {
                     }
                 }
 
-                // 2. Double Check
                 if(!confirm("Are you sure you want to start a brand new auction? This will clear out the current active Teams, Players, and Categories to give you a clean slate.")) {
                     return false;
                 }
 
-                // 3. Process the Save
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "Saving..."; btn.disabled = true; }
 
@@ -890,9 +952,7 @@ async function uploadImageToCloudinary(file) {
                 if (logoInput && logoInput.files && logoInput.files.length > 0) {
                     try {
                         auctionLogoUrl = await compressImage(logoInput.files[0], 250);
-                    } catch (imgErr) {
-                        console.error("Image compression error", imgErr);
-                    }
+                    } catch (imgErr) {}
                 }
 
                 const newAuction = {
@@ -936,21 +996,15 @@ async function uploadImageToCloudinary(file) {
                 let history = safeGetStorage('auctionHistory', []);
                 if (!Array.isArray(history)) history = [];
                 
-                let existingIndex = history.findIndex(a => {
-                    if(!a) return false;
-                    if(a.setup && a.setup.id === newAuction.id) return true;
-                    if(a.id === newAuction.id) return true;
-                    return false;
-                });
-                
+                let existingIndex = history.findIndex(a => a && (a.setup ? a.setup.id === newAuction.id : a.id === newAuction.id));
                 if(existingIndex >= 0) history[existingIndex] = archive;
                 else history.push(archive);
                 
                 safeSetStorage('auctionHistory', history);
                 if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary(); 
 
-                // 4. Success Reset
                 populateAuctionDetails(newAuction);
+                
                 try {
                     document.querySelectorAll('.ca-input').forEach(el => {
                         if(el.tagName === 'INPUT' && el.type !== 'date' && el.type !== 'time') el.value = '';
@@ -963,10 +1017,8 @@ async function uploadImageToCloudinary(file) {
                 alert("Brand new auction created successfully! Your dashboard is now a clean slate.");
 
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
-                
             } catch(e) {
-                console.error("FATAL Submit Error:", e);
-                alert("Error saving auction. Reason: " + e.message);
+                alert("Error saving auction: " + e.message);
                 const btn = document.getElementById('setupSubmitBtn');
                 if (btn) { btn.innerText = "SUBMIT"; btn.disabled = false; }
             }
@@ -1003,191 +1055,17 @@ async function uploadImageToCloudinary(file) {
                 loadBidIncrements();
                 if (typeof renderAuctionDetailLists === 'function') renderAuctionDetailLists();
                 if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
-            } catch (err) {
-                console.error("Populate Failed", err);
-            }
+            } catch (err) {}
         }
 
-        // --- FULLY SECURED PLAYERS DATABASE RENDERER ---
-        function renderPlayersDatabase(filter = 'all') {
-            try {
-                // 1. Forcefully scrub null/corrupted objects out of memory before drawing
-                window.allPlayers = (window.allPlayers || []).filter(p => p !== null && p !== undefined && typeof p === 'object');
-                
-                updateRosterCategoryDropdown(); 
-
-                const container = document.getElementById('playersListContainer');
-                if (!container) return;
-
-                if(window.allPlayers.length === 0) {
-                    container.innerHTML = "<p style='color: #64748b;'>No players registered yet.</p>";
-                    return;
-                }
-
-                let filteredPlayers = window.allPlayers;
-                
-                if (filter.startsWith('category:')) {
-                    const cat = filter.replace('category:', '');
-                    if (cat !== 'all') {
-                        filteredPlayers = window.allPlayers.filter(p => p && String(p.category || '').trim() === cat);
-                    }
-                } else if (filter !== 'all') {
-                    filteredPlayers = window.allPlayers.filter(p => p && p.status === filter);
-                }
-
-                if(filteredPlayers.length === 0) {
-                    container.innerHTML = `<p style='color: #64748b;'>No players found for this filter.</p>`;
-                    return;
-                }
-
-                let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
-
-                filteredPlayers.forEach(p => {
-                    const photoSrc = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
-                    const safeName = p.name ? String(p.name).replace(/"/g, '&quot;').replace(/'/g, '&#39;') : 'Unnamed Player';
-                    const safeId = p._id ? String(p._id) : '';
-
-                    let statusBox = '';
-                    let teamLogoOverlay = '';
-                    let resetBtnHtml = '';
-
-                    if (p.status === 'sold') {
-                        statusBox = `<div style="background: #10b981; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">SOLD: ₹${p.soldPrice || p.basePrice || 0}</div>`;
-                        resetBtnHtml = `<button class="edit-del-btn" style="color:#f59e0b; font-size:14px;" onclick="resetPlayerToAvailable('${safeId}')" title="Move to Available">🔄</button>`;
-                        if (p.teamLogo && typeof p.teamLogo === 'string' && p.teamLogo.length > 5) {
-                            teamLogoOverlay = `<img src="${p.teamLogo}" style="position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover;">`;
-                        }
-                    } else if (p.status === 'unsold') {
-                        statusBox = `<div style="background: #ef4444; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">UNSOLD</div>`;
-                        resetBtnHtml = `<button class="edit-del-btn" style="color:#f59e0b; font-size:14px;" onclick="resetPlayerToAvailable('${safeId}')" title="Move to Available">🔄</button>`;
-                    } else {
-                        statusBox = `<div style="background: #3b82f6; color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px;">AVAILABLE</div>`;
-                    }
-
-                    html += `
-                    <div style="background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; flex-direction: column; align-items: center;">
-                        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                            <span style="background: #e2e8f0; color: #334155; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">#${p.serialNumber || '-'}</span>
-                            <div style="display: flex; gap: 5px;">
-                                ${resetBtnHtml}
-                                <button class="edit-del-btn" onclick="openEditPlayerModal('${safeId}')">✏️</button>
-                                <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${safeId}')">🗑️</button>
-                            </div>
-                        </div>
-                        <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
-                            <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
-                            ${teamLogoOverlay}
-                        </div>
-                        <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px; word-break: break-word;">${safeName}</div>
-                        <div style="color: #64748b; font-size: 13px; text-align: center; line-height: 1.4;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice || 0}</div>
-                        <div style="width: 100%; margin-top: auto;">${statusBox}</div>
-                    </div>`;
-                });
-
-                html += `</div>`;
-                container.innerHTML = html;
-                
-            } catch(e) {
-                console.error("Render Roster Error:", e);
-                const container = document.getElementById('playersListContainer');
-                if (container) container.innerHTML = `<p style="color: red;">Error loading players. Please click 'Reset Browser Memory' button.</p>`;
-            }
-        }
-
-        // --- SECURED DROPDOWN FILTER ---
-        function updateRosterCategoryDropdown() {
-            try {
-                const dropdown = document.getElementById('rosterCategoryFilter');
-                if (!dropdown) return;
-                
-                const uniqueCats = [...new Set(window.allPlayers.filter(p => p && p.category).map(p => String(p.category).trim()).filter(c => c !== ''))].sort();
-                
-                const currentVal = dropdown.value || 'all';
-                dropdown.innerHTML = '<option value="all">All Categories (All Players)</option>';
-                
-                uniqueCats.forEach(cat => {
-                    const opt = document.createElement('option');
-                    // Value is safely stored as just the category name to prevent duplication errors
-                    opt.value = 'category:' + cat; 
-                    opt.innerText = cat;
-                    dropdown.appendChild(opt);
-                });
-                
-                if (currentVal.startsWith('category:') && uniqueCats.includes(currentVal.replace('category:', ''))) {
-                    dropdown.value = currentVal;
-                } else {
-                    dropdown.value = 'all';
-                }
-            } catch (err) {
-                console.error("Dropdown error:", err);
-            }
-        }
-
-        function safeInit() {
-            try { loadSavedMemory(); } catch(e) {}
-        }
-
-        function loadSavedMemory() {
-            const activeSetup = safeGetStorage('auctionSetup', {});
-            const activeTourneyId = activeSetup.id || 'KBL2026';
-
-            const deletedPlayers = safeGetStorage('deletedPlayers', []);
-            const deletedTracker = safeGetStorage('deletedTeams', []);
-
-            let localTeams = safeGetStorage('auctionTeams', []);
-            if (Array.isArray(localTeams)) {
-                let cleanedTeams = localTeams.filter(t => {
-                    if (!t) return false;
-                    let idKey = t._id || t.id;
-                    let nameKey = String(t.name || '').trim().toLowerCase();
-                    if (t.tournamentId && String(t.tournamentId) !== String(activeTourneyId)) return false;
-                    return !deletedTracker.includes(idKey) && !deletedTracker.includes(nameKey);
-                });
-                safeSetStorage('auctionTeams', cleanedTeams);
-                window.allTeams = cleanedTeams;
-            }
-
-            // Strips nulls immediately out of storage memory
-            window.allPlayers = safeGetStorage('auctionPlayers', []).filter(p => p && typeof p === 'object' && !deletedPlayers.includes(p._id) && (!p.tournamentId || String(p.tournamentId) === String(activeTourneyId)));
-
-            let changed = false;
-            window.allPlayers.forEach(p => {
-                if(!p.status) { p.status = 'available'; changed = true; }
-            });
-            if(changed) safeSetStorage('auctionPlayers', window.allPlayers);
-
-            updatePlayerCounterBtn();
-            applyLiveLogoSize();
-            loadBidIncrements();
-            updateDashboardHistoryCard();
-            updateManualCategoryDropdowns();
-            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary(); 
-            try { renderFranchiseStandings(); } catch(e){}
-
-            const savedSetup = safeGetStorage('auctionSetup', {});
-            if(savedSetup.sportsType) document.getElementById('setupSportsType').value = savedSetup.sportsType;
-            if(savedSetup.name) document.getElementById('setupName').value = savedSetup.name;
-            if(savedSetup.budget) document.getElementById('setupBudget').value = savedSetup.budget;
-            if(savedSetup.minBid) document.getElementById('setupMinBid').value = savedSetup.minBid;
-            if(savedSetup.bidInc) {
-                document.getElementById('setupBidIncrease').value = savedSetup.bidInc;
-                currentBidIncrease = parseInt(savedSetup.bidInc);
-            }
-        }
-
-        // --- Bidding Maths & Safety Rules Core Logic ---
         function getTeamStats(teamId) {
             const setup = safeGetStorage('auctionSetup', {});
             const globalBudget = parseInt(setup.budget) || 0; 
-
-            const teamPlayers = window.allPlayers.filter(p => p.status === 'sold' && p.teamId === teamId);
+            const teamPlayers = (window.allPlayers || []).filter(p => p && p.status === 'sold' && p.teamId === teamId);
             const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
-            
             let teamInfo = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
-            
             let budget = (teamInfo && parseInt(teamInfo.budget) > 0) ? parseInt(teamInfo.budget) : globalBudget;
             const maxPlayers = parseInt(setup.maxPlayers || 0);
-            
             return {
                 totalPlayers: teamPlayers.length,
                 totalSpent: totalSpent,
@@ -1201,11 +1079,9 @@ async function uploadImageToCloudinary(file) {
             const stats = getTeamStats(teamId);
             const setup = safeGetStorage('auctionSetup', {});
             const basePrice = parseInt(setup.minBid) || 0;
-            
             const remainingNeeded = Math.max(0, stats.playersNeeded - 1);
             const reserveFund = remainingNeeded * basePrice;
             const maxAllowableBid = stats.purse - reserveFund;
-
             return {
                 ...stats,
                 reserve: reserveFund,
@@ -1242,19 +1118,15 @@ async function uploadImageToCloudinary(file) {
             if (bidAmount > 0 && bidAmount > maxAllowableBid) {
                 return { allowed: false, reason: 'insufficient_funds', reserve: reserveFund, maxBid: maxAllowableBid };
             }
-
             return { allowed: true };
         }
 
         function getAvailableCategories() {
             const activeTeams = getActiveTeams();
             const rawCats = safeGetStorage('auctionCats', []);
-            
             if (!rawCats || rawCats.length === 0) return null;
-
             const validCategories = rawCats.map(c => typeof c === 'object' ? String(c.name || '').trim().toLowerCase() : String(c).trim().toLowerCase()).filter(Boolean);
             if (validCategories.length === 0) return null;
-
             return validCategories.filter(catName => {
                 if (activeTeams.length === 0) return true;
                 return activeTeams.some(team => {
@@ -1270,9 +1142,7 @@ async function uploadImageToCloudinary(file) {
             activeTeams.forEach((t, index) => {
                 const btn = document.getElementById('franchise-btn-' + index);
                 if(!btn) return;
-                
                 const check = canTeamBid(t._id || t.id, 0, livePlayerActive.category);
-                
                 if(!check.allowed && (check.reason === 'category_full' || check.reason === 'team_full')) {
                     btn.classList.add('red-shadow');
                 } else {
@@ -1281,59 +1151,19 @@ async function uploadImageToCloudinary(file) {
             });
         }
 
-        function renderDashboardFranchiseStandings() {
-            const container = document.getElementById('dashboard-franchises-list');
-            if (!container) return;
-
-            const activeTeams = getActiveTeams();
-            if (activeTeams.length === 0) {
-                container.innerHTML = '<span style="color: #94a3b8;">No franchises added yet.</span>';
-                return;
-            }
-
-            let html = '';
-            activeTeams.forEach((t, i) => {
-                const fin = getFranchiseFinancials(t._id || t.id);
-                const logo = getTeamLogo(t, 'Team ' + (i + 1));
-                const safeName = t.name ? String(t.name) : 'Unnamed';
-
-                html += `
-                <div class="ad-card" style="width: 280px; padding: 15px; cursor: pointer; text-align: center; border: 1px solid #cbd5e1;" onclick="showFranchiseRoster('${t._id || t.id}')">
-                    <img src="${logo}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid #cbd5e1;">
-                    <h3 style="margin: 0 0 10px 0; color: #1e73be;">${safeName}</h3>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Needed Players:</span> <strong>${fin.playersNeeded}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Amount Remaining:</span> <strong>₹${fin.purse}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155; margin-bottom: 5px;">
-                        <span>Reserve Fund:</span> <strong style="color: #ef4444;">₹${fin.reserve}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #334155;">
-                        <span>Max Possible Bid:</span> <strong style="color: #10b981;">₹${fin.maxBid}</strong>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
         function renderFranchiseStandings() {
             const container = document.getElementById('standings-franchises-list');
             if (!container) return;
-
             const activeTeams = getActiveTeams();
             if (activeTeams.length === 0) {
                 container.innerHTML = '<span style="color: #94a3b8; padding: 20px; font-size: 18px;">No franchises added yet. Please add teams in the My Auction tab.</span>';
                 return;
             }
-
             let html = '';
             activeTeams.forEach((t, i) => {
                 const fin = getFranchiseFinancials(t._id || t.id);
                 const logo = getTeamLogo(t, 'Team ' + (i + 1));
                 const safeName = t.name ? String(t.name) : 'Unnamed';
-
                 html += `
                 <div class="ad-card" style="width: 300px; padding: 20px; cursor: pointer; text-align: center; border: 2px solid #cbd5e1; background: white;" onclick="showFranchiseRoster('${t._id || t.id}')">
                     <img src="${logo}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #1e73be; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -1355,19 +1185,14 @@ async function uploadImageToCloudinary(file) {
             container.innerHTML = html;
         }
 
-      function showFranchiseRoster(teamId) {
+        function showFranchiseRoster(teamId) {
             const team = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
             if (!team) return;
-
             document.getElementById('fr-team-name').innerText = team.name + " - Roster";
-            
             const fin = getFranchiseFinancials(teamId);
             const rosterContainer = document.getElementById('fr-roster-list');
             const allCats = safeGetStorage('auctionCats', []);
-            
             let html = '';
-
-            // Build the visual grid grouped by Category
             if (allCats.length > 0) {
                 const rosterByCat = {};
                 fin.roster.forEach(p => {
@@ -1375,81 +1200,32 @@ async function uploadImageToCloudinary(file) {
                     if(!rosterByCat[c]) rosterByCat[c] = [];
                     rosterByCat[c].push(p);
                 });
-
                 allCats.forEach(cat => {
                     const catName = typeof cat === 'object' ? cat.name : cat;
                     const normalizedCatName = String(catName).trim().toLowerCase();
                     const limit = typeof cat === 'object' ? parseInt(cat.maxPlayers) || 0 : 0;
-                    
                     const boughtPlayers = rosterByCat[normalizedCatName] || [];
-                    
-                    // Decide how many boxes to draw (Use the set limit, or at least 1 if no limit is set)
                     const totalSlots = limit > 0 ? limit : Math.max(boughtPlayers.length, 1);
 
-                    html += `<h4 style="color: #38bdf8; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">${catName}</h4>`;
-                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
-                    
+                    html += `<h4 style="color: #38bdf8; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">${catName}</h4><div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
                     for(let i = 0; i < totalSlots; i++) {
                         if (i < boughtPlayers.length) {
                             const p = boughtPlayers[i];
-                            // FILLED BOX (Green)
-                            html += `
-                            <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;">
-                                <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
-                                <div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div>
-                            </div>`;
+                            html += `<div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;"><div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div><div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div></div>`;
                         } else {
-                            // EMPTY BOX (Dark Blue Dashed)
-                            html += `
-                            <div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 55px; box-sizing: border-box;">
-                                <span style="font-size: 12px; font-style: italic;">Empty Slot</span>
-                            </div>`;
+                            html += `<div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 55px; box-sizing: border-box;"><span style="font-size: 12px; font-style: italic;">Empty Slot</span></div>`;
                         }
                     }
                     html += `</div>`;
                 });
-
-                // Failsafe: Just in case a player was bought but their category was later deleted/changed
-                const matchedCats = allCats.map(c => String(typeof c === 'object' ? c.name : c).trim().toLowerCase());
-                const unmatchedPlayers = fin.roster.filter(p => !matchedCats.includes(String(p.category || '').trim().toLowerCase()));
-                
-                if (unmatchedPlayers.length > 0) {
-                    html += `<h4 style="color: #ef4444; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">Other / Uncategorized</h4>`;
-                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
-                    unmatchedPlayers.forEach(p => {
-                        html += `
-                        <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;">
-                            <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
-                            <div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div>
-                        </div>`;
-                    });
-                    html += `</div>`;
-                }
-
             } else {
-                // Fallback if no categories exist at all
-                if (fin.roster.length === 0) {
-                    html = '<p style="color: #94a3b8;">No players bought yet.</p>';
-                } else {
-                    html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
-                    fin.roster.forEach(p => {
-                        html += `
-                        <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;">
-                            <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div>
-                            <div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div>
-                        </div>`;
-                    });
-                    html += `</div>`;
-                }
+                html += `<div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">`;
+                fin.roster.forEach(p => {
+                    html += `<div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; justify-content: center; min-height: 55px; box-sizing: border-box;"><div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${p.name}">${p.name}</div><div style="font-size: 12px; margin-top: 4px; font-weight: bold;">₹${p.soldPrice}</div></div>`;
+                });
+                html += `</div>`;
             }
-            
-            // Append Financial Summary Footer
-            html += `
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">
-                    <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
-                    <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
-                </div>`;
-
+            html += `<div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;"><span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span><span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span></div>`;
             rosterContainer.innerHTML = html;
             openModal('modal-franchise-roster');
         }
@@ -1467,24 +1243,19 @@ async function uploadImageToCloudinary(file) {
         function getActiveTeams() {
             const activeSetup = safeGetStorage('auctionSetup', {});
             const activeTourneyId = activeSetup.id || 'KBL2026'; 
-
             const deletedTracker = safeGetStorage('deletedTeams', []);
             let localTeams = safeGetStorage('auctionTeams', []);
             if (!Array.isArray(localTeams)) localTeams = [];
-
             let globalTeams = Array.isArray(window.allTeams) ? window.allTeams : [];
             let combined = [...localTeams, ...globalTeams];
-
             let uniqueMap = new Map();
             combined.forEach(t => {
                 if (!t) return;
                 let nameKey = String(t.name || '').trim().toLowerCase();
                 let idKey = t._id || t.id;
                 if (!nameKey) return;
-
                 if (deletedTracker.includes(idKey) || deletedTracker.includes(nameKey)) return;
                 if (t.tournamentId && String(t.tournamentId) !== String(activeTourneyId)) return;
-
                 if (!uniqueMap.has(nameKey)) {
                     uniqueMap.set(nameKey, t);
                 }
@@ -1492,35 +1263,29 @@ async function uploadImageToCloudinary(file) {
             return Array.from(uniqueMap.values());
         }
 
-      async function compressImage(file, maxSize = 100) {
+        async function compressImage(file, maxSize = 100) {
             return new Promise((resolve) => {
                 if (!file) return resolve("");
-
                 const reader = new FileReader();
                 reader.onerror = () => { resolve(""); };
                 reader.onload = (event) => {
                     const dataUrl = event.target.result;
                     const img = new Image();
-                    img.onerror = () => { resolve(dataUrl); }; // If error, use raw image
+                    img.onerror = () => { resolve(dataUrl); };
                     img.onload = () => {
                         try {
                             const canvas = document.createElement('canvas');
                             let width = img.width || maxSize;
                             let height = img.height || maxSize;
-                            
-                            // Shrink aggressively to prevent 180+ players from crashing the 5MB storage limit
                             if (width > height) {
                                 if (width > maxSize) { height = Math.round(height * maxSize / width); width = maxSize; }
                             } else {
                                 if (height > maxSize) { width = Math.round(width * maxSize / height); height = maxSize; }
                             }
-                            
                             canvas.width = Math.max(1, width);
                             canvas.height = Math.max(1, height);
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            
-                            // High compression JPEG (40% quality)
                             resolve(canvas.toDataURL('image/jpeg', 0.4)); 
                         } catch(e) { 
                             resolve(dataUrl); 
@@ -1531,34 +1296,29 @@ async function uploadImageToCloudinary(file) {
                 reader.readAsDataURL(file);
             });
         }
+
         function openModal(modalId) { document.getElementById(modalId).classList.remove('hidden'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
 
         function navTo(viewId) {
             const sidebar = document.querySelector('.dash-sidebar');
-    if (sidebar) {
-        if (viewId === 'view-live-room') {
-            sidebar.classList.add('live-mode-sidebar');
-        } else {
-            sidebar.classList.remove('live-mode-sidebar');
-        }
-    }
+            if (sidebar) {
+                if (viewId === 'view-live-room') {
+                    sidebar.classList.add('live-mode-sidebar');
+                } else {
+                    sidebar.classList.remove('live-mode-sidebar');
+                }
+            }
             ['view-dashboard', 'view-setup', 'view-auction-detail', 'view-live-room', 'view-control', 'view-franchise-standings'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
-            
             ['nav-dashboard', 'nav-setup', 'nav-detail', 'nav-live', 'nav-control', 'nav-standings'].forEach(id => {
                 if(document.getElementById(id)) document.getElementById(id).classList.remove('active');
             });
-
             document.getElementById(viewId).classList.remove('hidden');
 
-            if(viewId === 'view-dashboard') {
-                document.getElementById('nav-dashboard').classList.add('active');
-            }
-            if(viewId === 'view-setup') {
-                document.getElementById('nav-setup').classList.add('active');
-            }
+            if(viewId === 'view-dashboard') document.getElementById('nav-dashboard').classList.add('active');
+            if(viewId === 'view-setup') document.getElementById('nav-setup').classList.add('active');
             if(viewId === 'view-auction-detail') { 
                 document.getElementById('nav-detail').classList.add('active'); 
                 try { populateAuctionDetails(); } catch(e){}
@@ -1580,11 +1340,9 @@ async function uploadImageToCloudinary(file) {
         function loadBidIncrements() {
             const container = document.getElementById('bidIncrementContainer');
             if (!container) return;
-            
             const activeSetup = safeGetStorage('auctionSetup', {});
             const tiers = activeSetup.tiers || [];
             container.innerHTML = '';
-            
             if (tiers.length === 0) {
                 container.innerHTML = createBidRowHTML('', '', true);
             } else {
@@ -1599,7 +1357,6 @@ async function uploadImageToCloudinary(file) {
             const btnHtml = isAdd 
                 ? `<button type="button" class="ad-btn-small" style="background: #1e73be;" onclick="addBidIncrementRow(this)">ADD</button>`
                 : `<button type="button" class="ad-btn-small" style="background: #ef4444;" onclick="removeBidIncrementRow(this)">REMOVE</button>`;
-                
             return `
             <div class="bid-tier-row" style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px;">
                 <input type="number" class="ad-small-input" placeholder="Incr." value="${incVal}" onchange="saveBidIncrements()" style="width: 80px; padding: 8px;">
@@ -1613,7 +1370,6 @@ async function uploadImageToCloudinary(file) {
             btn.innerText = "REMOVE";
             btn.style.background = "#ef4444";
             btn.setAttribute("onclick", "removeBidIncrementRow(this)");
-            
             const container = document.getElementById('bidIncrementContainer');
             container.insertAdjacentHTML('beforeend', createBidRowHTML('', '', true));
             saveBidIncrements();
@@ -1625,29 +1381,23 @@ async function uploadImageToCloudinary(file) {
             saveBidIncrements();
         }
 
-    function saveBidIncrements() {
-        let tiers = [];
-        let rows = document.querySelectorAll('#bidIncrementContainer .bid-tier-row');
-        
-        rows.forEach(row => {
-            let inputs = row.querySelectorAll('input[type="number"]');
-            if (inputs && inputs.length >= 2) {
-                let incAmount = parseInt(inputs[0].value);
-                let afterAmount = parseInt(inputs[1].value);
-                
-                if (!isNaN(incAmount) && !isNaN(afterAmount) && incAmount > 0 && afterAmount > 0) {
-                    tiers.push({ inc: incAmount, after: afterAmount });
+        function saveBidIncrements() {
+            let tiers = [];
+            let rows = document.querySelectorAll('#bidIncrementContainer .bid-tier-row');
+            rows.forEach(row => {
+                let inputs = row.querySelectorAll('input[type="number"]');
+                if (inputs && inputs.length >= 2) {
+                    let incAmount = parseInt(inputs[0].value);
+                    let afterAmount = parseInt(inputs[1].value);
+                    if (!isNaN(incAmount) && !isNaN(afterAmount) && incAmount > 0 && afterAmount > 0) {
+                        tiers.push({ inc: incAmount, after: afterAmount });
+                    }
                 }
-            }
-        });
-
-        // Sync perfectly with your Bulletproof Storage Engine!
-        let activeSetup = safeGetStorage('auctionSetup', {});
-        activeSetup.tiers = tiers;
-        safeSetStorage('auctionSetup', activeSetup);
-        
-        console.log("Custom Bid Tiers successfully saved to memory:", tiers);
-    }
+            });
+            let activeSetup = safeGetStorage('auctionSetup', {});
+            activeSetup.tiers = tiers;
+            safeSetStorage('auctionSetup', activeSetup);
+        }
 
         function generateTeamInputs() {
             const num = parseInt(document.getElementById('numOfTeams').value) || 0;
@@ -1706,9 +1456,7 @@ async function uploadImageToCloudinary(file) {
                     } else {
                         teamContainer.innerHTML = '<span style="color: #94a3b8;">No teams added yet.</span>';
                     }
-                } catch(e) {
-                    teamContainer.innerHTML = '<span style="color: #ef4444;">Error loading teams.</span>';
-                }
+                } catch(e) {}
             }
 
             const catContainer = document.getElementById('ad-categories-list');
@@ -1741,7 +1489,6 @@ async function uploadImageToCloudinary(file) {
             try {
                 const num = parseInt(document.getElementById('numOfCategories').value) || 0;
                 let currentCats = safeGetStorage('auctionCats', []);
-                
                 for(let i=1; i<=num; i++) {
                     const input = document.getElementById('catName_'+i);
                     const maxInput = document.getElementById('catMax_'+i);
@@ -1751,10 +1498,8 @@ async function uploadImageToCloudinary(file) {
                 }
                 safeSetStorage('auctionCats', currentCats); 
                 window.currentCategories = currentCats;
-                
                 updateManualCategoryDropdowns();
                 renderAuctionDetailLists();
-                
                 document.getElementById('numOfCategories').value = '';
                 document.getElementById('categoryInputsContainer').innerHTML = '';
                 closeModal('modal-category');
@@ -1774,7 +1519,7 @@ async function uploadImageToCloudinary(file) {
                 else cats[index] = newName;
                 safeSetStorage('auctionCats', cats);
                 updateManualCategoryDropdowns();
-                try { renderAuctionDetailLists(); } catch(e) {}
+                renderAuctionDetailLists();
             }
         }
 
@@ -1784,20 +1529,18 @@ async function uploadImageToCloudinary(file) {
             cats = cats.filter(c => (c.name || c) !== name);
             safeSetStorage('auctionCats', cats);
             updateManualCategoryDropdowns();
-            try { renderAuctionDetailLists(); } catch(e) {}
+            renderAuctionDetailLists();
         }
 
         async function addMultipleTeams() {
             try {
                 const num = parseInt(document.getElementById('numOfTeams').value) || 0;
                 const btn = document.getElementById('addTeamBtn');
-                
                 if(num === 0) return alert("Please enter the number of teams to add.");
                 if(btn) { btn.innerText = "Saving Teams... Please wait"; btn.disabled = true; }
 
                 let localTeams = safeGetStorage('auctionTeams', []);
                 if (!Array.isArray(localTeams)) localTeams = [];
-
                 const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
                 localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
 
@@ -1814,7 +1557,6 @@ async function uploadImageToCloudinary(file) {
                     if (logoInput && logoInput.files && logoInput.files[0]) {
                         logoDataUrl = await compressImage(logoInput.files[0], 120);
                     }
-                    
                     if (!logoDataUrl) {
                         logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
                     }
@@ -1827,18 +1569,14 @@ async function uploadImageToCloudinary(file) {
                         purseRemaining: Number(budget),
                         tournamentId: activeTourneyId
                     };
-
                     localTeams.push(newTeam);
-                    try { fetch('/api/franchises', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({...newTeam, tournamentId: activeTourneyId}) }).catch(e => {}); } catch(e) {}
                 }
 
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
-
                 document.getElementById('numOfTeams').value = ''; 
                 document.getElementById('teamInputsContainer').innerHTML = '';
                 if(btn) { btn.innerText = "Add All Teams"; btn.disabled = false; }
-                
                 closeModal('modal-team');
                 renderAuctionDetailLists();
                 try { renderFranchiseStandings(); } catch(e){}
@@ -1852,25 +1590,20 @@ async function uploadImageToCloudinary(file) {
 
         function deleteTeam(id) {
             if(!confirm("Are you sure you want to delete this franchise?")) return;
-            
             let localTeams = safeGetStorage('auctionTeams', []);
             let teamToDelete = localTeams.find(t => t._id === id || t.id === id) || (window.allTeams || []).find(t => t._id === id || t.id === id);
-
             let deletedTracker = safeGetStorage('deletedTeams', []);
             if (id && !deletedTracker.includes(id)) deletedTracker.push(id);
             if (teamToDelete && teamToDelete.name && !deletedTracker.includes(teamToDelete.name.trim().toLowerCase())) {
                 deletedTracker.push(teamToDelete.name.trim().toLowerCase());
             }
             safeSetStorage('deletedTeams', deletedTracker);
-
             localTeams = localTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             safeSetStorage('auctionTeams', localTeams);
             if (window.allTeams) {
                 window.allTeams = window.allTeams.filter(t => t._id !== id && t.id !== id && (teamToDelete ? t.name.trim().toLowerCase() !== teamToDelete.name.trim().toLowerCase() : true));
             }
-            
-            try { fetch('/api/franchises/' + id, { method: 'DELETE' }).catch(e=>{}); } catch(e){}
-            try { renderAuctionDetailLists(); } catch(e) {}
+            renderAuctionDetailLists();
             try { renderFranchiseStandings(); } catch(e) {}
         }
 
@@ -1891,7 +1624,6 @@ async function uploadImageToCloudinary(file) {
 
             let localTeams = safeGetStorage('auctionTeams', []);
             let tIndex = localTeams.findIndex(t => t._id === id || t.id === id);
-            
             if(tIndex > -1) {
                 localTeams[tIndex].name = newName;
                 if(logoInput.files && logoInput.files[0]) {
@@ -1899,10 +1631,782 @@ async function uploadImageToCloudinary(file) {
                 }
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
-                try { renderAuctionDetailLists(); } catch(e) {}
+                renderAuctionDetailLists();
                 try { renderFranchiseStandings(); } catch(e) {}
                 closeModal('modal-edit-team');
             }
+        }
+
+        function importExcelPlayers(btn) {
+            const fileInput = document.getElementById('excelFile');
+            const file = fileInput.files[0];
+            if (!file) return alert("Please select an Excel or CSV file first.");
+
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    let json = [];
+                    for (let sheetName of workbook.SheetNames) {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const sheetData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                        if (sheetData && sheetData.length > 0) {
+                            json = sheetData;
+                            break;
+                        }
+                    }
+
+                    if (json.length === 0) throw new Error("File is empty or contains no readable data.");
+
+                    let localPlayers = safeGetStorage('auctionPlayers', []);
+                    if (!Array.isArray(localPlayers)) localPlayers = [];
+                    const activeSetup = safeGetStorage('auctionSetup', {});
+                    const activeTourneyId = activeSetup.id || 'KBL2026';
+
+                    let addedCount = 0;
+                    json.forEach((row, index) => {
+                        const cleanRow = {};
+                        for (let key in row) {
+                            let safeKey = String(key).toLowerCase().replace(/[^a-z0-9]/g, '');
+                            cleanRow[safeKey] = row[key];
+                        }
+                        let name = cleanRow['playername'] || cleanRow['name'] || cleanRow['player'] || cleanRow['players'] || row['Player Name'] || row['Name'] || Object.values(row)[1] || Object.values(row)[0];
+                        let cat = cleanRow['category'] || cleanRow['cat'] || cleanRow['pool'] || 'Default';
+                        let price = cleanRow['baseprice'] || cleanRow['price'] || cleanRow['base'] || 0;
+                        let slno = cleanRow['slno'] || cleanRow['serialno'] || cleanRow['sl'] || cleanRow['no'] || (localPlayers.length + 1);
+                        let photoLink = cleanRow['photo'] || cleanRow['image'] || cleanRow['photourl'] || cleanRow['url'] || '';
+                        
+                        if (name && String(name).trim() !== '') {
+                            localPlayers.push({
+                                _id: 'plyr_' + Date.now() + '_' + Math.floor(Math.random()*1000) + index,
+                                serialNumber: slno,
+                                name: String(name).trim(),
+                                category: String(cat).trim(),
+                                basePrice: parseInt(price) || parseInt(activeSetup.minBid) || 0,
+                                status: 'available',
+                                photoUrl: String(photoLink).trim(),
+                                tournamentId: activeTourneyId
+                            });
+                            addedCount++;
+                        }
+                    });
+
+                    if (addedCount === 0) throw new Error("Could not detect player names.");
+
+                    safeSetStorage('auctionPlayers', localPlayers);
+                    window.allPlayers = localPlayers;
+                    renderPlayersDatabase('all');
+                    updatePlayerCounterBtn();
+                    alert(`✅ Successfully imported ${addedCount} players!`);
+                    closeModal('modal-player');
+                    fileInput.value = '';
+                } catch(err) {
+                    console.error("Excel Error:", err);
+                    alert("Upload Failed: " + err.message);
+                } finally {
+                    btn.innerText = "Upload File";
+                    btn.disabled = false;
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function addPlayer() {
+            const name = document.getElementById('playerName').value;
+            const cat = document.getElementById('playerCategoryManual').value;
+            const price = document.getElementById('playerBasePrice').value;
+            const photoInput = document.getElementById('playerPhoto');
+
+            if (!name || !cat) return alert("Player Name and Category are required!");
+
+            let photoUrl = "";
+            if (photoInput && photoInput.files[0]) {
+                photoUrl = await compressImage(photoInput.files[0], 200);
+            }
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const activeTourneyId = activeSetup.id || 'KBL2026';
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            if (!Array.isArray(localPlayers)) localPlayers = [];
+
+            const newPlayer = {
+                _id: 'plyr_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                serialNumber: localPlayers.length + 1,
+                name: name.trim(),
+                category: cat,
+                basePrice: parseInt(price) || parseInt(activeSetup.minBid) || 0,
+                status: 'available',
+                photoUrl: photoUrl,
+                tournamentId: activeTourneyId
+            };
+
+            localPlayers.push(newPlayer);
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+            renderPlayersDatabase('all');
+            updatePlayerCounterBtn();
+
+            document.getElementById('playerName').value = '';
+            document.getElementById('playerBasePrice').value = '';
+            if(photoInput) photoInput.value = '';
+            alert("Player added successfully!");
+        }
+
+        function importFromGoogleSheet(btn) {
+            alert("Google Sheets sync requires a backend endpoint setup. Please use the Excel/CSV upload feature instead.");
+        }
+
+        function deletePlayer(id) {
+            if(!confirm("Are you sure you want to permanently delete this player?")) return;
+            let deletedTracker = safeGetStorage('deletedPlayers', []);
+            if(!deletedTracker.includes(id)) deletedTracker.push(id);
+            safeSetStorage('deletedPlayers', deletedTracker);
+            window.allPlayers = window.allPlayers.filter(p => p._id !== id);
+            safeSetStorage('auctionPlayers', window.allPlayers);
+            renderPlayersDatabase('all');
+            updatePlayerCounterBtn();
+            try { renderFranchiseStandings(); } catch(e) {}
+        }
+
+        function openEditPlayerModal(id) {
+            const p = window.allPlayers.find(p => p._id === id);
+            if(!p) return;
+            updateManualCategoryDropdowns();
+            document.getElementById('editPlayerId').value = p._id;
+            document.getElementById('editPlayerName').value = p.name;
+            document.getElementById('editPlayerBasePrice').value = p.basePrice || 0;
+            document.getElementById('editPlayerCategoryManual').value = p.category || '';
+            document.getElementById('editPlayerPhoto').value = ""; 
+            openModal('modal-edit-player');
+        }
+
+        async function savePlayerEdit() {
+            const id = document.getElementById('editPlayerId').value;
+            const newName = document.getElementById('editPlayerName').value;
+            const newPrice = document.getElementById('editPlayerBasePrice').value;
+            const newCat = document.getElementById('editPlayerCategoryManual').value;
+            const photoInput = document.getElementById('editPlayerPhoto');
+
+            if(!newName || !newPrice) return alert("Name and Price are required.");
+            let pIndex = window.allPlayers.findIndex(p => p._id === id);
+            if(pIndex > -1) {
+                window.allPlayers[pIndex].name = newName;
+                window.allPlayers[pIndex].basePrice = newPrice;
+                window.allPlayers[pIndex].category = newCat;
+                if(photoInput.files && photoInput.files[0]) {
+                    window.allPlayers[pIndex].photoUrl = await compressImage(photoInput.files[0], 200);
+                }
+                safeSetStorage('auctionPlayers', window.allPlayers);
+                renderPlayersDatabase('all');
+                closeModal('modal-edit-player');
+                try { renderFranchiseStandings(); } catch(e) {}
+            }
+        }
+
+        function updateDashboardHistoryCard() {
+            const savedSetup = safeGetStorage('auctionSetup', {});
+            if(savedSetup.name) {
+                document.getElementById('recentAuctionCard').style.display = 'flex';
+                document.getElementById('histName').innerText = savedSetup.name;
+                document.getElementById('histDate').innerText = savedSetup.date || 'Active Auction';
+                document.getElementById('histLogo').src = getTeamLogo(savedSetup, savedSetup.name);
+            }
+        }
+
+        function updatePlayerCounterBtn() {
+            const counterBtn = document.getElementById('adPlayerCounterBtn');
+            if (counterBtn) {
+                const count = (window.allPlayers && window.allPlayers.length) ? window.allPlayers.length : 0;
+                counterBtn.innerText = `${count} Players Added (View Roster)`;
+            }
+        }
+
+        function openPlayerModal() {
+            updateManualCategoryDropdowns();
+            openModal('modal-player');
+        }
+
+        function changeLiveLogoSize(val) {
+            document.getElementById('liveLogoSizeDisp').innerText = val + 'px';
+            localStorage.setItem('liveLogoSize', val);
+            applyLiveLogoSize();
+        }
+
+        function applyLiveLogoSize() {
+            const size = localStorage.getItem('liveLogoSize') || '150';
+            const logoEl = document.getElementById('la-bidder-logo');
+            if(logoEl) {
+                logoEl.style.width = size + 'px';
+                logoEl.style.height = size + 'px';
+                if (liveCurrentTeamId) logoEl.style.display = 'inline-block';
+            }
+            const disp = document.getElementById('liveLogoSizeDisp');
+            if(disp) disp.innerText = size + 'px';
+            const slider = document.getElementById('liveLogoResizer');
+            if(slider) slider.value = size;
+        }
+
+        function updateLiveControls() {
+            const hasBid = (liveCurrentTeamId !== null);
+            const isFinalized = (livePlayerActive && (livePlayerActive.status === 'sold' || livePlayerActive.status === 'unsold'));
+            const noPlayer = !livePlayerActive;
+
+            const lockButtons = {
+                searchBtn: document.getElementById('la-search-btn'),
+                nextBtn: document.getElementById('la-next-btn'),
+                searchInput: document.getElementById('la-search-input'),
+                unsoldBtn: document.getElementById('la-unsold-btn'),
+                soldBtn: document.getElementById('la-sold-btn'),
+                undoBtn: document.getElementById('la-undo-btn'),
+                customBtn: document.getElementById('la-custom-btn'),
+                customInput: document.getElementById('la-manual-bid'),
+                strip: document.getElementById('la-franchise-strip')
+            };
+
+            const toggle = (el, isActive) => {
+                if(!el) return;
+                if (el.tagName === 'DIV') {
+                    el.style.pointerEvents = isActive ? 'auto' : 'none';
+                    el.style.opacity = isActive ? '1' : '0.4';
+                } else if (el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+                    el.disabled = !isActive;
+                    el.style.opacity = isActive ? '1' : '0.4';
+                } else {
+                    el.disabled = !isActive;
+                    el.style.opacity = isActive ? '1' : '0.4';
+                    el.style.cursor = isActive ? 'pointer' : 'not-allowed';
+                }
+            };
+
+            if (noPlayer || isFinalized) {
+                toggle(lockButtons.searchBtn, true);
+                toggle(lockButtons.nextBtn, true);
+                toggle(lockButtons.searchInput, true);
+                toggle(lockButtons.unsoldBtn, false);
+                toggle(lockButtons.soldBtn, false);
+                toggle(lockButtons.undoBtn, false);
+                toggle(lockButtons.customBtn, false);
+                toggle(lockButtons.customInput, false);
+                toggle(lockButtons.strip, false);
+            } else {
+                toggle(lockButtons.strip, true);
+                toggle(lockButtons.customBtn, true);
+                toggle(lockButtons.customInput, true);
+                toggle(lockButtons.searchBtn, !hasBid);
+                toggle(lockButtons.nextBtn, !hasBid);
+                toggle(lockButtons.searchInput, !hasBid);
+                toggle(lockButtons.unsoldBtn, !hasBid);
+                toggle(lockButtons.soldBtn, hasBid);
+                toggle(lockButtons.undoBtn, hasBid);
+            }
+        }
+
+        function populateCustomBidDropdown() {
+            const datalist = document.getElementById('custom-bid-options');
+            if (!datalist) return;
+            datalist.innerHTML = '';
+            if (!livePlayerActive) return;
+
+            const activeTeams = getActiveTeams();
+            let maxPurse = 0;
+            activeTeams.forEach(t => {
+                const fin = getFranchiseFinancials(t._id || t.id);
+                if (fin.maxBid > maxPurse) maxPurse = fin.maxBid;
+            });
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const fallbackBase = parseInt(activeSetup.minBid) || 0;
+            let basePrice = parseInt(livePlayerActive.basePrice || fallbackBase);
+            let currentVal = parseInt(liveCurrentBid) || basePrice;
+            let simulatedBid = currentVal;
+            let optionsCount = 0;
+
+            while (optionsCount < 40) {
+                let inc = getDynamicIncrement(simulatedBid);
+                if(inc <= 0) inc = 100;
+                simulatedBid += inc;
+                if (maxPurse > 0 && simulatedBid > maxPurse) break;
+                const opt = document.createElement('option');
+                opt.value = simulatedBid;
+                datalist.appendChild(opt);
+                optionsCount++;
+            }
+        }
+
+        async function initLiveAuctionRoom() {
+            const strip = document.getElementById('la-franchise-strip');
+            if (!strip) return;
+            let activeTeams = getActiveTeams();
+            renderFranchiseStrip(activeTeams);
+            const state = safeGetStorage('liveAuctionState', null);
+            if (state && state.player) {
+                restoreLiveState(state);
+            } else {
+                resetLiveBoard();
+            }
+            applyLiveLogoSize();
+        }
+
+        function renderFranchiseStrip(teams) {
+            const strip = document.getElementById('la-franchise-strip');
+            if (!strip) return;
+            strip.innerHTML = '';
+            if (!teams || teams.length === 0) {
+                strip.innerHTML = '<span style="color:#64748b; padding:10px;">No franchises found. Add teams in My Auction.</span>';
+                return;
+            }
+            teams.forEach((t, index) => {
+                try {
+                    const logo = getTeamLogo(t, 'Team ' + (index + 1));
+                    const safeName = t.name ? String(t.name).substring(0, 12) : ('Team ' + (index + 1));
+                    strip.innerHTML += `
+                        <div id="franchise-btn-${index}" class="franchise-btn" onclick="franchiseBidByIndex(${index})" style="min-width: 100px; cursor: pointer;">
+                            <img src="${logo}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 2px solid #cbd5e1; display: inline-block;">
+                            <span style="font-size: 14px; font-weight: bold; margin-top: 5px; display: block; color: white;">${safeName}</span>
+                        </div>`;
+                } catch(err) {}
+            });
+            evaluateFranchiseStripForPlayer();
+        }
+
+        function resetLiveBoard() {
+            livePlayerActive = null;
+            liveCurrentBid = 0;
+            liveCurrentTeamId = null;
+            isFirstBid = true;
+            liveBidHistory = [];
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            document.getElementById('la-assoc-name').innerText = activeSetup.name || 'KARKALA BADMINTON ASSOCIATION';
+
+            const assocLogo = document.getElementById('la-assoc-logo');
+            if (assocLogo) {
+                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
+            }
+
+            document.getElementById('la-sl-no').innerText = "0";
+            document.getElementById('la-name').innerText = "WAITING FOR PLAYER...";
+            document.getElementById('la-cat').innerText = "---";
+            document.getElementById('la-club').innerText = "---";
+            document.getElementById('la-current-bid').innerText = "0";
+            document.getElementById('la-photo').src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png";
+
+            document.getElementById('la-bidder-box').style.display = 'none';
+            document.getElementById('la-bidder-name').style.display = 'none';
+            document.getElementById('la-sold-stamp').classList.remove('active');
+            
+            document.getElementById('la-search-input').value = '';
+            document.getElementById('la-manual-bid').value = '';
+            populateCustomBidDropdown();
+
+            applyLiveLogoSize();
+            updateLiveControls();
+            evaluateFranchiseStripForPlayer(); 
+            saveLiveState();
+        }
+
+        function pushPlayerToScreen(p, isGoingBack = false) {
+            if(livePlayerActive && !isGoingBack) {
+                livePlayerHistory.push(livePlayerActive);
+            }
+            livePlayerActive = p;
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            const fallbackBase = parseInt(activeSetup.minBid) || 0;
+            let rawPrice = p.basePrice || p.BasePrice || p['Base Price'] || p.price || p.Price || fallbackBase;
+            liveCurrentBid = parseInt(rawPrice) || fallbackBase;
+
+            liveCurrentTeamId = null;
+            isFirstBid = true;
+            liveBidHistory = [];
+            document.getElementById('la-sl-no').innerText = p.serialNumber || '0';
+            document.getElementById('la-name').innerText = p.name;
+            document.getElementById('la-cat').innerText = p.category || 'N/A';
+            document.getElementById('la-club').innerText = p.club || p.team || 'N/A';
+            document.getElementById('la-current-bid').innerText = liveCurrentBid;
+
+            const assocLogo = document.getElementById('la-assoc-logo');
+            if (assocLogo) {
+                assocLogo.src = (activeSetup.logoUrl && activeSetup.logoUrl.length > 5) ? activeSetup.logoUrl : '/spa-logo.png.png';
+            }
+
+            const photoEl = document.getElementById('la-photo');
+            photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; 
+            setTimeout(() => {
+                photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            }, 50); 
+
+            document.getElementById('la-bidder-box').style.display = 'none';
+            document.getElementById('la-bidder-name').style.display = 'none';
+            document.getElementById('la-sold-stamp').classList.remove('active');
+
+            updateLiveControls();
+            evaluateFranchiseStripForPlayer();
+            populateCustomBidDropdown();
+            saveLiveState();
+        }
+
+        function getDynamicIncrement(currentBid) {
+            let bid = parseInt(currentBid) || 0;
+            let activeSetup = safeGetStorage('auctionSetup', {});
+            let currentIncrement = parseInt(activeSetup.bidInc) || 100;
+            let tiers = activeSetup.tiers;
+            if (tiers && Array.isArray(tiers) && tiers.length > 0) {
+                tiers.sort((a, b) => parseInt(a.after) - parseInt(b.after));
+                tiers.forEach(tier => {
+                    let threshold = parseInt(tier.after) || 0;
+                    let incAmount = parseInt(tier.inc) || 0;
+                    if (threshold > 0 && bid >= threshold) {
+                        currentIncrement = incAmount;
+                    }
+                });
+            }
+            return currentIncrement;
+        }
+
+        function franchiseBidByIndex(index) {
+            if (!livePlayerActive) return alert("⚠️ No player is currently on the auction block!");
+            const activeTeams = getActiveTeams();
+            const team = activeTeams[index];
+            if (!team) return;
+
+            const activeSetup = safeGetStorage('auctionSetup', {});
+            let currentVal = parseInt(liveCurrentBid) || 0;
+            if (isNaN(currentVal) || currentVal === 0) {
+                const fallbackBase = parseInt(activeSetup.minBid) || 0;
+                let rawPrice = livePlayerActive.basePrice || fallbackBase;
+                currentVal = parseInt(rawPrice) || fallbackBase;
+            }
+
+            let fallbackInc = parseInt(activeSetup.bidInc) || 100;
+            let exactIncrement = getDynamicIncrement(currentVal) || fallbackInc;
+            let proposedBid = isFirstBid ? currentVal : (currentVal + exactIncrement);
+
+            const check = canTeamBid(team._id || team.id, proposedBid, livePlayerActive.category);
+            if (!check.allowed) {
+                let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
+                return alert("🛑 " + team.name + " cannot bid: " + formattedReason);
+            }
+
+            liveBidHistory.push({
+                bid: liveCurrentBid, 
+                teamId: liveCurrentTeamId,
+                isFirst: isFirstBid,
+                logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
+                teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
+                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none'
+            });
+
+            liveCurrentBid = proposedBid;
+            liveCurrentTeamId = team._id || team.id;
+            isFirstBid = false;
+
+            document.getElementById('la-current-bid').innerText = liveCurrentBid;
+            document.getElementById('la-bidder-box').style.display = 'flex';
+            document.getElementById('la-bidder-name').innerText = team.name;
+            document.getElementById('la-bidder-name').style.display = 'block';
+            document.getElementById('la-bidder-logo').src = getTeamLogo(team, team.name);
+
+            updateLiveControls();
+            populateCustomBidDropdown();
+            saveLiveState();
+        }
+
+        function applyManualBid() {
+            if (!livePlayerActive) return alert("⚠️ No player is currently on the auction block!");
+            const manInput = document.getElementById('la-manual-bid');
+            if (!manInput || manInput.value === '') return alert("⚠️ Please enter or select an amount in the Custom Bid box.");
+            
+            const manBid = parseInt(manInput.value);
+            if (isNaN(manBid)) return alert("Please enter a valid number.");
+            let currentPrice = parseInt(liveCurrentBid) || 0;
+
+            if (manBid <= currentPrice) return alert("Manual custom bid must be higher than current bid.");
+
+            if (liveCurrentTeamId) {
+                const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
+                if (!check.allowed) {
+                    let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
+                    return alert("🛑 Insufficient Funds! Leading franchise cannot afford this bid: " + formattedReason);
+                }
+            }
+
+            liveBidHistory.push({
+                bid: liveCurrentBid, 
+                teamId: liveCurrentTeamId,
+                isFirst: isFirstBid,
+                logoUrl: document.getElementById('la-bidder-logo') ? document.getElementById('la-bidder-logo').src : '',
+                teamName: document.getElementById('la-bidder-name') ? document.getElementById('la-bidder-name').innerText : '',
+                displayState: document.getElementById('la-bidder-box') ? document.getElementById('la-bidder-box').style.display : 'none'
+            });
+
+            liveCurrentBid = manBid;
+            isFirstBid = false;
+            document.getElementById('la-current-bid').innerText = liveCurrentBid;
+            document.getElementById('la-manual-bid').value = '';
+            
+            updateLiveControls();
+            populateCustomBidDropdown();
+            saveLiveState();
+        }
+
+        function undoLastBid() {
+            if(liveBidHistory.length === 0) return; 
+            const lastState = liveBidHistory.pop();
+            liveCurrentBid = lastState.bid;
+            liveCurrentTeamId = lastState.teamId;
+            isFirstBid = lastState.isFirst;
+
+            document.getElementById('la-current-bid').innerText = liveCurrentBid;
+            document.getElementById('la-bidder-logo').src = lastState.logoUrl;
+            document.getElementById('la-bidder-name').innerText = lastState.teamName;
+            document.getElementById('la-bidder-box').style.display = lastState.displayState;
+            document.getElementById('la-bidder-name').style.display = lastState.displayState;
+
+            updateLiveControls();
+            populateCustomBidDropdown();
+            saveLiveState();
+        }
+
+        function animateSoldPhoto() {
+            const photo = document.getElementById('la-photo');
+            const target = document.getElementById('la-bidder-logo');
+            if(!photo || !target) return;
+            const photoRect = photo.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+
+            const clone = photo.cloneNode(true);
+            clone.style.position = 'fixed'; 
+            clone.style.top = photoRect.top + 'px';
+            clone.style.left = photoRect.left + 'px';
+            clone.style.width = photoRect.width + 'px';
+            clone.style.height = photoRect.height + 'px';
+            clone.style.zIndex = '9999';
+            clone.style.transition = 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)';
+            clone.style.borderRadius = '50%';
+            clone.style.border = '4px solid #10b981';
+            clone.style.opacity = '1';
+            clone.style.margin = '0';
+            clone.style.transformOrigin = 'center center';
+            document.body.appendChild(clone);
+            clone.getBoundingClientRect();
+
+            clone.style.top = targetRect.top + 'px';
+            clone.style.left = targetRect.left + 'px';
+            clone.style.width = targetRect.width + 'px';
+            clone.style.height = targetRect.height + 'px';
+            clone.style.opacity = '0.3';
+            clone.style.transform = 'scale(0.5) rotate(720deg)';
+
+            setTimeout(() => {
+                if(clone.parentNode) clone.parentNode.removeChild(clone);
+            }, 850);
+        }
+
+        function finalizeSale(resultType) {
+            if(!livePlayerActive) return alert("No player on screen!");
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            let pIndex = localPlayers.findIndex(p => (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase()));
+
+            if(resultType === 'sold') {
+                if(!liveCurrentTeamId) return alert("A franchise must bid to sell!");
+                const activeTeams = getActiveTeams();
+                let winningTeam = activeTeams.find(t => (t._id === liveCurrentTeamId || t.id === liveCurrentTeamId));
+                const winningName = winningTeam ? (winningTeam.name || 'Team') : 'Team';
+                const winningLogo = winningTeam ? getTeamLogo(winningTeam) : '';
+
+                livePlayerActive.status = 'sold';
+                livePlayerActive.soldPrice = liveCurrentBid;
+                livePlayerActive.teamId = liveCurrentTeamId;
+                livePlayerActive.teamName = winningName;
+                livePlayerActive.teamLogo = winningLogo;
+
+                if(pIndex > -1) localPlayers[pIndex] = { ...localPlayers[pIndex], ...livePlayerActive };
+                else localPlayers.push(livePlayerActive);
+
+                let globalIndex = window.allPlayers.findIndex(p => (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase()));
+                if(globalIndex > -1) window.allPlayers[globalIndex] = { ...window.allPlayers[globalIndex], ...livePlayerActive };
+                else window.allPlayers.push(livePlayerActive);
+
+                safeSetStorage('auctionPlayers', localPlayers);
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                const activeTourneyId = activeSetup.id || 'KBL2026';
+                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: liveCurrentTeamId, soldPrice: liveCurrentBid, tournamentId: activeTourneyId }); } catch(e){}
+
+                document.getElementById('la-sold-stamp').innerText = "SOLD";
+                document.getElementById('la-sold-stamp').style.borderColor = "white";
+                document.getElementById('la-sold-stamp').style.color = "white";
+                document.getElementById('la-sold-stamp').classList.add('active');
+                animateSoldPhoto();
+
+            } else if(resultType === 'unsold') {
+                livePlayerActive.status = 'unsold';
+                if(pIndex > -1) localPlayers[pIndex].status = 'unsold';
+                else localPlayers.push(livePlayerActive);
+
+                let globalIndex = window.allPlayers.findIndex(p => (p._id && livePlayerActive._id && p._id === livePlayerActive._id) || (p.name && livePlayerActive.name && p.name.trim().toLowerCase() === livePlayerActive.name.trim().toLowerCase()));
+                if(globalIndex > -1) window.allPlayers[globalIndex].status = 'unsold';
+
+                safeSetStorage('auctionPlayers', localPlayers);
+                const activeSetup = safeGetStorage('auctionSetup', {});
+                const activeTourneyId = activeSetup.id || 'KBL2026';
+                try { socket.emit('adminSellPlayer', { playerId: livePlayerActive._id, teamId: null, soldPrice: 0, tournamentId: activeTourneyId, statusOverride: 'unsold' }); } catch(e){}
+
+                document.getElementById('la-sold-stamp').innerText = "UNSOLD";
+                document.getElementById('la-sold-stamp').style.borderColor = "#ef4444";
+                document.getElementById('la-sold-stamp').style.color = "#ef4444";
+                document.getElementById('la-sold-stamp').classList.add('active');
+            }
+            updateLiveControls();
+            saveLiveState();
+        }
+
+        function nextRandomPlayer() {
+            if (livePlayerActive && livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
+                return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
+            }
+            if (!window.allPlayers || window.allPlayers.length === 0) {
+                return alert("No players found! Please add players in the Roster first.");
+            }
+            let activeCategories = getAvailableCategories();
+            const availablePlayers = window.allPlayers.filter(p => {
+                const status = String(p.status || 'available').toLowerCase();
+                const isAvailable = (status === 'available' || status === '');
+                if (!isAvailable) return false;
+                if (activeCategories && activeCategories.length > 0) {
+                    const pCat = String(p.category || '').trim().toLowerCase();
+                    return activeCategories.includes(pCat);
+                }
+                return true;
+            });
+            if(availablePlayers.length === 0) {
+                return alert("⚠️ WARNING: No available players found in the active categories!");
+            }
+            const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+            pushPlayerToScreen(randomPlayer);
+        }
+
+        function manualSearchPlayer() {
+            if (livePlayerActive && livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
+                return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before searching for a new player.");
+            }
+            const term = document.getElementById('la-search-input').value.trim().toLowerCase();
+            if(!term) return alert("Please enter a player name or Serial Number to search.");
+            if (!window.allPlayers || window.allPlayers.length === 0) return alert("Database is empty!");
+
+            const found = window.allPlayers.find(p => (p.serialNumber && String(p.serialNumber).toLowerCase() === term) || (p.name && p.name.toLowerCase().includes(term)));
+            if(!found) return alert("Player not found in database!");
+            pushPlayerToScreen(found);
+        }
+
+        function resetAllPlayersForSecondRound() {
+            if (!confirm("⚠️ Start 2nd Round? This will move only the UNSOLD players back to the Available list. All SOLD players will remain untouched.")) return;
+            let localPlayers = safeGetStorage('auctionPlayers', []);
+            localPlayers = localPlayers.map(p => {
+                const status = String(p.status || '').toLowerCase();
+                if (status === 'unsold' || status === '') {
+                    p.status = 'available';
+                    delete p.soldTo;
+                    delete p.soldPrice;
+                }
+                return p;
+            });
+            safeSetStorage('auctionPlayers', localPlayers);
+            window.allPlayers = localPlayers;
+            safeSetStorage('savedLivePlayer', null);
+            safeSetStorage('liveAuctionState', null);
+            livePlayerActive = null;
+            alert("🔄 Success! Unsold players moved back to Available pool.");
+            location.reload();
+        }
+
+        function saveAuctionProgress(status) {
+            let setup = safeGetStorage('auctionSetup', {});
+            if (!setup.name) return alert("⚠️ No active auction details found to save!");
+            setup.status = status; 
+            safeSetStorage('auctionSetup', setup);
+            let archive = {
+                setup: setup,
+                teams: safeGetStorage('auctionTeams', []),
+                players: safeGetStorage('auctionPlayers', []),
+                cats: safeGetStorage('auctionCats', []),
+                tiers: safeGetStorage('auctionBidTiers', [])
+            };
+            let history = safeGetStorage('auctionHistory', []);
+            if (!Array.isArray(history)) history = [];
+            let existingIndex = history.findIndex(a => a && (a.setup ? a.setup.id === setup.id : a.id === setup.id));
+            if (existingIndex >= 0) history[existingIndex] = archive;
+            else history.push(archive);
+            safeSetStorage('auctionHistory', history);
+            renderAuctionLibrary();
+            alert(`✅ Success! Auction saved as "${status.toUpperCase()}".`);
+        }
+
+        function renderAuctionLibrary() {
+            let history = safeGetStorage('auctionHistory', []);
+            if (!Array.isArray(history)) history = [];
+            let incompleteContainer = document.getElementById('incomplete-auctions-list');
+            let completedContainer = document.getElementById('completed-auctions-list');
+            let incompleteHtml = '';
+            let completedHtml = '';
+
+            history.forEach(item => {
+                if (!item || !item.setup) return;
+                let setup = item.setup;
+                let name = setup.name || 'Unnamed Auction';
+                let date = setup.date || 'No Date';
+                let status = setup.status || 'incomplete';
+                let id = setup.id;
+                let logo = (setup.logoUrl && setup.logoUrl.length > 5) ? setup.logoUrl : getTeamLogo(setup, name);
+
+                let cardHtml = `
+                <div class="auction-history-card" style="margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px; cursor: pointer; flex: 1;" onclick="loadAuctionFromLibrary('${id}')">
+                        <img src="${logo}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;">
+                        <div>
+                            <div style="font-weight: bold; color: #334155; font-size: 15px;">${name}</div>
+                            <div style="color: #94a3b8; font-size: 12px;">Date: ${date}</div>
+                        </div>
+                    </div>
+                    <button class="edit-del-btn" style="color: red;" onclick="deleteAuctionFromLibrary('${id}')">🗑️</button>
+                </div>`;
+                if (status === 'completed') completedHtml += cardHtml;
+                else incompleteHtml += cardHtml;
+            });
+
+            if (incompleteContainer) incompleteContainer.innerHTML = incompleteHtml || '<span style="color: #94a3b8; font-size: 13px;">No incomplete auctions.</span>';
+            if (completedContainer) completedContainer.innerHTML = completedHtml || '<span style="color: #94a3b8; font-size: 13px;">No completed auctions.</span>';
+        }
+
+        function loadAuctionFromLibrary(id) {
+            let history = safeGetStorage('auctionHistory', []);
+            let match = history.find(a => a && a.setup && String(a.setup.id) === String(id));
+            if (!match) return alert("Auction archive not found!");
+
+            window.spaMemory = {};
+            safeSetStorage('liveAuctionState', null);
+            safeSetStorage('savedLivePlayer', null);
+
+            localStorage.setItem('auctionSetup', JSON.stringify(match.setup));
+            localStorage.setItem('auctionTeams', JSON.stringify(match.teams || []));
+            localStorage.setItem('auctionPlayers', JSON.stringify(match.players || []));
+            localStorage.setItem('auctionCats', JSON.stringify(match.cats || []));
+            localStorage.setItem('auctionBidTiers', JSON.stringify(match.tiers || []));
+
+            alert(`📂 Successfully loaded "${match.setup.name}"!`);
+            window.location.reload();
+        }
+
+        function deleteAuctionFromLibrary(id) {
+            if (!confirm("Are you sure you want to delete this auction from your library?")) return;
+            let history = safeGetStorage('auctionHistory', []);
+            history = history.filter(a => a && a.setup && String(a.setup.id) !== String(id));
+            safeSetStorage('auctionHistory', history);
+            renderAuctionLibrary();
         }
     </script>
 </body>
