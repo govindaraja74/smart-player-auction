@@ -282,8 +282,8 @@
             <div id="view-setup" class="hidden">
                 <h1 class="dash-title">CREATE AUCTION</h1>
                 
-                <!-- FIX: Form perfectly triggers required tooltips without reloading the page -->
-                <form id="createAuctionForm">
+                <!-- FIX: Form perfectly stops browser refresh but keeps red validation tooltips -->
+                <form id="createAuctionForm" onsubmit="event.preventDefault(); submitSetup(); return false;">
                     <div class="ca-grid">
                         <div class="ca-label">Auction Logo</div>
                         <div style="grid-column: 2 / span 3;">
@@ -310,8 +310,8 @@
                         <div class="ca-label">Player Per Team*</div>
                         <div style="display: flex; align-items: center;"><input type="number" id="setupMaxPlayers" class="ca-input" placeholder="Player per Team" required></div>
                         <div style="grid-column: 3 / span 2;"></div>
-                        <!-- FIX: Uses reportValidity() to check fields natively before saving -->
-                        <button type="button" id="setupSubmitBtn" class="ca-btn" onclick="if(document.getElementById('createAuctionForm').reportValidity()) { submitSetup(); }">SUBMIT</button>
+                        <!-- FIX: Submit button securely triggers the onsubmit above -->
+                        <button type="submit" id="setupSubmitBtn" class="ca-btn">SUBMIT</button>
                     </div>
                 </form>
             </div>
@@ -856,8 +856,13 @@ async function uploadImageToCloudinary(file) {
             populateCustomBidDropdown();
         }
 
+        // --- NEW: FORM SUBMIT HANDLER TO PREVENT RELOAD ---
+        function handleAuctionSubmit(event) {
+            event.preventDefault(); // Physically blocks browser refresh
+            submitSetup();
+        }
+
         function safeInit() {
-            // FIX: Removed event overriding entirely for secure native HTML5 validation!
             try { loadSavedMemory(); } catch(e) {}
         }
 
