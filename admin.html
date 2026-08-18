@@ -271,52 +271,76 @@
             text-overflow: ellipsis;
             width: 90%;
         }
-        /* OVERRIDES TO AUTO-FIT STANDINGS ON ONE SCREEN */
+      /* ULTIMATE AUTO-FIT STANDINGS - SCALES TO ANY NUMBER OF TEAMS */
         #view-franchise-standings {
             height: 100vh !important;
             display: flex !important;
             flex-direction: column !important;
-            overflow: hidden !important; /* Stops the main page from scrolling */
+            overflow: hidden !important; 
         }
-        /* Targets the container holding the cards */
+        
+        /* Swap from Grid to Flex for infinite elasticity */
         #view-franchise-standings > div:nth-of-type(2),
         #view-franchise-standings .standings-container,
         #view-franchise-standings div[style*="flex-wrap"] {
             flex: 1 !important;
-            display: grid !important;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; /* Auto-creates columns */
-            grid-auto-rows: minmax(0, 1fr) !important; /* Auto-shrinks heights to fit screen */
-            gap: 12px !important;
-            padding-bottom: 20px !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-content: stretch !important; /* Forces rows to share the exact screen height perfectly */
+            justify-content: center !important;
+            gap: 4px !important;
+            padding: 5px !important;
             overflow: hidden !important;
-            align-content: stretch !important;
         }
-        /* Shrinks the padding and margins of the white cards */
+        
+        /* Elastic Cards */
         #view-franchise-standings > div:nth-of-type(2) > div,
         #view-franchise-standings .box {
-            padding: 10px 15px !important;
+            flex: 1 1 20% !important; /* Attempts ~4-5 per row, but will squeeze/wrap as much as needed */
+            min-width: 110px !important; /* Absolute smallest width before wrapping */
+            padding: 4px 8px !important; 
             margin: 0 !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: space-around !important;
-            height: 100% !important;
+            justify-content: center !important;
+            min-height: 0 !important; 
         }
-        /* Dynamically shrinks the logos so they don't take up too much vertical space */
+        
+        /* Viewport-Relative Logos */
         #view-franchise-standings img {
-            max-width: 55px !important;
-            max-height: 55px !important;
-            margin: 0 auto 5px auto !important;
+            width: auto !important;
+            max-width: 35px !important;
+            height: auto !important;
+            max-height: 4vh !important; /* Logo shrinks automatically if screen height gets crowded */
+            margin: 0 auto 2px auto !important;
         }
-        /* Scales the text down to fit */
+        
+        /* Viewport-Relative Text */
         #view-franchise-standings h2, 
         #view-franchise-standings h3 {
-            font-size: 16px !important;
-            margin: 5px 0 !important;
+            font-size: clamp(10px, 1.8vh, 14px) !important;
+            margin: 0 0 2px 0 !important;
+            text-align: center !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        #view-franchise-standings p, 
-        #view-franchise-standings div {
-            font-size: clamp(11px, 1.2vw, 13px) !important;
-            margin: 2px 0 !important;
+        
+        /* Compressed Stat Rows */
+        #view-franchise-standings .box > div {
+            margin: 0 !important;
+            padding-bottom: 2px !important;
+            font-size: clamp(8px, 1.2vh, 12px) !important; /* Text shrinks dynamically as rows increase */
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+        }
+        
+        /* Prevents text from breaking layout on extreme squishing */
+        #view-franchise-standings .box > div > span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
