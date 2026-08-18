@@ -271,6 +271,53 @@
             text-overflow: ellipsis;
             width: 90%;
         }
+        /* OVERRIDES TO AUTO-FIT STANDINGS ON ONE SCREEN */
+        #view-franchise-standings {
+            height: 100vh !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important; /* Stops the main page from scrolling */
+        }
+        /* Targets the container holding the cards */
+        #view-franchise-standings > div:nth-of-type(2),
+        #view-franchise-standings .standings-container,
+        #view-franchise-standings div[style*="flex-wrap"] {
+            flex: 1 !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important; /* Auto-creates columns */
+            grid-auto-rows: minmax(0, 1fr) !important; /* Auto-shrinks heights to fit screen */
+            gap: 12px !important;
+            padding-bottom: 20px !important;
+            overflow: hidden !important;
+            align-content: stretch !important;
+        }
+        /* Shrinks the padding and margins of the white cards */
+        #view-franchise-standings > div:nth-of-type(2) > div,
+        #view-franchise-standings .box {
+            padding: 10px 15px !important;
+            margin: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-around !important;
+            height: 100% !important;
+        }
+        /* Dynamically shrinks the logos so they don't take up too much vertical space */
+        #view-franchise-standings img {
+            max-width: 55px !important;
+            max-height: 55px !important;
+            margin: 0 auto 5px auto !important;
+        }
+        /* Scales the text down to fit */
+        #view-franchise-standings h2, 
+        #view-franchise-standings h3 {
+            font-size: 16px !important;
+            margin: 5px 0 !important;
+        }
+        #view-franchise-standings p, 
+        #view-franchise-standings div {
+            font-size: clamp(11px, 1.2vw, 13px) !important;
+            margin: 2px 0 !important;
+        }
     </style>
 </head>
 <body onload="setTimeout(safeInit, 300)">
