@@ -224,6 +224,36 @@
         .live-presentation-board { border-radius: 0 !important; border: none !important; border-bottom: 4px solid #ef4444 !important; flex: 1 !important; min-height: auto !important; }
         .live-bottom-panel { border-radius: 0 !important; border: none !important; padding: 10px 20px !important; }
         #la-franchise-strip { margin-top: 8px !important; min-height: 60px !important; padding: 5px !important; }
+        /* OVERRIDES FOR AUTO-FITTING FRANCHISE LOGOS IN ONE LINE */
+        #la-franchise-strip {
+            display: flex !important;
+            flex-wrap: nowrap !important; /* Forces single line */
+            justify-content: center;
+            width: 100% !important;
+            gap: 4px !important;
+            padding: 10px 5px !important;
+            overflow: hidden !important; /* Removes scrollbar */
+        }
+        #la-franchise-strip .franchise-btn {
+            flex: 1 1 0 !important; /* Allows them to dynamically shrink/grow */
+            min-width: 0 !important; /* Crucial for shrinking past normal limits */
+            padding: 5px !important;
+        }
+        #la-franchise-strip .franchise-btn img {
+            width: 100% !important;
+            max-width: 55px !important; /* Won't get overly huge if only a few teams */
+            height: auto !important;
+            aspect-ratio: 1 / 1; /* Keeps them perfectly round while shrinking */
+            min-width: 15px !important;
+            border-width: 2px !important;
+        }
+        #la-franchise-strip .franchise-btn span {
+            font-size: clamp(8px, 1.2vw, 13px) !important; /* Shrinks text dynamically */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Adds ... if text is too long */
+            width: 100%;
+        }
     </style>
 </head>
 <body onload="setTimeout(safeInit, 300)">
@@ -421,10 +451,11 @@
             <div id="view-live-room" class="hidden" style="height: 100%;">
                 <div class="live-room" style="background: #0f172a;">
                     
-                    <!-- Admin Top Bar -->
+                  <!-- Admin Top Bar -->
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: #0f172a;">
                         <h1 style="margin: 0; color: white; font-size: 16px;">ADMIN CONTROL PANEL</h1>
                         <div>
+                            <button class="btn-success" style="background: #10b981; margin-right: 10px; padding: 6px 12px; font-size: 13px;" onclick="toggleFullScreen()">⛶ Full Screen</button>
                             <button class="btn-primary" style="background: #3b82f6; margin-right: 10px; padding: 6px 12px; font-size: 13px;" onclick="navTo('view-franchise-standings')">📊 Standings</button>
                             <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444; padding: 6px 12px; font-size: 13px;" onclick="navTo('view-dashboard')">Exit Room</button>
                         </div>
@@ -651,6 +682,18 @@
             } catch (err) {
                 console.error("Upload error:", err);
                 return "";
+            }
+        }
+        // Full Screen Toggle Logic
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         }
 
