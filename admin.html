@@ -225,34 +225,51 @@
         .live-bottom-panel { border-radius: 0 !important; border: none !important; padding: 10px 20px !important; }
         #la-franchise-strip { margin-top: 8px !important; min-height: 60px !important; padding: 5px !important; }
         /* OVERRIDES FOR AUTO-FITTING FRANCHISE LOGOS IN ONE LINE */
+     /* OVERRIDES FOR AUTO-FITTING FRANCHISE LOGOS IN ONE LINE */
         #la-franchise-strip {
             display: flex !important;
-            flex-wrap: nowrap !important; /* Forces single line */
+            flex-wrap: nowrap !important;
             justify-content: center;
             width: 100% !important;
-            gap: 4px !important;
-            padding: 10px 5px !important;
-            overflow: hidden !important; /* Removes scrollbar */
+            gap: 15px !important; /* Adds nice spacing between buttons */
+            padding: 10px 20px !important;
+            overflow: hidden !important;
         }
         #la-franchise-strip .franchise-btn {
-            flex: 1 1 0 !important; /* Allows them to dynamically shrink/grow */
-            min-width: 0 !important; /* Crucial for shrinking past normal limits */
-            padding: 5px !important;
+            flex: 1 1 0 !important;
+            max-width: 160px !important; /* Stops buttons from stretching too wide when there are only a few teams */
+            min-width: 0 !important;
+            padding: 10px 5px !important;
+            background: linear-gradient(145deg, #1e293b, #0f172a) !important; /* Premium button gradient */
+            border: 2px solid #334155 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+        }
+        #la-franchise-strip .franchise-btn:hover {
+            border-color: #38bdf8 !important;
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 15px rgba(56, 189, 248, 0.3) !important; /* Glow effect on hover */
         }
         #la-franchise-strip .franchise-btn img {
             width: 100% !important;
-            max-width: 55px !important; /* Won't get overly huge if only a few teams */
+            max-width: 75px !important; /* Much bigger logos */
             height: auto !important;
-            aspect-ratio: 1 / 1; /* Keeps them perfectly round while shrinking */
-            min-width: 15px !important;
-            border-width: 2px !important;
+            aspect-ratio: 1 / 1;
+            min-width: 35px !important;
+            border: 3px solid #f8fafc !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4) !important;
         }
         #la-franchise-strip .franchise-btn span {
-            font-size: clamp(8px, 1.2vw, 13px) !important; /* Shrinks text dynamically */
+            font-size: clamp(13px, 1.8vw, 18px) !important; /* Much bigger, dynamic text */
+            font-weight: 900 !important; /* Extra bold */
+            letter-spacing: 1px !important;
+            text-transform: uppercase !important;
+            color: #f8fafc !important;
+            margin-top: 10px !important;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* Adds ... if text is too long */
-            width: 100%;
+            text-overflow: ellipsis;
+            width: 90%;
         }
     </style>
 </head>
