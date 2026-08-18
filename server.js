@@ -22,8 +22,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // ==========================================
 
 // 👇 REPLACE THIS STRING WITH YOUR ACTUAL MONGODB CONNECTION STRING 👇
-const cloudDB = process.env.MONGO_URI || 'mongodb+srv://auctionAdmin:<YOUR_PASSWORD>@<YOUR_CLUSTER_ADDRESS>.mongodb.net/SmartAuction?retryWrites=true&w=majority';
-
+const cloudDB = process.env.MONGO_URI || 'mongodb+srv://govindarajabhat_db_user:Adityaraja@74@cluster0.qkovz4n.mongodb.net/SmartAuction?appName=Cluster0';
 mongoose.connect(cloudDB)
     .then(() => console.log("✅ Successfully connected to MongoDB Atlas Cloud!"))
     .catch(err => console.error("❌ Cloud Database connection error:", err));
