@@ -271,12 +271,12 @@
             text-overflow: ellipsis;
             width: 90%;
         }
-/* 12-TEAM GRID - LOGO LEFT, DETAILS RIGHT IN WHITE BOXES */
+/* 16-TEAM WHITE BOX GRID - LOGO LEFT, STATS RIGHT */
         #view-franchise-standings {
             height: 100vh !important;
             display: flex !important;
             flex-direction: column !important;
-            background: #110e1b !important; /* Keeps the dark main background */
+            background: #110e1b !important; /* Premium dark background */
             overflow: hidden !important;
         }
         
@@ -286,91 +286,88 @@
             color: #ffffff !important;
         }
 
-        /* 1. Strict 3 Column Grid for the whole page */
+        /* 1. Main Grid (4 columns for 16 teams) */
         #view-franchise-standings > div:nth-of-type(2),
         #view-franchise-standings .standings-container,
         #view-franchise-standings div[style*="flex-wrap"] {
             flex: 1 !important;
             display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important; 
+            grid-template-columns: repeat(4, 1fr) !important; /* Exactly 4 columns */
             grid-auto-rows: minmax(0, 1fr) !important; 
-            gap: 12px !important;
+            gap: 10px !important;
             padding: 10px 20px 20px 20px !important;
             overflow: hidden !important;
         }
         
-        /* 2. White Card Layout */
+        /* 2. White Card Sub-Grid Layout */
         #view-franchise-standings > div:nth-of-type(2) > div,
         #view-franchise-standings .box {
-            background: #ffffff !important; /* Solid white boxes */
+            background: #ffffff !important; 
             border-radius: 8px !important;
-            padding: 8px 12px !important;
+            padding: 6px 10px !important;
             margin: 0 !important;
             display: grid !important;
-            /* Creates a 55px left column for the logo, and uses the rest for text */
-            grid-template-columns: 55px 1fr !important; 
-            grid-auto-rows: min-content !important; 
-            align-content: center !important;
-            column-gap: 15px !important;
+            /* 45px left column for logo, rest of space for text */
+            grid-template-columns: 45px 1fr !important; 
+            grid-template-rows: auto auto 1fr !important;
+            column-gap: 12px !important;
             row-gap: 2px !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+            height: 100% !important;
+            min-height: 0 !important;
+            overflow: hidden !important; /* Forces everything to stay inside the box */
         }
         
-        /* 3. Logo Positioning (Pinned to Top Left) */
+        /* 3. Logo Pinned to Top Left */
         #view-franchise-standings .box img {
             grid-column: 1 !important;
-            grid-row: 1 / span 6 !important; /* Tells the logo to span down alongside the text */
-            width: 55px !important;
-            height: 55px !important;
+            grid-row: 1 / span 6 !important; /* Spans down alongside all the text */
+            width: 45px !important;
+            height: 45px !important;
             object-fit: cover !important;
-            border-radius: 50% !important; /* Keeps the logo circular */
+            border-radius: 50% !important;
             margin: 0 !important;
-            align-self: start !important; /* Pins it to the very top corner */
+            align-self: start !important;
             border: 1px solid #e2e8f0 !important;
         }
         
-        /* 4. Force ALL text elements into the Right Column */
+        /* 4. Force ALL Text to the Right Column */
         #view-franchise-standings .box h2,
         #view-franchise-standings .box h3,
         #view-franchise-standings .box > div {
             grid-column: 2 !important;
+            margin: 0 !important;
         }
 
-        /* 5. Title & Subtitle Styling (Dark text for white background) */
+        /* 5. Title Styling */
         #view-franchise-standings .box h2 {
-            font-size: clamp(12px, 1.4vh, 15px) !important;
+            font-size: clamp(11px, 1.4vh, 14px) !important;
             color: #0f172a !important;
             font-weight: 900 !important;
             text-align: left !important;
-            margin: 0 0 2px 0 !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         
         #view-franchise-standings .box h3 {
-            font-size: clamp(9px, 1.1vh, 11px) !important;
-            color: #64748b !important;
-            text-align: left !important;
-            margin: 0 0 4px 0 !important;
+            display: none !important; /* Hides the owner name to save precious vertical space */
         }
 
-        /* 6. Stat Rows Styling */
+        /* 6. Stat Rows Formatting */
         #view-franchise-standings .box > div {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
-            margin: 0 !important;
             padding: 1px 0 !important;
-            font-size: clamp(9px, 1.1vh, 12px) !important;
+            font-size: clamp(8px, 1.1vh, 11px) !important;
             color: #475569 !important;
         }
         
-        /* Bold the stat values */
         #view-franchise-standings .box > div > span:last-child,
         #view-franchise-standings .box > div > strong {
             font-weight: bold !important;
-            color: #000000 !important;
+            color: #000000 !important; /* Dark bold text for the numbers */
         }
     </style>
 </head>
