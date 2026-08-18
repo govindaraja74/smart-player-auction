@@ -271,115 +271,106 @@
             text-overflow: ellipsis;
             width: 90%;
         }
- /* PREMIUM DARK 12-TEAM GRID (3 COLUMNS) */
+/* 12-TEAM GRID - LOGO LEFT, DETAILS RIGHT IN WHITE BOXES */
         #view-franchise-standings {
             height: 100vh !important;
             display: flex !important;
             flex-direction: column !important;
-            background: #110e1b !important; /* Deep premium dark background */
+            background: #110e1b !important; /* Keeps the dark main background */
             overflow: hidden !important;
         }
         
-        /* Make header text white */
+        /* Make the main page header text white */
         #view-franchise-standings h1, 
         #view-franchise-standings h2[style*="text-align"] {
             color: #ffffff !important;
         }
 
-        /* 1. Strict 3 Column Grid */
+        /* 1. Strict 3 Column Grid for the whole page */
         #view-franchise-standings > div:nth-of-type(2),
         #view-franchise-standings .standings-container,
         #view-franchise-standings div[style*="flex-wrap"] {
             flex: 1 !important;
             display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important; /* Forces exactly 3 columns */
-            grid-auto-rows: minmax(0, 1fr) !important; /* Divides the height evenly */
-            gap: 15px !important;
-            padding: 15px 25px !important;
+            grid-template-columns: repeat(3, 1fr) !important; 
+            grid-auto-rows: minmax(0, 1fr) !important; 
+            gap: 12px !important;
+            padding: 10px 20px 20px 20px !important;
             overflow: hidden !important;
         }
         
-        /* 2. Premium Dark Card Layout */
+        /* 2. White Card Layout */
         #view-franchise-standings > div:nth-of-type(2) > div,
         #view-franchise-standings .box {
-            background: rgba(30, 27, 46, 0.9) !important; /* Glassmorphism dark card */
-            border: 1px solid #475569 !important;
+            background: #ffffff !important; /* Solid white boxes */
             border-radius: 8px !important;
-            padding: 10px 15px !important;
+            padding: 8px 12px !important;
             margin: 0 !important;
             display: grid !important;
-            /* Sub-grid: 60px left column for Logo, remaining space for Stats */
-            grid-template-columns: 60px 1fr !important; 
-            grid-template-rows: auto repeat(4, 1fr) !important; 
+            /* Creates a 55px left column for the logo, and uses the rest for text */
+            grid-template-columns: 55px 1fr !important; 
+            grid-auto-rows: min-content !important; 
+            align-content: center !important;
             column-gap: 15px !important;
-            min-height: 0 !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+            row-gap: 2px !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
         }
         
-        /* 3. Title Positioning (Top span across) */
+        /* 3. Logo Positioning (Pinned to Top Left) */
+        #view-franchise-standings .box img {
+            grid-column: 1 !important;
+            grid-row: 1 / span 6 !important; /* Tells the logo to span down alongside the text */
+            width: 55px !important;
+            height: 55px !important;
+            object-fit: cover !important;
+            border-radius: 50% !important; /* Keeps the logo circular */
+            margin: 0 !important;
+            align-self: start !important; /* Pins it to the very top corner */
+            border: 1px solid #e2e8f0 !important;
+        }
+        
+        /* 4. Force ALL text elements into the Right Column */
+        #view-franchise-standings .box h2,
+        #view-franchise-standings .box h3,
+        #view-franchise-standings .box > div {
+            grid-column: 2 !important;
+        }
+
+        /* 5. Title & Subtitle Styling (Dark text for white background) */
         #view-franchise-standings .box h2 {
-            grid-column: 1 / -1 !important; /* Span both columns */
-            grid-row: 1 !important;
+            font-size: clamp(12px, 1.4vh, 15px) !important;
+            color: #0f172a !important;
+            font-weight: 900 !important;
             text-align: left !important;
-            font-size: clamp(12px, 1.6vh, 16px) !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            color: #f8fafc !important;
-            margin: 0 0 8px 0 !important;
-            border-bottom: 1px solid #334155 !important;
-            padding-bottom: 5px !important;
+            margin: 0 0 2px 0 !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         
-        /* Hide owner name to save space & match reference */
         #view-franchise-standings .box h3 {
-            display: none !important; 
+            font-size: clamp(9px, 1.1vh, 11px) !important;
+            color: #64748b !important;
+            text-align: left !important;
+            margin: 0 0 4px 0 !important;
         }
 
-        /* 4. Logo Positioning (Bottom Left) */
-        #view-franchise-standings .box img {
-            grid-column: 1 !important;
-            grid-row: 2 / span 4 !important; /* Spans downward next to the stats */
-            width: 100% !important;
-            height: auto !important;
-            aspect-ratio: 1 / 1 !important;
-            object-fit: contain !important;
-            background: #ffffff !important;
-            border-radius: 6px !important;
-            padding: 2px !important;
-            margin: 0 !important;
-            align-self: center !important;
-        }
-        
-        /* 5. Stats Positioning (Bottom Right) */
+        /* 6. Stat Rows Styling */
         #view-franchise-standings .box > div {
-            grid-column: 2 !important;
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
             margin: 0 !important;
-            padding: 0 !important;
-            font-size: clamp(10px, 1.3vh, 13px) !important;
-            color: #94a3b8 !important; /* Subtle gray for labels */
+            padding: 1px 0 !important;
+            font-size: clamp(9px, 1.1vh, 12px) !important;
+            color: #475569 !important;
         }
         
-        /* 6. Emphasize Values (White) */
+        /* Bold the stat values */
         #view-franchise-standings .box > div > span:last-child,
         #view-franchise-standings .box > div > strong {
-            font-size: clamp(13px, 1.6vh, 18px) !important;
-            font-weight: 900 !important;
-            color: #ffffff !important;
-        }
-        
-        /* 7. Highlight 'Amount Remaining' (Purse) in Giant Gold */
-        #view-franchise-standings .box > div:nth-of-type(2) > span:last-child,
-        #view-franchise-standings .box > div:nth-of-type(2) > strong {
-            font-size: clamp(18px, 2.4vh, 26px) !important;
-            color: #fbbf24 !important; /* Gold */
-            text-shadow: 0 0 10px rgba(251, 191, 36, 0.4) !important;
+            font-weight: bold !important;
+            color: #000000 !important;
         }
     </style>
 </head>
