@@ -858,36 +858,78 @@
         window.spaMemory = {}; 
 
         function safeGetStorage(key, defaultVal) {
-            if (window.spaMemory && window.spaMemory[key] !== undefined) {
-                return JSON.parse(JSON.stringify(window.spaMemory[key])); 
-            }
-            try {
-                const item = localStorage.getItem(key);
-                if (!item) return defaultVal;
-                const parsed = JSON.parse(item);
-                window.spaMemory[key] = parsed; 
-                return JSON.parse(JSON.stringify(parsed));
-            } catch (e) { 
-                return defaultVal; 
-            }
+          if (window.spaMemory && window.spaMemory[key] !== undefined) {
+            return JSON.parse(JSON.stringify(window.spaMemory[key]));
         }
-
-        function safeSetStorage(key, data) {
-            window.spaMemory[key] = JSON.parse(JSON.stringify(data)); 
-            try {
-                localStorage.setItem(key, JSON.stringify(data)); 
-            } catch (e) {
-                try {
-                    localStorage.removeItem('auctionHistory'); 
-                    localStorage.setItem(key, JSON.stringify(data)); 
-                } catch(err) {}
-            }
+        try {
+            const item = localStorage.getItem(key);
+            if (!item) return defaultVal;
+            const parsed = JSON.parse(item);
+            window.spaMemory[key] = parsed;
+            return JSON.parse(JSON.stringify(parsed));
+        } catch (e) {
+            return defaultVal;
         }
+    }
 
-        let activeSetupForSocket = safeGetStorage('auctionSetup', {});
-        let activeTourneyIdForSocket = activeSetupForSocket.id || 'KBL2026';
-        let socket = { emit: function(){} };
-        try { if(typeof io !== 'undefined') { socket = io(); socket.emit('joinRoom', activeTourneyIdForSocket); } } catch(e) {}
+    // --- 2. CLOUD-SYNC SETTER ---
+    function safeSetStorage(key, data) {
+        window.spaMemory[key] = JSON.parse(JSON.stringify(data));
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+            try {
+                localStorage.removeItem('auctionHistory');
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch(err) {}
+        }
+        
+        // 🔥 INSTANT CLOUD BACKUP 🔥
+        // Every time data changes locally, securely push the whole state to MongoDB!
+        if (typeof socket !== 'undefined' && socket.emit) {
+            socket.emit('save_auction_to_cloud', [window.spaMemory]);
+        }
+    }
+
+    let activeSetupForSocket = safeGetStorage('auctionSetup', {});
+    let activeTourneyIdForSocket = activeSetupForSocket.id || 'KBL2026';
+    let socket = { emit: function(){} };
+
+    // --- 3. FETCH MONGODB DATA ON PAGE LOAD ---
+    try { 
+        if(typeof io !== 'undefined') { 
+            socket = io(); 
+            socket.emit('joinRoom', activeTourneyIdForSocket); 
+            
+            // Ask MongoDB for the latest data the second the page opens
+            socket.emit('request_saved_auctions');
+            
+            // When MongoDB sends the data, inject it into this new browser!
+            socket.on('load_saved_auctions', (historyData) => {
+                if (historyData && historyData.length > 0) {
+                    let cloudData = historyData[0];
+                    let uiNeedsRefresh = false;
+                    
+                    for (let key in cloudData) {
+                        // Check if the cloud data is different from the empty local browser
+                        if (JSON.stringify(window.spaMemory[key]) !== JSON.stringify(cloudData[key])) {
+                            window.spaMemory[key] = cloudData[key];
+                            localStorage.setItem(key, JSON.stringify(cloudData[key]));
+                            uiNeedsRefresh = true;
+                        }
+                    }
+                    
+                    // If we pulled new data from the cloud, automatically redraw the screens!
+                    if (uiNeedsRefresh) {
+                        console.log("✅ Successfully synced with MongoDB Cloud!");
+                        if (typeof renderFranchises === 'function') renderFranchises();
+                        if (typeof renderFranchiseStandings === 'function') renderFranchiseStandings();
+                        if (typeof renderPlayersDatabase === 'function') renderPlayersDatabase();
+                    }
+                }
+            });
+        } 
+    } catch(e) {}
 
         let currentBidIncrease = 0;
         window.currentCategories = [];
