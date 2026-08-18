@@ -20,9 +20,13 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // ==========================================
 // 2. MONGOOSE MODELS & SCHEMAS
 // ==========================================
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/SmartAuction')
-    .then(() => console.log("✅ Connected to MongoDB"))
-    .catch(err => console.error("❌ Database error:", err));
+
+// 👇 REPLACE THIS STRING WITH YOUR ACTUAL MONGODB CONNECTION STRING 👇
+const cloudDB = process.env.MONGO_URI || 'mongodb+srv://auctionAdmin:<YOUR_PASSWORD>@<YOUR_CLUSTER_ADDRESS>.mongodb.net/SmartAuction?retryWrites=true&w=majority';
+
+mongoose.connect(cloudDB)
+    .then(() => console.log("✅ Successfully connected to MongoDB Atlas Cloud!"))
+    .catch(err => console.error("❌ Cloud Database connection error:", err));
 
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true },
