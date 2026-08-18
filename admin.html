@@ -2032,17 +2032,39 @@
             }
         }
 
-        async function initLiveAuctionRoom() {
+     async function initLiveAuctionRoom() {
             const strip = document.getElementById('la-franchise-strip');
             if (!strip) return;
+            
+            // 1. Always redraw the franchise strip in case you added/edited teams in another tab
             let activeTeams = getActiveTeams();
             renderFranchiseStrip(activeTeams);
+            
+            // 2. SMART CHECK: If a player is already loaded in active memory (just switching tabs)
+            if (livePlayerActive) {
+                updateLiveControls();
+                evaluateFranchiseStripForPlayer();
+                populateCustomBidDropdown();
+                applyLiveLogoSize();
+                return; // Stop the function here so the board DOES NOT reset!
+            }
+
+            // 3. FALLBACK: If the browser was completely refreshed, try to load from saved storage
             const state = safeGetStorage('liveAuctionState', null);
             if (state && state.player) {
-                restoreLiveState(state);
+                if (typeof restoreLiveState === 'function') {
+                    restoreLiveState(state);
+                } else {
+                     // Fallback if restoreLiveState isn't fully defined yet
+                     pushPlayerToScreen(state.player, true);
+                     if (state.currentBid) liveCurrentBid = state.currentBid;
+                     if (state.teamId) liveCurrentTeamId = state.teamId;
+                     document.getElementById('la-current-bid').innerText = liveCurrentBid;
+                }
             } else {
                 resetLiveBoard();
             }
+            
             applyLiveLogoSize();
         }
 
