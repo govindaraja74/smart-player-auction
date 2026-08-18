@@ -217,6 +217,13 @@
             font-size: 18px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.4);
         }
+        /* OVERRIDES FOR EDGE-TO-EDGE LIVE ROOM & COMPACT BOTTOM PANEL */
+        #view-live-room { padding: 0 !important; }
+        #view-live-room > div { max-width: 100% !important; width: 100% !important; height: 100vh !important; justify-content: space-between; zoom: 1 !important; }
+        .live-room { padding: 0 !important; border-radius: 0 !important; gap: 0 !important; }
+        .live-presentation-board { border-radius: 0 !important; border: none !important; border-bottom: 4px solid #ef4444 !important; flex: 1 !important; min-height: auto !important; }
+        .live-bottom-panel { border-radius: 0 !important; border: none !important; padding: 10px 20px !important; }
+        #la-franchise-strip { margin-top: 8px !important; min-height: 60px !important; padding: 5px !important; }
     </style>
 </head>
 <body onload="setTimeout(safeInit, 300)">
@@ -410,21 +417,24 @@
                 </div>
             </div>
 
-            <!-- VIEW D: LIVE AUCTION ROOM -->
+        <!-- VIEW D: LIVE AUCTION ROOM -->
             <div id="view-live-room" class="hidden" style="height: 100%;">
-                <div class="live-room" style="background: #0f172a; padding: 15px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h1 style="margin: 0; color: white; font-size: 20px;">ADMIN CONTROL PANEL</h1>
+                <div class="live-room" style="background: #0f172a;">
+                    
+                    <!-- Admin Top Bar -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: #0f172a;">
+                        <h1 style="margin: 0; color: white; font-size: 16px;">ADMIN CONTROL PANEL</h1>
                         <div>
-                            <button class="btn-primary" style="background: #3b82f6; margin-right: 10px;" onclick="navTo('view-franchise-standings')">📊 Standings</button>
-                            <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444;" onclick="navTo('view-dashboard')">Exit Room</button>
+                            <button class="btn-primary" style="background: #3b82f6; margin-right: 10px; padding: 6px 12px; font-size: 13px;" onclick="navTo('view-franchise-standings')">📊 Standings</button>
+                            <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444; padding: 6px 12px; font-size: 13px;" onclick="navTo('view-dashboard')">Exit Room</button>
                         </div>
                     </div>
 
+                    <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
-                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 20px; left: 20px; width: 140px; height: 140px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
+                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 15px; left: 20px; width: 120px; height: 120px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
 
-                        <div class="live-header">
+                        <div class="live-header" style="margin-bottom: 20px;">
                             <h2 id="la-assoc-name">KARKALA BADMINTON ASSOCIATION</h2>
                             <div class="sub-header"><span>PLAYERS</span> AUCTION</div>
                         </div>
@@ -432,59 +442,64 @@
                         <div class="live-content-area">
                             <div class="live-left-panel">
                                 <div class="live-sl-badge" id="la-sl-no">#0</div>
-                                <div class="live-photo-circle">
+                                <div class="live-photo-circle" style="width: 250px; height: 250px;">
                                     <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
                                 </div>
                             </div>
 
-                            <div class="live-center-panel">
+                            <div class="live-center-panel" style="margin-top: -30px;">
                                 <div class="info-ribbon" id="la-name">WAITING FOR PLAYER</div>
                                 <div class="info-ribbon" id="la-club">LOCATION: ---</div>
                                 <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
                             </div>
 
                             <div class="live-right-panel">
-                                <div class="live-massive-price" id="la-current-bid">0</div>
-                                <div class="live-team-box" id="la-bidder-box" style="display: none;">
+                                <div class="live-massive-price" id="la-current-bid" style="font-size: 95px; margin-bottom: 10px;">0</div>
+                                <div class="live-team-box" id="la-bidder-box" style="display: none; width: 160px; height: 160px;">
                                     <img id="la-bidder-logo" src="">
                                 </div>
-                                <div class="live-team-name-disp" id="la-bidder-name">Team Name</div>
+                                <div class="live-team-name-disp" id="la-bidder-name" style="font-size: 22px;">Team Name</div>
                             </div>
                         </div>
                         
                         <div id="la-sold-stamp" class="sold-stamp-overlay">SOLD</div>
 
-                        <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5;">
-                            <img src="/spa-logo.png.png" style="height: 60px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
-                            <div style="font-size: 12px; color: #f8fafc; margin-top: 3px; font-weight: bold; letter-spacing: 1px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8);">Performing the ultimate fair and dynamic player auction experience.</div>
+                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5;">
+                            <img src="/spa-logo.png.png" style="height: 50px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
+                            <div style="font-size: 11px; color: #f8fafc; margin-top: 2px; font-weight: bold; letter-spacing: 1px;">Performing the ultimate fair and dynamic player auction experience.</div>
                         </div>
                     </div>
 
-                    <div class="live-bottom-panel" style="margin-top: 20px; max-width: 100%; width: 100%;">
-                        <div class="live-controls">
-                            <input type="text" id="la-search-input" placeholder="Player Name or Sl. No." style="width: 200px; padding: 12px; color:black;">
-                            <button id="la-search-btn" class="btn-primary" onclick="manualSearchPlayer()">Search Manual</button>
-                            <button id="la-next-btn" class="btn-primary" style="background: #a855f7;" onclick="nextRandomPlayer()">Next Random</button>
-                            <div style="width: 2px; height: 30px; background: #334155; margin: 0 10px;"></div>
+                    <!-- SINGLE-LINE COMPACT BOTTOM PANEL -->
+                    <div class="live-bottom-panel" style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 15px;">
                             
-                            <input type="number" id="la-manual-bid" list="custom-bid-options" placeholder="Custom Bid ₹" style="width: 130px; padding: 12px; color:black; border-radius: 4px; border: none;">
-                            <datalist id="custom-bid-options"></datalist>
+                            <!-- Left: Search & Next -->
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="la-search-input" placeholder="Name or Sl. No." style="width: 150px; padding: 10px; color:black; font-size: 13px;">
+                                <button id="la-search-btn" class="btn-primary" style="padding: 10px 15px; font-size: 13px;" onclick="manualSearchPlayer()">Search</button>
+                                <button id="la-next-btn" class="btn-primary" style="background: #a855f7; padding: 10px 15px; font-size: 13px;" onclick="nextRandomPlayer()">Next Random</button>
+                            </div>
                             
-                            <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6;" onclick="applyManualBid()">Apply Bid</button>
+                            <!-- Center: Action Buttons -->
+                            <div style="display: flex; gap: 10px; flex: 1; justify-content: center;">
+                                <button id="la-unsold-btn" class="btn-danger" style="font-size: 16px; padding: 10px 25px; min-width: 120px;" onclick="finalizeSale('unsold')">UNSOLD</button>
+                                <button id="la-undo-btn" class="btn-primary" style="background: #f97316; font-size: 14px; padding: 10px 15px;" onclick="undoLastBid()">Undo Last Bid</button>
+                                <button id="la-sold-btn" class="btn-success" style="font-size: 16px; padding: 10px 25px; min-width: 120px;" onclick="finalizeSale('sold')">SOLD!</button>
+                            </div>
+                            
+                            <!-- Right: Custom Bid -->
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="la-manual-bid" list="custom-bid-options" placeholder="Custom Bid ₹" style="width: 120px; padding: 10px; color:black; border-radius: 4px; border: none; font-size: 13px;">
+                                <datalist id="custom-bid-options"></datalist>
+                                <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6; padding: 10px 15px; font-size: 13px;" onclick="applyManualBid()">Apply Bid</button>
+                            </div>
                         </div>
                         
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 20px;">
-                            <button id="la-unsold-btn" class="btn-danger" style="font-size: 18px; padding: 12px 30px; width: 25%;" onclick="finalizeSale('unsold')">UNSOLD</button>
-                            <button id="la-undo-btn" class="btn-primary" style="background: #f97316; font-size: 16px; padding: 12px 30px; width: 25%;" onclick="undoLastBid()">Undo Last Bid</button>
-                            <button id="la-sold-btn" class="btn-success" style="font-size: 18px; padding: 12px 30px; width: 25%;" onclick="finalizeSale('sold')">SOLD!</button>
-                        </div>
-                        
-                        <h4 style="margin: 0 0 10px 0; color: #94a3b8; text-transform: uppercase;">Click Franchise Logo to Bid</h4>
                         <div id="la-franchise-strip" class="franchise-strip"></div>
                     </div>
                 </div>
             </div>
-
             <!-- VIEW E: DATABASE PANEL (PLAYERS ROSTER) -->
             <div id="view-control" class="hidden">
                 <h1 class="dash-title">PLAYERS ROSTER</h1>
