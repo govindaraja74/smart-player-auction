@@ -1469,11 +1469,17 @@
                 }
             }
             
-            // Append Financial Summary Footer and close the PDF wrapper
+          // Append Financial Summary Footer and close the PDF wrapper
             html += `
-                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; justify-content: space-between; font-size: 16px; font-weight: bold;">
-                    <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
-                    <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; flex-direction: column; gap: 12px; font-size: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Total Spent: <strong style="color: #ef4444;">₹${fin.totalSpent}</strong></span>
+                        <span>Purse Remaining: <strong style="color: #10b981;">₹${fin.purse}</strong></span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Reserve Fund: <strong style="color: #f59e0b;">₹${fin.reserve}</strong></span>
+                        <span>Max Possible Bid: <strong style="color: #3b82f6;">₹${fin.maxBid}</strong></span>
+                    </div>
                 </div>
             </div>`;
 
