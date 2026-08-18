@@ -37,6 +37,14 @@ UserSchema.pre('save', async function(next) {
 UserSchema.methods.comparePassword = async function(cand) { return bcrypt.compare(cand, this.password); };
 const User = mongoose.model('User', UserSchema);
 
+// ==========================================
+// PERMANENT AUCTION HISTORY SCHEMA
+// ==========================================
+const SavedAuctionSchema = new mongoose.Schema({
+    adminId: { type: String, default: "main_admin" },
+    history: { type: Array, default: [] }
+});
+const SavedAuction = mongoose.model('SavedAuction', SavedAuctionSchema);
 const TournamentSchema = new mongoose.Schema({
     ownerId: { type: String, required: true },
     name: { type: String, required: true },
