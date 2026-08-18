@@ -187,6 +187,35 @@ app.post('/api/venue/login', venueLockMiddleware, async (req, res) => {
 io.on('connection', (socket) => {
     socket.on('joinRoom', (roomCode) => { socket.join(roomCode); socket.roomCode = roomCode; });
 
+    // ----------------------------------------------------
+    // CLOUD SAVE & LOAD: AUCTION LIBRARY
+    // ----------------------------------------------------
+    
+    // 1. Send saved auctions to the browser when the admin logs in
+    socket.on('request_saved_auctions', async () => {
+        try {
+            let doc = await SavedAuction.findOne({ adminId: "main_admin" });
+            if (doc && doc.history) {
+                socket.emit('load_saved_auctions', doc.history);
+            }
+        } catch (err) {
+            console.error('Error reading saved auctions from DB:', err);
+        }
+    });
+
+    // 2. Save auction progress permanently to MongoDB when admin clicks save
+    socket.on('save_auction_to_cloud', async (historyData) => {
+        try {
+            await SavedAuction.findOneAndUpdate(
+                { adminId: "main_admin" },
+                { history: historyData },
+                { upsert: true, new: true } // "upsert" creates it if it doesn't exist yet
+            );
+            console.log('✅ Auction progress saved permanently to MongoDB.');
+        } catch (err) {
+            console.error('❌ Error saving auction to DB:', err);
+        }
+    });
     // Live Auction - Sell Player
     socket.on('adminSellPlayer', async (data) => {
         const session = await mongoose.startSession();
