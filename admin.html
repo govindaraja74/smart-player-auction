@@ -271,7 +271,7 @@
             text-overflow: ellipsis;
             width: 90%;
         }
-      /* ULTIMATE AUTO-FIT STANDINGS - SCALES TO ANY NUMBER OF TEAMS */
+     /* EXTREME AUTO-FIT STANDINGS - FORCES ALL CARDS ONTO ONE SCREEN */
         #view-franchise-standings {
             height: 100vh !important;
             display: flex !important;
@@ -279,64 +279,64 @@
             overflow: hidden !important; 
         }
         
-        /* Swap from Grid to Flex for infinite elasticity */
+        /* 1. Strict Grid that divides exact height and width */
         #view-franchise-standings > div:nth-of-type(2),
         #view-franchise-standings .standings-container,
         #view-franchise-standings div[style*="flex-wrap"] {
             flex: 1 !important;
-            display: flex !important;
-            flex-wrap: wrap !important;
-            align-content: stretch !important; /* Forces rows to share the exact screen height perfectly */
-            justify-content: center !important;
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important; 
+            grid-auto-rows: minmax(0, 1fr) !important; /* Divides the exact remaining height equally */
             gap: 4px !important;
             padding: 5px !important;
             overflow: hidden !important;
         }
         
-        /* Elastic Cards */
+        /* 2. Strip all space from the cards so they can shrink infinitely */
         #view-franchise-standings > div:nth-of-type(2) > div,
         #view-franchise-standings .box {
-            flex: 1 1 20% !important; /* Attempts ~4-5 per row, but will squeeze/wrap as much as needed */
-            min-width: 110px !important; /* Absolute smallest width before wrapping */
-            padding: 4px 8px !important; 
+            padding: 2px 6px !important; 
             margin: 0 !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: center !important;
+            justify-content: space-evenly !important;
             min-height: 0 !important; 
+            min-width: 0 !important;
+            overflow: hidden !important;
         }
         
-        /* Viewport-Relative Logos */
+        /* 3. Logos MUST shrink if the box gets short */
         #view-franchise-standings img {
             width: auto !important;
-            max-width: 35px !important;
             height: auto !important;
-            max-height: 4vh !important; /* Logo shrinks automatically if screen height gets crowded */
-            margin: 0 auto 2px auto !important;
+            max-width: 35px !important;
+            max-height: 30% !important; /* Forces logo to adapt to tiny row heights */
+            margin: 0 auto !important;
+            object-fit: contain !important;
         }
         
-        /* Viewport-Relative Text */
+        /* 4. Text shrinks drastically */
         #view-franchise-standings h2, 
         #view-franchise-standings h3 {
-            font-size: clamp(10px, 1.8vh, 14px) !important;
-            margin: 0 0 2px 0 !important;
+            font-size: clamp(9px, 1.5vh, 13px) !important;
+            margin: 0 !important;
             text-align: center !important;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
         
-        /* Compressed Stat Rows */
+        /* 5. Stat lines squished to the absolute maximum */
         #view-franchise-standings .box > div {
             margin: 0 !important;
-            padding-bottom: 2px !important;
-            font-size: clamp(8px, 1.2vh, 12px) !important; /* Text shrinks dynamically as rows increase */
+            padding: 0 !important;
+            font-size: clamp(7px, 1.2vh, 11px) !important; 
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
+            min-height: 0 !important;
         }
         
-        /* Prevents text from breaking layout on extreme squishing */
         #view-franchise-standings .box > div > span {
             white-space: nowrap;
             overflow: hidden;
