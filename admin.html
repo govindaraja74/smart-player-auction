@@ -1325,10 +1325,10 @@
             if (!team) return;
 
             // Add the Download PDF button dynamically to the header
-            document.getElementById('fr-team-name').innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>${team.name} - Roster</span>
-                    <button class="btn-primary" style="background: #a855f7; font-size: 13px; padding: 6px 12px; cursor: pointer;" onclick="downloadFranchiseRosterPDF('${team.name.replace(/'/g, "\\'")}')">📥 Download PDF</button>
+          document.getElementById('fr-team-name').innerHTML = `
+                <div style="display: flex; align-items: center; position: relative; width: 100%; min-height: 32px;">
+                    <span style="font-weight: bold;">${team.name} - Roster</span>
+                    <button class="btn-primary" style="position: absolute; left: 50%; transform: translateX(-50%); background: #a855f7; font-size: 13px; padding: 6px 15px; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 6px rgba(0,0,0,0.3);" onclick="downloadFranchiseRosterPDF('${team.name.replace(/'/g, "\\'")}')">📄 Download PDF</button>
                 </div>
             `;
             
