@@ -710,13 +710,24 @@
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
-        function checkPassword() {
+     function checkPassword() {
             const pwd = document.getElementById('adminPassword').value;
             if (pwd === "MasterUnlock2026") {
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 document.getElementById('errorMessage').style.display = 'none';
                 
+                // NEW: Fetch permanently saved data from the server
+                if (typeof socket !== 'undefined' && socket.connected) {
+                    socket.emit('request_saved_auctions');
+                    socket.on('load_saved_auctions', (serverHistory) => {
+                        if (serverHistory && serverHistory.length > 0) {
+                            safeSetStorage('auctionHistory', serverHistory);
+                            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
+                        }
+                    });
+                }
+
                 try { populateAuctionDetails(); } catch(e){}
                 try { updateDashboardHistoryCard(); } catch(e){}
                 try { updateManualCategoryDropdowns(); } catch(e){}
