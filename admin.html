@@ -2673,13 +2673,56 @@
                 document.getElementById('la-sold-stamp').style.color = "#ef4444";
                 document.getElementById('la-sold-stamp').classList.add('active');
             }
-            updateLiveControls();
+          updateLiveControls();
             saveLiveState();
+            
+            // Trigger check to see if rosters are full
+            checkAuctionCompletion();
+        }
+
+      function checkAuctionCompletion() {
+            const activeTeams = getActiveTeams();
+            if (activeTeams.length === 0) return;
+            
+            let totalNeeded = 0;
+            activeTeams.forEach(t => {
+                const stats = getTeamStats(t._id || t.id);
+                totalNeeded += stats.playersNeeded;
+            });
+            
+            if (totalNeeded === 0) {
+                setTimeout(() => {
+                    // Update the Live Board Graphics
+                    document.getElementById('la-name').innerText = "🎉 AUCTION COMPLETED! 🎉";
+                    document.getElementById('la-club').innerText = "ALL ROSTERS ARE FULL";
+                    document.getElementById('la-cat').innerText = "---";
+                    document.getElementById('la-sl-no').innerText = "🏁";
+                    document.getElementById('la-photo').src = "/spa-logo.png.png";
+                    
+                    alert("🏆 AUCTION COMPLETE! All franchises have successfully filled their maximum roster limits.");
+                    
+                    // Automatically save auction as completed to the library
+                    let setup = safeGetStorage('auctionSetup', {});
+                    if(setup.status !== 'completed') {
+                        saveAuctionProgress('completed');
+                    }
+                }, 1200); // Waits for the SOLD animation to finish before showing
+            }
         }
 
         function nextRandomPlayer() {
             if (livePlayerActive && livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
                 return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
+            }
+
+            // Lock the button if the auction is already complete
+            const activeTeams = getActiveTeams();
+            let totalNeeded = 0;
+            if (activeTeams.length > 0) {
+                activeTeams.forEach(t => totalNeeded += getTeamStats(t._id || t.id).playersNeeded);
+                if (totalNeeded === 0) {
+                    return alert("🏆 AUCTION COMPLETE! All teams are full. No more players can be drawn.");
+                }
             }
             if (!window.allPlayers || window.allPlayers.length === 0) {
                 return alert("No players found! Please add players in the Roster first.");
