@@ -65,11 +65,15 @@
 
         /* Dynamic Visual Block for Full Categories */
         .red-shadow {
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) !important;
-            border-color: red !important;
-            background-color: #3f1515 !important;
-            opacity: 0.5;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.9) !important;
+            border-color: #ef4444 !important;
+            background: #ef4444 !important; /* Bright, clear red background */
+            opacity: 0.85 !important; /* High opacity keeps the color strong */
             pointer-events: none;
+        }
+        .red-shadow img {
+            filter: grayscale(100%) opacity(0.8); /* Grays out the team logo slightly */
+            border-color: #fca5a5 !important;
         }
 
         /* Setup/Detail Classes */
