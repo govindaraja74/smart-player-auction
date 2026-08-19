@@ -63,16 +63,16 @@
         .franchise-btn:hover { background: #475569; border-color: #38bdf8; transform: translateY(-3px); }
         .franchise-btn img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; background: white; border: 1px solid #cbd5e1; }
 
-        /* Dynamic Visual Block for Full Categories */
-        .red-shadow {
+        /* Dynamic Visual Block for Full Categories & Insufficient Funds */
+        #la-franchise-strip .franchise-btn.red-shadow {
             box-shadow: 0 0 20px rgba(239, 68, 68, 0.9) !important;
             border-color: #ef4444 !important;
-            background: #ef4444 !important; /* Bright, clear red background */
-            opacity: 0.85 !important; /* High opacity keeps the color strong */
-            pointer-events: none;
+            background: #ef4444 !important;
+            opacity: 0.85 !important;
+            pointer-events: none !important;
         }
-        .red-shadow img {
-            filter: grayscale(100%) opacity(0.8); /* Grays out the team logo slightly */
+        #la-franchise-strip .franchise-btn.red-shadow img {
+            filter: grayscale(100%) opacity(0.8) !important;
             border-color: #fca5a5 !important;
         }
 
@@ -1405,14 +1405,23 @@
             });
         }
 
-        function evaluateFranchiseStripForPlayer() {
+       function evaluateFranchiseStripForPlayer() {
             if(!livePlayerActive) return;
             const activeTeams = getActiveTeams();
+            
+            // Calculate the actual required bid to check if they can afford it
+            let currentVal = parseInt(liveCurrentBid) || parseInt(livePlayerActive.basePrice) || 0;
+            let exactIncrement = getDynamicIncrement(currentVal) || 100;
+            let proposedBid = isFirstBid ? currentVal : (currentVal + exactIncrement);
+
             activeTeams.forEach((t, index) => {
                 const btn = document.getElementById('franchise-btn-' + index);
                 if(!btn) return;
-                const check = canTeamBid(t._id || t.id, 0, livePlayerActive.category);
-                if(!check.allowed && (check.reason === 'category_full' || check.reason === 'team_full')) {
+                
+                // Check if they are full OR if they are out of money
+                const check = canTeamBid(t._id || t.id, proposedBid, livePlayerActive.category);
+                
+                if(!check.allowed) {
                     btn.classList.add('red-shadow');
                 } else {
                     btn.classList.remove('red-shadow');
