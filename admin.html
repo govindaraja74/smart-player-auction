@@ -391,7 +391,21 @@
         #view-franchise-standings [style*="color:#10b981"] { color: #059669 !important; }
         #view-franchise-standings [style*="color: #3b82f6"],
         #view-franchise-standings [style*="color:#3b82f6"] { color: #2563eb !important; }
-    </style>
+   /* Force Franchise Standings to automatically fit exactly 4 in a row */
+        #standings-franchises-list {
+            max-width: 100% !important;
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 15px !important;
+        }
+        #standings-franchises-list .ad-card {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
+        }
+       </style>
 </head>
 <body onload="setTimeout(safeInit, 300)">
     <!-- Login Screen -->
