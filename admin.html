@@ -634,36 +634,39 @@
                         </div>
                     </div>
 
-                    <!-- SINGLE-LINE COMPACT BOTTOM PANEL -->
+                   <!-- SINGLE-LINE COMPACT BOTTOM PANEL -->
                     <div class="live-bottom-panel" style="width: 100%;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 15px;">
+                        <!-- Added padding-left: 25px to push everything away from the blue sidebar -->
+                        <div style="padding-left: 25px; width: 100%; box-sizing: border-box;">
                             
-                            <!-- Left: Search & Next -->
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="la-search-input" placeholder="Name or Sl. No." style="width: 150px; padding: 10px; color:black; font-size: 13px;">
-                                <button id="la-search-btn" class="btn-primary" style="padding: 10px 15px; font-size: 13px;" onclick="manualSearchPlayer()">Search</button>
-                                <button id="la-next-btn" class="btn-primary" style="background: #a855f7; padding: 10px 15px; font-size: 13px;" onclick="nextRandomPlayer()">Next Random</button>
+                            <!-- Added margin-bottom: 25px to create a clear gap before the franchise strip -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 15px; margin-bottom: 25px;">
+                                
+                                <!-- Left: Search & Next -->
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="la-search-input" placeholder="Name or Sl. No." style="width: 150px; padding: 10px; color:black; font-size: 13px;">
+                                    <button id="la-search-btn" class="btn-primary" style="padding: 10px 15px; font-size: 13px;" onclick="manualSearchPlayer()">Search</button>
+                                    <button id="la-next-btn" class="btn-primary" style="background: #a855f7; padding: 10px 15px; font-size: 13px;" onclick="nextRandomPlayer()">Next Random</button>
+                                </div>
+                                
+                                <!-- Center: Action Buttons -->
+                                <div style="display: flex; gap: 10px; flex: 1; justify-content: center;">
+                                    <button id="la-unsold-btn" class="btn-danger" style="font-size: 16px; padding: 10px 25px; min-width: 120px;" onclick="finalizeSale('unsold')">UNSOLD</button>
+                                    <button id="la-sold-btn" class="btn-success" style="font-size: 16px; padding: 10px 25px; min-width: 120px;" onclick="finalizeSale('sold')">SOLD!</button>
+                                </div>
+                                
+                                <!-- Right: Custom Bid & Undo -->
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <button id="la-undo-btn" class="btn-primary" style="background: #f97316; font-size: 14px; padding: 10px 15px; white-space: nowrap;" onclick="undoLastBid()">Undo Last Bid</button>
+                                    <input type="number" id="la-manual-bid" list="custom-bid-options" placeholder="Custom Bid ₹" style="width: 120px; padding: 10px; color:black; border-radius: 4px; border: none; font-size: 13px;">
+                                    <datalist id="custom-bid-options"></datalist>
+                                    <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6; padding: 10px 15px; font-size: 13px; white-space: nowrap;" onclick="applyManualBid()">Apply Bid</button>
+                                </div>
                             </div>
                             
-                            <!-- Center: Action Buttons -->
-                            <div style="display: flex; gap: 10px; flex: 1; justify-content: center;">
-                                <button id="la-unsold-btn" class="btn-danger" style="font-size: 16px; padding: 10px 25px; min-width: 120px;" onclick="finalizeSale('unsold')">UNSOLD</button>
-                                <button id="la-undo-btn" class="btn-primary" style="background: #f97316; font-size: 14px; padding: 10px 15px;" onclick="undoLastBid()">Undo Last Bid</button>
-                                <button id="la-sold-btn" class="btn-success" style="font-size: 16px; padding: 10px 25px; min-width: 120px;" onclick="finalizeSale('sold')">SOLD!</button>
-                            </div>
-                            
-                            <!-- Right: Custom Bid -->
-                            <div style="display: flex; gap: 8px;">
-                                <input type="number" id="la-manual-bid" list="custom-bid-options" placeholder="Custom Bid ₹" style="width: 120px; padding: 10px; color:black; border-radius: 4px; border: none; font-size: 13px;">
-                                <datalist id="custom-bid-options"></datalist>
-                                <button id="la-custom-btn" class="btn-primary" style="background: #3b82f6; padding: 10px 15px; font-size: 13px;" onclick="applyManualBid()">Apply Bid</button>
-                            </div>
+                            <div id="la-franchise-strip" class="franchise-strip"></div>
                         </div>
-                        
-                        <div id="la-franchise-strip" class="franchise-strip"></div>
                     </div>
-                </div>
-            </div>
             <!-- VIEW E: DATABASE PANEL (PLAYERS ROSTER) -->
             <div id="view-control" class="hidden">
                 <h1 class="dash-title">PLAYERS ROSTER</h1>
