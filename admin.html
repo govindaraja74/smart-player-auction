@@ -1750,7 +1750,7 @@
             }
         }
 
-        function renderAuctionDetailLists() {
+       function renderAuctionDetailLists() {
             const teamContainer = document.getElementById('ad-teams-list');
             if (teamContainer) {
                 try {
@@ -1787,12 +1787,16 @@
                         savedCats.forEach(c => {
                             const name = typeof c === 'object' ? c.name : c;
                             const max = typeof c === 'object' && c.maxPlayers ? ` <span style="color:#10b981; font-size:12px; font-weight:normal;">(Max Limit: ${c.maxPlayers})</span>` : '';
+                            
+                            // Escapes quotes to fix the button breaking issue
+                            const safeName = name.replace(/'/g, "\\'");
+                            
                             catHtml += `
                             <div style="padding: 10px; border-bottom: 1px solid #e2e8f0; color:#0f172a; font-size: 15px; display: flex; justify-content: space-between; align-items: center;">
                                 <div><strong>❖ ${name}</strong>${max}</div>
                                 <div style="display:flex; gap:5px;">
-                                    <button class="edit-del-btn" onclick="editCategory('${name}')">✏️</button>
-                                    <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${name}')">🗑️</button>
+                                    <button class="edit-del-btn" onclick="editCategory('${safeName}')">✏️</button>
+                                    <button class="edit-del-btn" style="color:red;" onclick="deleteCategory('${safeName}')">🗑️</button>
                                 </div>
                             </div>`;
                         });
@@ -1831,12 +1835,30 @@
         function editCategory(oldName) {
             const newName = prompt("Enter new category name:", oldName);
             if(!newName || newName.trim() === "" || newName === oldName) return;
+            
             let cats = safeGetStorage('auctionCats', []);
             let index = cats.findIndex(c => (c.name || c) === oldName);
+            
             if(index > -1) {
                 if(typeof cats[index] === 'object') cats[index].name = newName;
                 else cats[index] = newName;
                 safeSetStorage('auctionCats', cats);
+                
+                // Cascade the name change to any players already in this category
+                let players = safeGetStorage('auctionPlayers', []);
+                let playersUpdated = false;
+                players.forEach(p => {
+                    if (p.category === oldName) {
+                        p.category = newName;
+                        playersUpdated = true;
+                    }
+                });
+                
+                if (playersUpdated) {
+                    safeSetStorage('auctionPlayers', players);
+                    window.allPlayers = players;
+                }
+
                 updateManualCategoryDropdowns();
                 renderAuctionDetailLists();
             }
@@ -1844,9 +1866,26 @@
 
         function deleteCategory(name) {
             if(!confirm(`Are you sure you want to delete the category '${name}'?`)) return;
+            
             let cats = safeGetStorage('auctionCats', []);
             cats = cats.filter(c => (c.name || c) !== name);
             safeSetStorage('auctionCats', cats);
+            
+            // Remove the deleted category from existing players
+            let players = safeGetStorage('auctionPlayers', []);
+            let playersUpdated = false;
+            players.forEach(p => {
+                if (p.category === name) {
+                    p.category = ''; 
+                    playersUpdated = true;
+                }
+            });
+            
+            if (playersUpdated) {
+                safeSetStorage('auctionPlayers', players);
+                window.allPlayers = players;
+            }
+
             updateManualCategoryDropdowns();
             renderAuctionDetailLists();
         }
