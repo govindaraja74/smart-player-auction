@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The League | Smart Players Auction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        :root {
+            --primary: #0284c7; 
+            --secondary: #fde047;
+            --dark: #0f172a;
+            --card-bg: #1e293b;
+        }
+        body { background-color: var(--dark); color: white; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* Simple Navbar */
+        .navbar { padding: 20px 40px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; }
+        .nav-brand { font-size: 22px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
+        .nav-brand img { height: 35px; }
+        .nav-brand span { color: var(--secondary); }
+
+        /* Main Content */
+        .container { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; }
+        .header { text-align: center; margin-bottom: 50px; }
+        .header h1 { font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
+        .header p { color: #94a3b8; font-size: 18px; margin-top: 10px; }
+
+        /* Login Portals Grid */
+        .portal-grid { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; }
+        
+        .portal-card {
+            background: var(--card-bg); border: 1px solid #334155; border-radius: 12px;
+            padding: 40px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .portal-icon { font-size: 50px; margin-bottom: 20px; }
+        .portal-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+        .portal-card p { font-size: 14px; color: #94a3b8; margin-bottom: 30px; line-height: 1.5; }
+        
+        input {
+            width: 100%; padding: 12px 15px; margin-bottom: 15px; border-radius: 6px;
+            border: 1px solid #475569; background: #0f172a; color: white; outline: none;
+        }
+        input:focus { border-color: var(--primary); }
+
+        .login-btn {
+            width: 100%; background: var(--primary); color: white; border: none;
+            padding: 15px; border-radius: 6px; font-weight: 800; font-size: 16px;
+            cursor: pointer; transition: 0.3s; text-transform: uppercase;
+        }
+        .login-btn:hover { background: #0369a1; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/index.html" class="nav-brand">
+            <img src="/spa-logo.png.png" alt="Logo">
+            Smart <span>Players</span> Auction
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>The <span>League</span></h1>
+            <p>Official Match-Day Operations & Tournament Hub</p>
+        </div>
+
+        <div class="portal-grid">
+            <!-- Franchise Login -->
+            <div class="portal-card">
+                <div class="portal-icon">👔</div>
+                <h2>Franchise Portal</h2>
+                <p>Login to submit your match-day playing order, manage your roster, and view statistics.</p>
+                <input type="text" placeholder="Franchise ID or Username">
+                <input type="password" placeholder="Password">
+                <button class="login-btn">Secure Login</button>
+            </div>
+
+            <!-- Umpire Login -->
+            <div class="portal-card">
+                <div class="portal-icon">⚖️</div>
+                <h2>Umpire Portal</h2>
+                <p>Login to access digital score sheets, log match events, and update the live scoreboard.</p>
+                <input type="text" placeholder="Umpire ID">
+                <input type="password" placeholder="Passcode">
+                <button class="login-btn" style="background: var(--secondary); color: #0f172a;">Secure Login</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
