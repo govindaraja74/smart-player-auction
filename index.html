@@ -21,25 +21,29 @@
 
         /* --- NAVBAR (TOP RIGHT PUBLIC LINKS) --- */
         .navbar {
-            position: absolute; top: 0; width: 100%; padding: 25px 50px;
+            position: absolute; top: 0; width: 100%; padding: 20px 40px;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 100; background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), transparent);
+            z-index: 100; background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), transparent);
         }
-        .nav-brand { font-size: 26px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-brand { 
+            display: flex; align-items: center; gap: 15px;
+            font-size: 24px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; 
+        }
+        .nav-brand img { height: 45px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
         .nav-brand span { color: var(--secondary); }
         
-        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-links { display: flex; gap: 25px; align-items: center; }
         .nav-links a {
-            color: white; text-decoration: none; font-size: 15px; font-weight: 600;
+            color: white; text-decoration: none; font-size: 14px; font-weight: 600;
             text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s;
         }
         .nav-links a:hover { color: var(--secondary); }
         
-        .public-badge { background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-size: 11px; color: #94a3b8; margin-left: 5px; }
+        .public-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 10px; color: #94a3b8; margin-left: 5px; }
         
         .org-btn { 
             background: transparent; border: 2px solid #ef4444; color: #ef4444; 
-            padding: 8px 20px; border-radius: 5px; font-size: 13px; margin-left: 20px;
+            padding: 8px 18px; border-radius: 5px; font-size: 12px; margin-left: 15px;
             transition: 0.3s;
         }
         .org-btn:hover { background: #ef4444; color: white; }
@@ -47,24 +51,29 @@
         /* --- HERO POSTER SECTION --- */
         .hero {
             position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center;
-            /* High Quality Sports Background Image with a Dark Blue Overlay */
-            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)),
-                        url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+            /* Multi-sport generic stadium floodlights background */
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)),
+                        url('https://images.unsplash.com/photo-1556816214-cb33616dd3fe?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
         }
-        .hero-content { max-width: 1000px; padding: 0 20px; z-index: 10; margin-top: 50px; }
-        .hero h1 { font-size: 72px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; text-shadow: 2px 4px 15px rgba(0,0,0,0.8); line-height: 1.1; }
+        .hero-content { max-width: 1100px; padding: 0 20px; z-index: 10; margin-top: 60px; display: flex; flex-direction: column; align-items: center;}
+        
+        .hero-logo { height: 140px; margin-bottom: 25px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
+        
+        .hero h1 { font-size: 68px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; text-shadow: 2px 4px 15px rgba(0,0,0,0.8); line-height: 1.1; }
         .hero h1 span { color: var(--secondary); }
-        .hero p { font-size: 20px; color: #cbd5e1; margin-bottom: 40px; line-height: 1.6; font-weight: 400; }
+        .hero p { font-size: 19px; color: #cbd5e1; margin-bottom: 40px; line-height: 1.6; font-weight: 400; max-width: 800px;}
         
         /* The Sports List Tags */
         .sports-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 50px; }
         .sport-tag { 
             background: rgba(255, 255, 255, 0.05); padding: 12px 25px; border-radius: 30px; 
-            font-size: 16px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1); 
+            font-size: 15px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1); 
             backdrop-filter: blur(10px); color: #e2e8f0; text-transform: uppercase; letter-spacing: 1px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s;
         }
-        .sport-tag:hover { background: var(--primary); color: white; border-color: var(--primary); cursor: default; }
+        .sport-tag:hover { background: var(--primary); color: white; border-color: var(--primary); cursor: default; transform: scale(1.05); }
+        
+        .sport-tag.highlight { background: var(--primary); color: white; border-color: #38bdf8; box-shadow: 0 0 15px rgba(2, 132, 199, 0.6);}
 
         .cta-btn {
             background: var(--primary); color: white; text-decoration: none;
@@ -90,12 +99,13 @@
         .feature-card p { font-size: 15px; color: #94a3b8; line-height: 1.7; }
 
         /* Responsive Design */
-        @media(max-width: 900px) {
+        @media(max-width: 1050px) {
             .navbar { flex-direction: column; gap: 20px; padding: 20px; text-align: center; background: rgba(15, 23, 42, 0.95); }
             .nav-links { flex-wrap: wrap; justify-content: center; gap: 15px; }
             .org-btn { margin-left: 0; }
-            .hero h1 { font-size: 48px; }
-            .hero-content { margin-top: 120px; }
+            .hero h1 { font-size: 42px; }
+            .hero-content { margin-top: 150px; }
+            .hero-logo { height: 100px; }
         }
     </style>
 </head>
@@ -103,7 +113,10 @@
 
     <!-- NAVBAR: Public Links on Top Right -->
     <nav class="navbar">
-        <div class="nav-brand">Smart <span>Players</span> Auction</div>
+        <div class="nav-brand">
+            <img src="/spa-logo.png.png" alt="SPA Logo">
+            Smart <span>Players</span> Auction
+        </div>
         <div class="nav-links">
             <a href="#">Live Auction <span class="public-badge">Public</span></a>
             <a href="#">Players List <span class="public-badge">Public</span></a>
@@ -117,6 +130,9 @@
     <!-- HERO POSTER SECTION -->
     <header class="hero">
         <div class="hero-content">
+            <!-- Center Logo -->
+            <img src="/spa-logo.png.png" alt="Smart Players Auction" class="hero-logo">
+            
             <h1>The Ultimate <span>Sports Auction</span> Experience</h1>
             <p>Welcome to the next generation of player bidding. Watch the live auction unfold, track franchise budgets, and view detailed player rosters in real-time.</p>
             
@@ -132,6 +148,7 @@
                 <div class="sport-tag">🏑 Hockey</div>
                 <div class="sport-tag">🏃‍♂️ Kho-Kho</div>
                 <div class="sport-tag">🏀 Basketball</div>
+                <div class="sport-tag highlight">✨ And Many More</div>
             </div>
 
             <div>
@@ -154,8 +171,8 @@
             
             <div class="feature-card">
                 <div class="feature-icon">📊</div>
-                <h3>Franchise Financials</h3>
-                <p>Complete transparency for public viewers and team owners. Track exactly how much purse money each franchise has remaining, their required player counts, and their maximum allowable bid limits.</p>
+                <h3>Franchise Budgets & Player Details</h3>
+                <p>Complete transparency for public viewers and team owners. Track exactly how much purse money each franchise has remaining, their maximum allowable bid limits, and monitor detailed player roster assignments as squads are built.</p>
             </div>
             
             <div class="feature-card">
