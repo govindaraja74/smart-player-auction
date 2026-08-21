@@ -48,17 +48,34 @@
         }
         .org-btn:hover { background: #ef4444; color: white; }
 
-    /* --- HERO POSTER SECTION --- */
+        /* --- HERO POSTER & ANIMATED MULTI-SPORT SLIDER --- */
         .hero {
-            position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center;
-            /* Multi-sport equipment background featuring different sports */
-            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)),
-                        url('https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+            position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
         }
-        .hero-content { max-width: 1100px; padding: 0 20px; z-index: 10; margin-top: 60px; display: flex; flex-direction: column; align-items: center;}
         
+        /* Background Slider Container */
+        .bg-slider { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-color: var(--dark); }
+        .bg-slider::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)); z-index: 2; }
+        
+        /* Individual Slides */
+        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; animation: fadeSlides 25s infinite; }
+        .slide-1 { background-image: url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } /* Cricket */
+        .slide-2 { background-image: url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2000&auto=format&fit=crop'); animation-delay: 5s; } /* Indoor Arena (Kabaddi/Volleyball/Badminton) */
+        .slide-3 { background-image: url('https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=2000&auto=format&fit=crop'); animation-delay: 10s; } /* Football */
+        .slide-4 { background-image: url('https://images.unsplash.com/photo-1595435934249-5df7ed86e1f4?q=80&w=2000&auto=format&fit=crop'); animation-delay: 15s; } /* Tennis */
+        .slide-5 { background-image: url('https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2000&auto=format&fit=crop'); animation-delay: 20s; } /* Basketball */
+
+        @keyframes fadeSlides {
+            0% { opacity: 0; transform: scale(1); }
+            10% { opacity: 1; }
+            20% { opacity: 1; }
+            30% { opacity: 0; transform: scale(1.05); } /* Creates a slow cinematic zoom */
+            100% { opacity: 0; }
+        }
+
+        /* Hero Content */
+        .hero-content { max-width: 1100px; padding: 0 20px; z-index: 10; margin-top: 60px; display: flex; flex-direction: column; align-items: center; position: relative;}
         .hero-logo { height: 140px; margin-bottom: 25px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
-        
         .hero h1 { font-size: 68px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; text-shadow: 2px 4px 15px rgba(0,0,0,0.8); line-height: 1.1; }
         .hero h1 span { color: var(--secondary); }
         .hero p { font-size: 19px; color: #cbd5e1; margin-bottom: 40px; line-height: 1.6; font-weight: 400; max-width: 800px;}
@@ -129,6 +146,16 @@
 
     <!-- HERO POSTER SECTION -->
     <header class="hero">
+        
+        <!-- Animated Multi-Sport Background Slider -->
+        <div class="bg-slider">
+            <div class="slide slide-1"></div>
+            <div class="slide slide-2"></div>
+            <div class="slide slide-3"></div>
+            <div class="slide slide-4"></div>
+            <div class="slide slide-5"></div>
+        </div>
+
         <div class="hero-content">
             <!-- Center Logo -->
             <img src="/spa-logo.png.png" alt="Smart Players Auction" class="hero-logo">
