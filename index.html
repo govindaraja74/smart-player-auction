@@ -1,89 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Players Auction | The Ultimate Bidding Platform</title>
-    
-    <!-- Importing a beautiful modern font -->
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Base Reset & Variables */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        :root {
-            --primary: #0284c7;    /* Bright Blue */
-            --secondary: #fde047;  /* Bright Yellow */
-            --dark: #0f172a;       /* Deep Navy */
-            --light: #f8fafc;
-        }
-        body { background-color: var(--dark); color: var(--light); overflow-x: hidden; }
-
-        /* --- NAVBAR (TOP RIGHT PUBLIC LINKS) --- */
-        .navbar {
-            position: absolute; top: 0; width: 100%; padding: 20px 40px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 100; background: linear-gradient(to bottom, rgba(15, 23, 42, 0.95), transparent);
-        }
-        .nav-brand { 
-            display: flex; align-items: center; gap: 15px;
-            font-size: 24px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; 
-        }
-        .nav-brand img { height: 45px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-        .nav-brand span { color: var(--secondary); }
-        
-        .nav-links { display: flex; gap: 25px; align-items: center; }
-        .nav-links a {
-            color: white; text-decoration: none; font-size: 14px; font-weight: 600;
-            text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s;
-        }
-        .nav-links a:hover { color: var(--secondary); }
-        
-        .public-badge { background: rgba(255,255,255,0.1); padding: 4px 8px; border-radius: 4px; font-size: 10px; color: #94a3b8; margin-left: 5px; }
-        
-        .org-btn { 
-            background: transparent; border: 2px solid #ef4444; color: #ef4444; 
-            padding: 8px 18px; border-radius: 5px; font-size: 12px; margin-left: 15px;
-            transition: 0.3s;
-        }
-        .org-btn:hover { background: #ef4444; color: white; }
-
-        /* --- HERO POSTER & ANIMATED MULTI-SPORT SLIDER --- */
-        .hero {
-            position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
-        }
-        
-        /* Background Slider Container */
-        .bg-slider { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background-color: var(--dark); }
-        .bg-slider::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.95)); z-index: 2; }
-        
-        /* Individual 10 Slides changing every 2 seconds (20s total loop) */
-        .slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; animation: fadeSlides 20s infinite; }
-        
-        .slide-1 { background-image: url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2000&auto=format&fit=crop'); animation-delay: 0s; } /* Cricket */
-        .slide-2 { background-image: url('https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?q=80&w=2000&auto=format&fit=crop'); animation-delay: 2s; } /* Badminton Doubles */
-        .slide-3 { background-image: url('https://images.unsplash.com/photo-1518609878373-06d740f60d8b?q=80&w=2000&auto=format&fit=crop'); animation-delay: 4s; } /* Football */
-        .slide-4 { background-image: url('https://images.unsplash.com/photo-1595435934249-5df7ed86e1f4?q=80&w=2000&auto=format&fit=crop'); animation-delay: 6s; } /* Tennis */
-        .slide-5 { background-image: url('https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=2000&auto=format&fit=crop'); animation-delay: 8s; } /* Basketball */
-        .slide-6 { background-image: url('https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?q=80&w=2000&auto=format&fit=crop'); animation-delay: 10s; } /* Volleyball */
-        .slide-7 { background-image: url('https://images.unsplash.com/photo-1599586120429-48281b6f0ece?q=80&w=2000&auto=format&fit=crop'); animation-delay: 12s; } /* Hockey */
-        .slide-8 { background-image: url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2000&auto=format&fit=crop'); animation-delay: 14s; } /* Kabaddi / Arena Mat */
-        .slide-9 { background-image: url('https://images.unsplash.com/photo-1530549595977-09cb3eb1e61f?q=80&w=2000&auto=format&fit=crop'); animation-delay: 16s; } /* Kho-Kho / Field Sprint */
-        .slide-10 { background-image: url('https://images.unsplash.com/photo-1526676537331-716ddbf5a6bf?q=80&w=2000&auto=format&fit=crop'); animation-delay: 18s; } /* Throwball / Net */
-
-        /* Math: 2s per slide out of 20s = 10%. Fade in 2%, Hold 6%, Fade out 2%. */
-        @keyframes fadeSlides {
-            0% { opacity: 0; transform: scale(1); }
-            2% { opacity: 1; }
-            8% { opacity: 1; }
-            10% { opacity: 0; transform: scale(1.05); } 
-            100% { opacity: 0; }
-        }
-
-        /* Hero Content */
+/* Hero Content */
         .hero-content { max-width: 1100px; padding: 0 20px; z-index: 10; margin-top: 60px; display: flex; flex-direction: column; align-items: center; position: relative;}
-        .hero-logo { height: 140px; margin-bottom: 25px; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.6)); }
-        .hero h1 { font-size: 68px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; text-shadow: 2px 4px 15px rgba(0,0,0,0.8); line-height: 1.1; }
+        
+        /* LOGO: Increased size and blended perfectly */
+        .hero-logo { 
+            height: 220px; /* Made the logo much bigger */
+            margin-bottom: 20px; 
+            border-radius: 50%; /* Makes the logo perfectly round so it doesn't look like a square paper cutout */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 25px rgba(255, 255, 255, 0.1); /* Adds a deep shadow and subtle glow to blend it into the dark background */
+        }
+        
+        /* HEADING: Reduced size for a sleeker look */
+        .hero h1 { 
+            font-size: 52px; /* Shrunk down from 68px */
+            font-weight: 900; 
+            text-transform: uppercase; 
+            margin-bottom: 20px; 
+            text-shadow: 2px 4px 15px rgba(0,0,0,0.8); 
+            line-height: 1.2; 
+        }
         .hero h1 span { color: var(--secondary); }
         .hero p { font-size: 19px; color: #cbd5e1; margin-bottom: 40px; line-height: 1.6; font-weight: 400; max-width: 800px;}
         
@@ -127,106 +61,10 @@
             .navbar { flex-direction: column; gap: 20px; padding: 20px; text-align: center; background: rgba(15, 23, 42, 0.95); }
             .nav-links { flex-wrap: wrap; justify-content: center; gap: 15px; }
             .org-btn { margin-left: 0; }
-            .hero h1 { font-size: 42px; }
+            
+            /* Mobile tweaks for the new sizes */
+            .hero h1 { font-size: 34px; } 
             .hero-content { margin-top: 150px; }
-            .hero-logo { height: 100px; }
+            .hero-logo { height: 150px; } 
         }
     </style>
-</head>
-<body>
-
-    <!-- NAVBAR: Public Links on Top Right -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <img src="/spa-logo.png.png" alt="SPA Logo">
-            Smart <span>Players</span> Auction
-        </div>
-        <div class="nav-links">
-            <a href="#">Live Auction <span class="public-badge">Public</span></a>
-            <a href="#">Players List <span class="public-badge">Public</span></a>
-            <a href="#">Franchise Standings <span class="public-badge">Public</span></a>
-            
-            <!-- Hidden Organizer Login -->
-            <a href="/admin.html" class="org-btn">Organizer Login 🔒</a>
-        </div>
-    </nav>
-
-    <!-- HERO POSTER SECTION -->
-    <header class="hero">
-        
-        <!-- Animated Multi-Sport Background Slider -->
-        <div class="bg-slider">
-            <div class="slide slide-1"></div>
-            <div class="slide slide-2"></div>
-            <div class="slide slide-3"></div>
-            <div class="slide slide-4"></div>
-            <div class="slide slide-5"></div>
-            <div class="slide slide-6"></div>
-            <div class="slide slide-7"></div>
-            <div class="slide slide-8"></div>
-            <div class="slide slide-9"></div>
-            <div class="slide slide-10"></div>
-        </div>
-
-        <div class="hero-content">
-            <!-- Center Logo -->
-            <img src="/spa-logo.png.png" alt="Smart Players Auction" class="hero-logo">
-            
-            <h1>The Ultimate <span>Sports Auction</span> Experience</h1>
-            <p>Welcome to the next generation of player bidding. Watch the live auction unfold, track franchise budgets, and view detailed player rosters in real-time.</p>
-            
-            <!-- Sports Showcase -->
-            <div class="sports-tags">
-                <div class="sport-tag">🏏 Cricket</div>
-                <div class="sport-tag">🏸 Badminton</div>
-                <div class="sport-tag">🏐 Volleyball</div>
-                <div class="sport-tag">🏃 Kabaddi</div>
-                <div class="sport-tag">⚽ Football</div>
-                <div class="sport-tag">🎾 Tennis</div>
-                <div class="sport-tag">🏓 Table Tennis</div>
-                <div class="sport-tag">🏑 Hockey</div>
-                <div class="sport-tag">🏃‍♂️ Kho-Kho</div>
-                <div class="sport-tag">🏐 Throwball</div>
-                <div class="sport-tag highlight">✨ And Many More</div>
-            </div>
-
-            <div>
-                <a href="#" class="cta-btn">Enter Public Portal</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- FEATURES & DETAILS SECTION -->
-    <section class="features">
-        <h2 class="section-title">Platform Features</h2>
-        <p class="section-subtitle">Everything you need to experience a transparent, dynamic, and thrilling sports auction.</p>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>Live Real-Time Bidding</h3>
-                <p>Experience the excitement of the auction room from anywhere. See the current player on the block, the leading franchise, and the current bid update instantly as the auctioneer drops the hammer.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>Franchise Budgets & Player Details</h3>
-                <p>Complete transparency for public viewers and team owners. Track exactly how much purse money each franchise has remaining, their maximum allowable bid limits, and monitor detailed player roster assignments as squads are built.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">👥</div>
-                <h3>Player Database & Rosters</h3>
-                <p>Browse through the categorized database of all registered players. See who has been sold, who remains available, and view the complete final squad constructed by every franchise.</p>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🏆</div>
-                <h3>Multi-Sport Versatility</h3>
-                <p>Whether it is the high-flying action of Volleyball, the precision of Badminton, or the endurance of Football, our dynamic bidding engine is custom-built to handle any sports league format.</p>
-            </div>
-        </div>
-    </section>
-
-</body>
-</html>
