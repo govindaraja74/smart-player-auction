@@ -3,46 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Players Auction - KBL 2026</title>
+    <title>Smart Players Auction | The Ultimate Bidding Platform</title>
+    
+    <!-- Importing a beautiful modern font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: Arial, sans-serif; background-color: #0d1b2a; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { background-color: #1b263b; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 450px; }
-        select, button { width: 100%; padding: 14px; margin: 15px 0; border-radius: 6px; border: none; font-size: 16px; box-sizing: border-box; }
-        select { background-color: #ffffff; color: #000000; font-weight: bold; }
-        button { background-color: #28a745; color: white; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #218838; }
-        .btn-admin { background-color: #0284c7; margin-top: 10px; }
-        .btn-admin:hover { background-color: #0369a1; }
-        h1 { margin-top: 0; color: #f8fafc; }
-        p { color: #94a3b8; }
+        /* Base Reset & Variables */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        :root {
+            --primary: #0284c7;    /* Bright Blue */
+            --secondary: #fde047;  /* Bright Yellow */
+            --dark: #0f172a;       /* Deep Navy */
+            --light: #f8fafc;
+        }
+        body { background-color: var(--dark); color: var(--light); overflow-x: hidden; }
+
+        /* --- NAVBAR (TOP RIGHT PUBLIC LINKS) --- */
+        .navbar {
+            position: absolute; top: 0; width: 100%; padding: 25px 50px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100; background: linear-gradient(to bottom, rgba(15, 23, 42, 0.9), transparent);
+        }
+        .nav-brand { font-size: 26px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-brand span { color: var(--secondary); }
+        
+        .nav-links { display: flex; gap: 30px; align-items: center; }
+        .nav-links a {
+            color: white; text-decoration: none; font-size: 15px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--secondary); }
+        
+        .public-badge { background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-size: 11px; color: #94a3b8; margin-left: 5px; }
+        
+        .org-btn { 
+            background: transparent; border: 2px solid #ef4444; color: #ef4444; 
+            padding: 8px 20px; border-radius: 5px; font-size: 13px; margin-left: 20px;
+            transition: 0.3s;
+        }
+        .org-btn:hover { background: #ef4444; color: white; }
+
+        /* --- HERO POSTER SECTION --- */
+        .hero {
+            position: relative; height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center;
+            /* High Quality Sports Background Image with a Dark Blue Overlay */
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.95)),
+                        url('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80') center/cover no-repeat fixed;
+        }
+        .hero-content { max-width: 1000px; padding: 0 20px; z-index: 10; margin-top: 50px; }
+        .hero h1 { font-size: 72px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; text-shadow: 2px 4px 15px rgba(0,0,0,0.8); line-height: 1.1; }
+        .hero h1 span { color: var(--secondary); }
+        .hero p { font-size: 20px; color: #cbd5e1; margin-bottom: 40px; line-height: 1.6; font-weight: 400; }
+        
+        /* The Sports List Tags */
+        .sports-tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 50px; }
+        .sport-tag { 
+            background: rgba(255, 255, 255, 0.05); padding: 12px 25px; border-radius: 30px; 
+            font-size: 16px; font-weight: 600; border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px); color: #e2e8f0; text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .sport-tag:hover { background: var(--primary); color: white; border-color: var(--primary); cursor: default; }
+
+        .cta-btn {
+            background: var(--primary); color: white; text-decoration: none;
+            font-size: 18px; padding: 18px 50px; border-radius: 8px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 2px; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
+            transition: 0.3s; display: inline-block; border: 2px solid var(--primary);
+        }
+        .cta-btn:hover { background: transparent; color: var(--primary); transform: translateY(-3px); }
+
+        /* --- FEATURES SECTION --- */
+        .features { padding: 100px 20px; background: var(--dark); text-align: center; }
+        .section-title { font-size: 42px; color: white; margin-bottom: 20px; text-transform: uppercase; font-weight: 900; }
+        .section-subtitle { font-size: 18px; color: #64748b; margin-bottom: 60px; }
+        
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
+        .feature-card {
+            background: #1e293b; padding: 40px 30px; border-radius: 12px; border: 1px solid #334155;
+            transition: transform 0.3s, box-shadow 0.3s; text-align: left;
+        }
+        .feature-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-color: var(--primary); }
+        .feature-icon { font-size: 45px; margin-bottom: 25px; display: inline-block; background: #0f172a; padding: 15px; border-radius: 12px; border: 1px solid #475569;}
+        .feature-card h3 { font-size: 22px; margin-bottom: 15px; color: white; font-weight: 800; }
+        .feature-card p { font-size: 15px; color: #94a3b8; line-height: 1.7; }
+
+        /* Responsive Design */
+        @media(max-width: 900px) {
+            .navbar { flex-direction: column; gap: 20px; padding: 20px; text-align: center; background: rgba(15, 23, 42, 0.95); }
+            .nav-links { flex-wrap: wrap; justify-content: center; gap: 15px; }
+            .org-btn { margin-left: 0; }
+            .hero h1 { font-size: 48px; }
+            .hero-content { margin-top: 120px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Smart Players Auction</h1>
-        <p>Select your sport to enter the tournament portal</p>
+    <!-- NAVBAR: Public Links on Top Right -->
+    <nav class="navbar">
+        <div class="nav-brand">Smart <span>Players</span> Auction</div>
+        <div class="nav-links">
+            <a href="#">Live Auction <span class="public-badge">Public</span></a>
+            <a href="#">Players List <span class="public-badge">Public</span></a>
+            <a href="#">Franchise Standings <span class="public-badge">Public</span></a>
+            
+            <!-- Hidden Organizer Login for you -->
+            <a href="/admin.html" class="org-btn">Organizer Login 🔒</a>
+        </div>
+    </nav>
 
-        <!-- Game Selector Dropdown -->
-        <select id="gameSelector">
-            <option value="Badminton">Badminton</option>
-            <option value="Table Tennis">Table Tennis</option>
-            <option value="Volleyball">Volleyball</option>
-            <option value="Cricket Tennis">Cricket Tennis</option>
-        </select>
+    <!-- HERO POSTER SECTION -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>The Ultimate <span>Sports Auction</span> Experience</h1>
+            <p>Welcome to the next generation of player bidding. Watch the live auction unfold, track franchise budgets, and view detailed player rosters in real-time.</p>
+            
+            <!-- Sports Showcase -->
+            <div class="sports-tags">
+                <div class="sport-tag">🏏 Cricket</div>
+                <div class="sport-tag">🏸 Badminton</div>
+                <div class="sport-tag">🏐 Volleyball</div>
+                <div class="sport-tag">🏃 Kabaddi</div>
+                <div class="sport-tag">⚽ Football</div>
+                <div class="sport-tag">🎾 Tennis</div>
+                <div class="sport-tag">🏓 Table Tennis</div>
+                <div class="sport-tag">🏑 Hockey</div>
+                <div class="sport-tag">🏃‍♂️ Kho-Kho</div>
+                <div class="sport-tag">🏀 Basketball</div>
+            </div>
 
-        <button onclick="enterAuction()">Proceed to Auction / Register</button>
-        <button class="btn-admin" onclick="window.location.href='/admin'">Organizer Control Room</button>
-    </div>
+            <div>
+                <a href="#" class="cta-btn">Enter Public Portal</a>
+            </div>
+        </div>
+    </header>
 
-    <script>
-        function enterAuction() {
-            const selectedGame = document.getElementById('gameSelector').value;
-            // Saves the chosen game and moves to live view or registration
-            localStorage.setItem('selectedGame', selectedGame);
-            alert("Selected Game: " + selectedGame + "! Redirecting to registration & live stats...");
-            window.location.href = '/admin'; // Takes you straight to admin control room for now
-        }
-    </script>
+    <!-- FEATURES & DETAILS SECTION -->
+    <section class="features">
+        <h2 class="section-title">Platform Features</h2>
+        <p class="section-subtitle">Everything you need to experience a transparent, dynamic, and thrilling sports auction.</p>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Live Real-Time Bidding</h3>
+                <p>Experience the excitement of the auction room from anywhere. See the current player on the block, the leading franchise, and the current bid update instantly as the auctioneer drops the hammer.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Franchise Financials</h3>
+                <p>Complete transparency for public viewers and team owners. Track exactly how much purse money each franchise has remaining, their required player counts, and their maximum allowable bid limits.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <h3>Player Database & Rosters</h3>
+                <p>Browse through the categorized database of all registered players. See who has been sold, who remains available, and view the complete final squad constructed by every franchise.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Multi-Sport Versatility</h3>
+                <p>Whether it is the high-flying action of Volleyball, the precision of Badminton, or the endurance of Football, our dynamic bidding engine is custom-built to handle any sports league format.</p>
+            </div>
+        </div>
+    </section>
+
 </body>
 </html>
