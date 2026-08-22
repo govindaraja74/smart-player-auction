@@ -8,6 +8,7 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const path = require('path'); // Added this to handle file routing
 
 const app = express();
 app.use(express.static(__dirname));
@@ -273,110 +274,33 @@ io.on('connection', (socket) => {
 // 6. FRONTEND HTML STRINGS & ROUTES
 // ==========================================
 
-// SEO-Optimized Homepage UI
-const HTML_HOME = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Primary Meta Tags -->
-    <title>Smart Players Auction | Sports League Management Software</title>
-    <meta name="title" content="Smart Players Auction | Sports League Management Software">
-    <meta name="description" content="The ultimate digital platform for running live sports auctions, digital scoreboards, and league management. Perfect for badminton, cricket, and local sports tournaments.">
-    <meta name="keywords" content="sports auction software, badminton league management, player draft app, live sports bidding, digital umpire scoreboard, tournament manager India">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Open Graph / WhatsApp / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Smart Players Auction | Live Draft & Scoring">
-    <meta property="og:description" content="Run professional live sports auctions and digital umpire scoreboards straight from your phone.">
-    <meta property="og:site_name" content="Smart Players Auction">
-
-    <style>
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f3f4f6; color: #1f2937; margin: 0; padding: 0; text-align: center; }
-        .hero { background: #1e3a8a; color: white; padding: 4rem 2rem; }
-        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-        .hero p { font-size: 1.2rem; color: #d1d5db; max-width: 600px; margin: 0 auto 2rem auto; line-height: 1.5; }
-        .features { display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; padding: 3rem 1rem; }
-        .feature-card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 300px; }
-        .btn { display: inline-block; background: #10b981; color: white; padding: 1rem 2rem; text-decoration: none; font-size: 1.2rem; font-weight: bold; border-radius: 8px; transition: background 0.3s; cursor: pointer; border: none; }
-        .btn:hover { background: #059669; }
-    </style>
-</head>
-<body>
-    <div class="hero">
-        <h1>Smart Players Auction</h1>
-        <p>The complete digital operating system for your sports league. From live franchise bidding to real-time courtside scoreboards.</p>
-       <button onclick="window.location.href='/admin'" style="background-color: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; font-weight: bold;">
-  Organizer Login
-</button>
-    </div>
-    
-    <div class="features">
-        <div class="feature-card">
-            <h3 style="color: #2563eb;">Live Bidding Room</h3>
-            <p>Run your franchise player draft smoothly. Connects owners in real-time via local Wi-Fi.</p>
-        </div>
-        <div class="feature-card">
-            <h3 style="color: #10b981;">Digital Scoreboards</h3>
-            <p>BWF-compliant umpire tablets that broadcast live scores directly to the spectator screen.</p>
-        </div>
-        <div class="feature-card">
-            <h3 style="color: #f59e0b;">League Standings</h3>
-            <p>Automatically track points, walkovers, and team rosters all in one secure place.</p>
-        </div>
-    </div>
-</body>
-</html>
-`;
-
-// Player Registration UI
-const HTML_REGISTER = `
-<!DOCTYPE html><html><head><title>Smart Players Auction - Registration</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
-body{font-family:sans-serif; background:#f3f4f6; padding:2rem;} .card{background:#fff; padding:2rem; max-width:400px; margin:auto; border-radius:8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);} input,select,button{width:100%; padding:10px; margin:10px 0; border-radius:4px; border:1px solid #d1d5db; box-sizing: border-box;} button{background:#2563eb; color:white; border:none; cursor:pointer; font-weight: bold;} .title{text-align: center; color: #1e3a8a; margin-bottom: 0;} .subtitle{text-align: center; color: #6b7280; margin-top: 5px; margin-bottom: 20px;}
-</style></head><body>
-<div class="card">
-    <h2 class="title">Smart Players Auction</h2>
-    <p class="subtitle">Player Registration</p>
-    <form id="regForm">
-        <input type="text" id="name" placeholder="Full Name" required>
-        <select id="category"><option>Smash Specialist</option><option>Defender</option><option>All-Rounder</option></select>
-        <input type="number" id="price" placeholder="Base Price (₹)" required>
-        <button type="submit">Submit Registration</button>
-    </form>
-</div>
-<script>
-    const code = new URLSearchParams(window.location.search).get('room');
-    document.getElementById('regForm').onsubmit = async(e) => {
-        e.preventDefault();
-        const res = await fetch('/api/public/register/' + code, { method: 'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: document.getElementById('name').value, category: document.getElementById('category').value, basePrice: document.getElementById('price').value }) });
-        alert(res.ok ? "Successfully Registered for the Draft!" : "Error registering. Please try again.");
-    }
-</script></body></html>`;
-
-// Umpire Scoreboard UI
-const HTML_UMPIRE = `
-<!DOCTYPE html><html><head><title>Smart Players Auction - Umpire</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>
-body{background:#111827; color:white; font-family:sans-serif; margin:0; padding:10px;} .header{text-align:center; padding: 10px; color: #9ca3af;} .grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;} .btn{padding:2rem; font-size:2rem; width:100%; background:#10b981; border:none; color:white; border-radius:8px; cursor: pointer;} .team-panel{background:#1f2937; padding: 1rem; border-radius: 8px; text-align: center;}
-</style></head><body>
-    <div class="header">
-        <h3>Smart Players Auction<br><small>Umpire Control Board</small></h3>
-    </div>
-    <div class="grid">
-        <div class="team-panel"><h3>Team A</h3><h1 id="scoreA">0</h1><button class="btn" onclick="add('A')">+1</button></div>
-        <div class="team-panel"><h3>Team B</h3><h1 id="scoreB">0</h1><button class="btn" onclick="add('B')">+1</button></div>
-    </div>
-<script src="/socket.io/socket.io.js"></script><script>
-    const socket = io(); socket.emit('joinRoom', 'DEFAULT-ROOM');
-    let state = { matchId: '123', teamA:{score:0, sets:0}, teamB:{score:0, sets:0} };
-    function add(t) { t==='A'?state.teamA.score++:state.teamB.score++; document.getElementById('score'+t).innerText = state['team'+t].score; socket.emit('umpireUpdateScore', state); }
-</script></body></html>`;
-
 // Route Handlers for the Frontend
-app.get('/', (req, res) => res.send(HTML_HOME));
-app.get('/register', (req, res) => res.send(HTML_REGISTER));
-app.get('/umpire', (req, res) => res.send(HTML_UMPIRE));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.get('/public.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public.html'));
+});
+
+app.get('/league.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'league.html'));
+});
+
+app.get('/franchise.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'franchise.html'));
+});
+
+app.get('/league-admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'league-admin.html'));
+});
+
 app.get('/admin', (req, res) => {
-    res.sendFile(__dirname + '/admin.html');
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
 // ==========================================
@@ -411,6 +335,7 @@ app.post('/api/players/register', async (req, res) => {
     await player.save();
     res.json({ success: true });
 });
+
 // Add a new Franchise
 app.post('/api/franchises', async (req, res) => {
     try {
@@ -429,10 +354,11 @@ app.post('/api/franchises', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 // Edit a Franchise
 app.put('/api/franchises/:id', async (req, res) => {
     try {
-        await Franchise.findByIdAndUpdate(req.params.id, req.body); // Changed Team to Franchise
+        await Franchise.findByIdAndUpdate(req.params.id, req.body);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -442,12 +368,14 @@ app.put('/api/franchises/:id', async (req, res) => {
 // Delete a Franchise
 app.delete('/api/franchises/:id', async (req, res) => {
     try {
-        await Franchise.findByIdAndDelete(req.params.id); // Changed Team to Franchise
+        await Franchise.findByIdAndDelete(req.params.id); 
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+// ==========================================
 // 7. START SERVER
 // ==========================================
 const PORT = process.env.PORT || 3000;
