@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Franchise Portal | Playing Order</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        :root { --primary: #0284c7; --secondary: #fde047; --dark: #0f172a; --card-bg: #1e293b; --success: #10b981; }
+        body { background-color: var(--dark); color: white; display: flex; flex-direction: column; min-height: 100vh; }
+
+        .navbar { padding: 20px 40px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { font-size: 22px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
+        .nav-brand img { height: 35px; }
+        .nav-brand span { color: var(--secondary); }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; display: none; font-weight: bold;}
+
+        .container { flex-grow: 1; padding: 40px 20px; max-width: 900px; margin: 0 auto; width: 100%; }
+        
+        /* LOGIN SECTION */
+        #login-section { text-align: center; margin-top: 50px; background: var(--card-bg); padding: 40px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        #login-section h1 { margin-bottom: 20px; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; outline: none; font-size: 16px; }
+        button.btn-primary { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        button.btn-primary:hover { background: #0369a1; }
+
+        /* DASHBOARD SECTION */
+        #dashboard-section { display: none; }
+        .dash-header { margin-bottom: 30px; border-bottom: 1px solid #334155; padding-bottom: 20px; }
+        .dash-header h1 { font-size: 32px; color: var(--secondary); margin-bottom: 5px; }
+        
+        .roster-card { background: var(--card-bg); border-radius: 8px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
+        .player-info { display: flex; align-items: center; gap: 15px; }
+        .player-info img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #cbd5e1; }
+        .player-name { font-weight: bold; font-size: 18px; }
+        .player-cat { font-size: 12px; color: #94a3b8; background: #0f172a; padding: 3px 8px; border-radius: 4px; }
+        
+        .order-select { width: 150px; margin-bottom: 0; }
+        
+        .submit-panel { margin-top: 30px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 20px; border-radius: 8px; text-align: center; }
+        .submit-btn { background: var(--success); color: white; border: none; padding: 15px 40px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; }
+        .submit-btn:hover { background: #059669; }
+
+        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px; }
+        .status-draft { background: #f59e0b; color: black; }
+        .status-submitted { background: var(--primary); color: white; }
+        .status-published { background: var(--success); color: white; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/index.html" class="nav-brand"><img src="/spa-logo.png.png" alt="Logo"> Smart <span>Players</span> Auction</a>
+        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout</button>
+    </nav>
+
+    <div class="container">
+        
+        <!-- LOGIN PORTAL -->
+        <div id="login-section">
+            <h1>Franchise Login</h1>
+            <p style="color: #94a3b8; margin-bottom: 25px;">Select your franchise to build your playing order.</p>
+            
+            <select id="teamSelect">
+                <option value="">-- Loading Franchises --</option>
+            </select>
+            
+            <input type="password" id="teamPassword" placeholder="Enter Franchise PIN (Default: 1234)">
+            <button class="btn-primary" onclick="loginFranchise()">Access Roster</button>
+        </div>
+
+        <!-- LINEUP BUILDER DASHBOARD -->
+        <div id="dashboard-section">
+            <div class="dash-header">
+                <h1 id="dashTeamName">TEAM NAME</h1>
+                <p>Assign your official match-day playing order below.</p>
+                <div id="lineupStatus" class="status-badge status-draft">Status: DRAFTING</div>
+            </div>
+
+            <div id="rosterContainer">
+                <!-- Roster populates here dynamically -->
+            </div>
+
+            <div class="submit-panel">
+                <p style="margin-bottom: 15px; color: #cbd5e1;">Once submitted, the Organizer will review and publish this lineup to the public.</p>
+                <button class="submit-btn" onclick="submitLineup()">Submit Order to Organizer</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentTeam = null;
+        let teamRoster = [];
+
+        // Load teams from the Auction Setup when page loads
+        window.onload = () => {
+            const setup = JSON.parse(localStorage.getItem('auctionSetup')) || {};
+            const teams = setup.teams || [];
+            const select = document.getElementById('teamSelect');
+            
+            if(teams.length === 0) {
+                select.innerHTML = '<option value="">No franchises found. Create them in Admin first.</option>';
+                return;
+            }
+
+            select.innerHTML = '<option value="">-- Select Your Franchise --</option>';
+            teams.forEach(t => {
+                let opt = document.createElement('option');
+                opt.value = t.id || t._id;
+                opt.innerText = t.name;
+                select.appendChild(opt);
+            });
+        };
+
+        function loginFranchise() {
+            const select = document.getElementById('teamSelect');
+            const teamId = select.value;
+            const pin = document.getElementById('teamPassword').value;
+
+            if(!teamId) return alert("Please select a franchise.");
+            if(pin !== "1234") return alert("Incorrect PIN."); // Basic security for now
+
+            const setup = JSON.parse(localStorage.getItem('auctionSetup')) || {};
+            currentTeam = (setup.teams || []).find(t => (t.id || t._id) === teamId);
+
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'block';
+            document.getElementById('dashTeamName').innerText = currentTeam.name.toUpperCase();
+
+            loadTeamRoster(teamId);
+        }
+
+        function loadTeamRoster(teamId) {
+            const allPlayers = JSON.parse(localStorage.getItem('localPlayers')) || [];
+            
+            // Extract ONLY players sold to this specific franchise
+            teamRoster = allPlayers.filter(p => p.status === 'sold' && (p.teamId === teamId || p.soldTo === teamId));
+            
+            const container = document.getElementById('rosterContainer');
+            container.innerHTML = '';
+
+            if(teamRoster.length === 0) {
+                container.innerHTML = '<p style="color: #fca5a5;">Your roster is empty. You must buy players in the auction first.</p>';
+                return;
+            }
+
+            // Check if a lineup was already submitted
+            let submittedData = JSON.parse(localStorage.getItem('submittedLineups')) || {};
+            let myLineup = submittedData[teamId] || {};
+
+            teamRoster.forEach(player => {
+                let savedOrder = myLineup[player.id || player._id] || "";
+                
+                let card = document.createElement('div');
+                card.className = 'roster-card';
+                card.innerHTML = `
+                    <div class="player-info">
+                        <img src="${player.photo || '/spa-logo.png.png'}" alt="Player">
+                        <div>
+                            <div class="player-name">${player.name}</div>
+                            <span class="player-cat">${player.category || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <select class="order-select" id="order_${player.id || player._id}">
+                        <option value="">Not Playing</option>
+                        <option value="Match 1" ${savedOrder === 'Match 1' ? 'selected' : ''}>Match 1</option>
+                        <option value="Match 2" ${savedOrder === 'Match 2' ? 'selected' : ''}>Match 2</option>
+                        <option value="Match 3" ${savedOrder === 'Match 3' ? 'selected' : ''}>Match 3</option>
+                        <option value="Match 4" ${savedOrder === 'Match 4' ? 'selected' : ''}>Match 4</option>
+                        <option value="Match 5" ${savedOrder === 'Match 5' ? 'selected' : ''}>Match 5</option>
+                        <option value="Substitute" ${savedOrder === 'Substitute' ? 'selected' : ''}>Substitute</option>
+                    </select>
+                `;
+                container.appendChild(card);
+            });
+
+            if(Object.keys(myLineup).length > 0) {
+                document.getElementById('lineupStatus').className = 'status-badge status-submitted';
+                document.getElementById('lineupStatus').innerText = 'Status: SUBMITTED TO ORGANIZER';
+            }
+        }
+
+        function submitLineup() {
+            if(!currentTeam) return;
+            
+            let myLineup = {};
+            teamRoster.forEach(player => {
+                let selectVal = document.getElementById('order_' + (player.id || player._id)).value;
+                if(selectVal) {
+                    myLineup[player.id || player._id] = selectVal;
+                }
+            });
+
+            // Save to database
+            let allLineups = JSON.parse(localStorage.getItem('submittedLineups')) || {};
+            allLineups[currentTeam.id || currentTeam._id] = myLineup;
+            localStorage.setItem('submittedLineups', JSON.stringify(allLineups));
+
+            document.getElementById('lineupStatus').className = 'status-badge status-submitted';
+            document.getElementById('lineupStatus').innerText = 'Status: SUBMITTED TO ORGANIZER';
+            
+            alert("✅ Playing Order Submitted Successfully!\n\nThe Organizer will review and publish this to the live portal.");
+        }
+
+        function logout() {
+            currentTeam = null;
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.getElementById('teamPassword').value = '';
+        }
+    </script>
+</body>
+</html>
