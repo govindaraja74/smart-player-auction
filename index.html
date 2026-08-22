@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Players Auction | The Ultimate Bidding Platform</title>
     
+    <!-- Force the browser to load the logo instantly -->
+    <link rel="preload" as="image" href="/spa-logo.png.png">
+    
     <!-- Importing a beautiful modern font -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <link rel="preload" as="image" href="/spa-logo.png.png">
     
     <style>
         /* Base Reset & Variables */
@@ -154,19 +156,19 @@
 </head>
 <body>
 
-    <!-- NAVBAR: Public Links on Top Right -->
+    <!-- NAVBAR: Public Links & Match-Day Hub -->
     <nav class="navbar">
         <div class="nav-brand">
             <img src="/spa-logo.png.png" alt="SPA Logo">
             Smart <span>Players</span> Auction
         </div>
         <div class="nav-links">
-            <a href="/league.html">Match-Day Hub</a>
-            <a href="#">Live Auction <span class="public-badge">Public</span></a>
-            <a href="#">Players List <span class="public-badge">Public</span></a>
-            <a href="#">Franchise Standings <span class="public-badge">Public</span></a>
+            <a href="/league.html">Match-Day Hub <span class="public-badge" style="background: #f59e0b; color: black;">New</span></a>
+            <a href="/public.html">Live Auction <span class="public-badge">Public</span></a>
+            <a href="/public.html">Players List <span class="public-badge">Public</span></a>
+            <a href="/public.html">Standings <span class="public-badge">Public</span></a>
             
-            <!-- Hidden Organizer Login -->
+            <!-- Organizer Login -->
             <a href="/admin.html" class="org-btn">Organizer Login 🔒</a>
         </div>
     </nav>
@@ -211,7 +213,7 @@
             </div>
 
             <div>
-                <a href="#" class="cta-btn">Enter Public Portal</a>
+                <a href="/public.html" class="cta-btn">Enter Public Portal</a>
             </div>
         </div>
     </header>
