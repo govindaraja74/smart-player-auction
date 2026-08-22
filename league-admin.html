@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Hub | Tournament Orders</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        :root { --primary: #0284c7; --secondary: #fde047; --dark: #0f172a; --card-bg: #1e293b; --success: #10b981; }
+        body { background-color: var(--dark); color: white; display: flex; flex-direction: column; min-height: 100vh; }
+
+        .navbar { padding: 20px 40px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .nav-brand { font-size: 22px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
+        .nav-brand img { height: 35px; }
+        .nav-brand span { color: var(--secondary); }
+
+        .container { flex-grow: 1; padding: 40px 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #334155; padding-bottom: 20px;}
+        .header h1 { font-size: 32px; color: var(--secondary); }
+        .header p { color: #94a3b8; margin-top: 5px; }
+
+        .teams-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; }
+        
+        .team-card { background: var(--card-bg); border-radius: 12px; border: 1px solid #334155; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .team-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #475569;}
+        .team-name { font-size: 20px; font-weight: 900; text-transform: uppercase; }
+        
+        .status-badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+        .status-pending { background: #f59e0b; color: black; }
+        .status-submitted { background: var(--primary); color: white; }
+        .status-published { background: var(--success); color: white; }
+
+        .match-group { margin-bottom: 15px; }
+        .match-title { font-size: 14px; color: var(--secondary); font-weight: bold; margin-bottom: 5px; text-transform: uppercase;}
+        .player-row { background: #0f172a; padding: 10px 15px; border-radius: 6px; font-size: 14px; margin-bottom: 5px; border: 1px solid #334155;}
+        
+        .publish-btn { width: 100%; background: var(--success); color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; text-transform: uppercase; transition: 0.3s;}
+        .publish-btn:hover { background: #059669; }
+        .publish-btn:disabled { background: #475569; cursor: not-allowed; color: #94a3b8; }
+        
+        .no-data { color: #94a3b8; font-style: italic; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/league.html" class="nav-brand"><img src="/spa-logo.png.png" alt="Logo"> Organizer <span>Hub</span></a>
+        <a href="/league.html" style="color: white; text-decoration: none; font-weight: bold;">Back to League Home</a>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Tournament Operations</h1>
+                <p>Review franchise playing orders and publish them for the umpires.</p>
+            </div>
+            <button class="publish-btn" style="width: auto; padding: 10px 20px;" onclick="publishAll()">Publish All Lineups</button>
+        </div>
+
+        <div class="teams-grid" id="teamsContainer">
+            <!-- Team cards load here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        window.onload = () => {
+            loadAllLineups();
+        };
+
+        function loadAllLineups() {
+            const setup = JSON.parse(localStorage.getItem('auctionSetup')) || {};
+            const teams = setup.teams || [];
+            const allPlayers = JSON.parse(localStorage.getItem('localPlayers')) || [];
+            
+            const submittedLineups = JSON.parse(localStorage.getItem('submittedLineups')) || {};
+            const publishedLineups = JSON.parse(localStorage.getItem('publishedLineups')) || {};
+            
+            const container = document.getElementById('teamsContainer');
+            container.innerHTML = '';
+
+            if (teams.length === 0) {
+                container.innerHTML = '<p>No franchises found in the system.</p>';
+                return;
+            }
+
+            teams.forEach(team => {
+                const teamId = team.id || team._id;
+                const teamRoster = allPlayers.filter(p => p.status === 'sold' && (p.teamId === teamId || p.soldTo === teamId));
+                
+                const teamLineup = submittedLineups[teamId] || {};
+                const isPublished = publishedLineups[teamId] ? true : false;
+                const hasSubmitted = Object.keys(teamLineup).length > 0;
+
+                let statusClass = isPublished ? 'status-published' : (hasSubmitted ? 'status-submitted' : 'status-pending');
+                let statusText = isPublished ? 'PUBLISHED' : (hasSubmitted ? 'READY TO PUBLISH' : 'PENDING SUBMISSION');
+
+                let cardHTML = `
+                    <div class="team-card">
+                        <div class="team-header">
+                            <div class="team-name">${team.name}</div>
+                            <div class="status-badge ${statusClass}">${statusText}</div>
+                        </div>
+                `;
+
+                if (!hasSubmitted) {
+                    cardHTML += `<p class="no-data">The franchise has not submitted their playing order yet.</p>`;
+                    cardHTML += `<button class="publish-btn" disabled>Awaiting Submission</button>`;
+                } else {
+                    // Group players by match
+                    const matches = ['Match 1', 'Match 2', 'Match 3', 'Match 4', 'Match 5', 'Substitute'];
+                    
+                    matches.forEach(match => {
+                        // Find players assigned to this match
+                        let matchPlayers = teamRoster.filter(p => teamLineup[p.id || p._id] === match);
+                        
+                        if (matchPlayers.length > 0) {
+                            cardHTML += `<div class="match-group"><div class="match-title">${match}</div>`;
+                            matchPlayers.forEach(p => {
+                                cardHTML += `<div class="player-row">${p.name} <span style="float: right; color: #94a3b8; font-size: 12px;">${p.category || ''}</span></div>`;
+                            });
+                            cardHTML += `</div>`;
+                        }
+                    });
+
+                    if (isPublished) {
+                        cardHTML += `<button class="publish-btn" style="background: #475569;" disabled>Already Published</button>`;
+                    } else {
+                        cardHTML += `<button class="publish-btn" onclick="publishTeam('${teamId}')">Publish Lineup</button>`;
+                    }
+                }
+
+                cardHTML += `</div>`;
+                container.innerHTML += cardHTML;
+            });
+        }
+
+        function publishTeam(teamId) {
+            let submitted = JSON.parse(localStorage.getItem('submittedLineups')) || {};
+            let published = JSON.parse(localStorage.getItem('publishedLineups')) || {};
+            
+            if (submitted[teamId]) {
+                published[teamId] = submitted[teamId];
+                localStorage.setItem('publishedLineups', JSON.stringify(published));
+                loadAllLineups(); // Refresh UI
+            }
+        }
+
+        function publishAll() {
+            let submitted = JSON.parse(localStorage.getItem('submittedLineups')) || {};
+            if(Object.keys(submitted).length === 0) return alert("No lineups have been submitted yet.");
+            
+            localStorage.setItem('publishedLineups', JSON.stringify(submitted));
+            loadAllLineups(); // Refresh UI
+            alert("✅ All currently submitted lineups have been published to the Umpire Portal.");
+        }
+    </script>
+</body>
+</html>
