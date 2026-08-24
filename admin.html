@@ -228,8 +228,8 @@
         .live-presentation-board { border-radius: 0 !important; border: none !important; border-bottom: 4px solid #ef4444 !important; flex: 1 !important; min-height: auto !important; }
         .live-bottom-panel { border-radius: 0 !important; border: none !important; padding: 10px 20px !important; }
         #la-franchise-strip { margin-top: 8px !important; min-height: 60px !important; padding: 5px !important; }
+        
         /* OVERRIDES FOR AUTO-FITTING FRANCHISE LOGOS IN ONE LINE */
-     /* OVERRIDES FOR AUTO-FITTING FRANCHISE LOGOS IN ONE LINE */
         #la-franchise-strip {
             display: flex !important;
             flex-wrap: nowrap !important;
@@ -275,7 +275,8 @@
             text-overflow: ellipsis;
             width: 90%;
         }
-/* 16-TEAM ULTIMATE WHITE CARD GRID */
+        
+        /* 16-TEAM ULTIMATE WHITE CARD GRID */
         #view-franchise-standings {
             height: 100vh !important;
             display: flex !important;
@@ -391,7 +392,8 @@
         #view-franchise-standings [style*="color:#10b981"] { color: #059669 !important; }
         #view-franchise-standings [style*="color: #3b82f6"],
         #view-franchise-standings [style*="color:#3b82f6"] { color: #2563eb !important; }
-   /* Force Franchise Standings to automatically fit exactly 4 in a row */
+        
+        /* Force Franchise Standings to automatically fit exactly 4 in a row */
         #standings-franchises-list {
             max-width: 100% !important;
             width: 100% !important;
@@ -823,6 +825,25 @@
         const CLOUD_NAME = "xdbqhbil";       
         const UPLOAD_PRESET = "auction_preset"; 
 
+        // 🔥 GOOGLE DRIVE IMAGE CONVERTER 🔥
+        function fixGoogleDriveImage(url) {
+            if (!url || url.trim() === '') return 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            
+            if (url.includes('drive.google.com')) {
+                let fileId = '';
+                if (url.includes('id=')) {
+                    fileId = url.split('id=')[1].split('&')[0];
+                } else if (url.includes('/d/')) {
+                    fileId = url.split('/d/')[1].split('/')[0];
+                }
+                
+                if (fileId) {
+                    return `https://drive.google.com/uc?export=view&id=${fileId}`;
+                }
+            }
+            return url; 
+        }
+
         async function uploadImageToCloudinary(file) {
             if (!file) return "";
             const formData = new FormData();
@@ -1090,7 +1111,8 @@
 
                 let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">`;
                 filteredPlayers.forEach(p => {
-                    const photoSrc = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                    const rawPhotoUrl = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : '';
+                    const photoSrc = fixGoogleDriveImage(rawPhotoUrl); // 🔥 APPLYING THE FIX HERE 🔥
                     const safeName = p.name ? String(p.name).replace(/"/g, '&quot;').replace(/'/g, '&#39;') : 'Unnamed Player';
                     const safeId = p._id ? String(p._id) : '';
 
@@ -1484,7 +1506,8 @@
 
             // Helper function to draw a player card with an image
             const getPlayerCardHTML = (p) => {
-                const photoSrc = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                const rawPhotoUrl = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : '';
+                const photoSrc = fixGoogleDriveImage(rawPhotoUrl); // 🔥 APPLYING THE FIX HERE 🔥
                 return `
                 <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
                     <img src="${photoSrc}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid white; margin-bottom: 8px; background: #e2e8f0;">
@@ -2068,7 +2091,7 @@
                         let cat = cleanRow['category'] || cleanRow['cat'] || cleanRow['pool'] || 'Default';
                         let price = cleanRow['baseprice'] || cleanRow['price'] || cleanRow['base'] || 0;
                         let slno = cleanRow['slno'] || cleanRow['serialno'] || cleanRow['sl'] || cleanRow['no'] || (localPlayers.length + 1);
-                        let photoLink = cleanRow['photo'] || cleanRow['image'] || cleanRow['photourl'] || cleanRow['url'] || '';
+                        let photoLink = cleanRow['photo'] || cleanRow['image'] || cleanRow['photourl'] || cleanRow['url'] || row['UPLOAD RECENT PHOTO'] || '';
                         
                         if (name && String(name).trim() !== '') {
                             localPlayers.push({
@@ -2449,7 +2472,8 @@
             const photoEl = document.getElementById('la-photo');
             photoEl.src = 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'; 
             setTimeout(() => {
-                photoEl.src = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+                const rawPhotoUrl = (p.photoUrl && p.photoUrl.length > 5) ? p.photoUrl : '';
+                photoEl.src = fixGoogleDriveImage(rawPhotoUrl); // 🔥 APPLYING THE FIX HERE 🔥
             }, 50); 
 
             document.getElementById('la-bidder-box').style.display = 'none';
@@ -2708,6 +2732,15 @@
                     }
                 }, 1200); // Waits for the SOLD animation to finish before showing
             }
+        }
+
+        function saveLiveState() {
+            safeSetStorage('liveAuctionState', {
+                player: livePlayerActive,
+                currentBid: liveCurrentBid,
+                teamId: liveCurrentTeamId
+            });
+            safeSetStorage('savedLivePlayer', livePlayerActive);
         }
 
         function nextRandomPlayer() {
