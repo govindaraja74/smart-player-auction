@@ -2207,7 +2207,7 @@
                             cleanRow[safeKey] = row[key];
                         }
                         let name = cleanRow['playername'] || cleanRow['name'] || cleanRow['player'] || cleanRow['players'] || row['Player Name'] || row['Name'] || Object.values(row)[1] || Object.values(row)[0];
-                        let cat = cleanRow['category'] || cleanRow['cat'] || cleanRow['pool'] || 'Default';
+                        let cat = cleanRow['category'] || cleanRow['category2'] || cleanRow['cat'] || cleanRow['pool'] || 'Default';
                         let price = cleanRow['baseprice'] || cleanRow['price'] || cleanRow['base'] || 0;
                         let slno = cleanRow['slno'] || cleanRow['serialno'] || cleanRow['sl'] || cleanRow['no'] || (localPlayers.length + 1);
                         let photoLink = cleanRow['photo'] || cleanRow['image'] || cleanRow['photourl'] || cleanRow['url'] || row['UPLOAD RECENT PHOTO'] || '';
