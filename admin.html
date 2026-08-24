@@ -276,8 +276,11 @@
             width: 90%;
         }
         
-        /* 16-TEAM ULTIMATE WHITE CARD GRID */
-        #view-franchise-standings {
+      /* 16-TEAM ULTIMATE WHITE CARD GRID */
+        #view-franchise-standings.hidden {
+            display: none !important;
+        }
+        #view-franchise-standings:not(.hidden) {
             height: 100vh !important;
             display: flex !important;
             flex-direction: column !important;
