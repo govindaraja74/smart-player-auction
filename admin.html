@@ -746,15 +746,12 @@
             <div id="view-live-room" class="hidden" style="height: 100%;">
                 <div class="live-room" style="background: #0f172a;">
                     
-                  <!-- Admin Top Bar -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 25px; background: #0f172a;">
-                        <h1 style="margin: 0; color: white; font-size: 16px;">ADMIN CONTROL PANEL</h1>
-                        <div>
-                            <button class="btn-success" style="background: #10b981; margin-right: 10px; padding: 6px 12px; font-size: 13px;" onclick="toggleFullScreen()">⛶ Full Screen</button>
-                            <button class="btn-primary" style="background: #3b82f6; margin-right: 10px; padding: 6px 12px; font-size: 13px;" onclick="navTo('view-franchise-standings')">📊 Standings</button>
-                            <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444; padding: 6px 12px; font-size: 13px;" onclick="navTo('view-dashboard')">Exit Room</button>
-                        </div>
-                    </div>
+                <!-- Hidden Pop-Out Right Menu -->
+                  <div class="live-right-admin-menu">
+                      <button class="btn-success" style="padding: 10px; font-size: 13px; width: 100%; border-radius: 6px;" onclick="toggleFullScreen()">⛶ Full Screen</button>
+                      <button class="btn-primary" style="background: #a855f7; padding: 10px; font-size: 13px; width: 100%; border-radius: 6px;" onclick="navTo('view-franchise-standings')">📊 Standings</button>
+                      <button class="btn-danger" style="background: transparent; border: 1px solid #ef4444; padding: 10px; font-size: 13px; width: 100%; border-radius: 6px;" onclick="navTo('view-dashboard')">Exit Room</button>
+                  </div>
 
                 <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
