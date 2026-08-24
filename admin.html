@@ -112,21 +112,122 @@
             font-family: 'Arial Black', Impact, sans-serif;
         }
         
-        .live-header { text-align: center; margin-bottom: 40px; position: relative; z-index: 2; }
-        .live-header h2 { color: #fde047; font-size: 42px; margin: 0; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .live-header .sub-header { display: inline-block; font-size: 38px; font-weight: bold; color: white; margin-top: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        .live-header .sub-header span { background: #ef4444; padding: 5px 20px; border-radius: 4px; margin-right: 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+       /* 1. SINGLE LINE HEADER WITH SMART WRAPPING */
+        .live-header { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            margin-bottom: 25px; 
+            position: relative; 
+            z-index: 2; 
+        }
+        .live-header h2 { 
+            color: #fde047; 
+            font-size: clamp(24px, 2.5vw, 36px); 
+            margin: 0; 
+            text-transform: uppercase; 
+            letter-spacing: 1.5px; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
+            white-space: nowrap; 
+        }
+        .live-header .sub-header { 
+            display: inline-flex; 
+            align-items: center; 
+            font-size: clamp(22px, 2.3vw, 34px); 
+            font-weight: bold; 
+            color: white; 
+            margin: 0; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
+            white-space: nowrap; 
+        }
+        .live-header .sub-header span { 
+            background: #ef4444; 
+            padding: 4px 14px; 
+            border-radius: 6px; 
+            margin-right: 10px; 
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5); 
+        }
         
-        .live-content-area { display: flex; justify-content: space-between; align-items: center; flex: 1; position: relative; z-index: 2; }
+        .live-content-area { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex: 1; 
+            position: relative; 
+            z-index: 2; 
+        }
         
-        .live-left-panel { position: relative; width: 350px; }
-        .live-photo-circle { width: 260px; height: 320px; border-radius: 16px; border: 8px solid #ea580c; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; display: flex; align-items: center; justify-content: center;}
-.live-photo-circle img { width: 100%; height: 100%; object-fit: contain; }
-        .live-sl-badge { position: absolute; top: 10px; left: -10px; background: #ea580c; color: white; font-size: 36px; padding: 15px 25px; border-radius: 50px; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; z-index: 10; }
+        /* 2. RECTANGULAR BOX PHOTO FRAME */
+        .live-left-panel { 
+            position: relative; 
+            width: 320px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .live-photo-circle { 
+            width: 270px !important; 
+            height: 330px !important; 
+            border-radius: 14px !important; 
+            border: 6px solid #ea580c !important; 
+            overflow: hidden !important; 
+            background: #1e293b !important; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6); 
+            margin: 0 auto; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .live-photo-circle img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain !important; 
+            background: #0f172a; 
+        }
+        .live-sl-badge { 
+            position: absolute; 
+            top: -12px; 
+            left: 10px; 
+            background: #ea580c; 
+            color: white; 
+            font-size: 28px; 
+            padding: 8px 18px; 
+            border-radius: 50px; 
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.5); 
+            border: 3px solid #fff; 
+            z-index: 10; 
+        }
 
-        .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 20px; font-family: Arial, sans-serif; margin-top: -60px; }
-        .info-ribbon { border: 3px solid #ea580c; border-left: none; border-radius: 0 40px 40px 0; padding: 15px 30px; font-size: 26px; font-weight: bold; color: white; width: fit-content; min-width: 350px; background: rgba(0,0,0,0.4); box-shadow: inset 0 0 15px rgba(234,88,12,0.3); text-transform: uppercase; }
-
+        /* 3. INFO RIBBONS (MOVED HIGHER & COMPACT) */
+        .live-center-panel { 
+            flex: 1; 
+            padding: 0 25px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 14px; 
+            font-family: Arial, sans-serif; 
+            margin-top: -70px !important; 
+        }
+        .info-ribbon { 
+            border: 3px solid #ea580c; 
+            border-left: none; 
+            border-radius: 0 40px 40px 0; 
+            padding: 10px 25px; 
+            font-size: 22px; 
+            font-weight: bold; 
+            color: white; 
+            width: fit-content; 
+            min-width: 320px; 
+            max-width: 90%; 
+            background: rgba(0,0,0,0.5); 
+            box-shadow: inset 0 0 15px rgba(234,88,12,0.3); 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
         .live-right-panel { width: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .live-massive-price { font-size: 110px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); white-space: nowrap; }
         
@@ -617,29 +718,33 @@
                         </div>
                     </div>
 
-                    <!-- PREMIUM PRESENTATION BOARD -->
+                <!-- PREMIUM PRESENTATION BOARD -->
                     <div class="live-presentation-board">
-                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 15px; left: 20px; width: 120px; height: 120px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
+                        <img id="la-assoc-logo" src="/spa-logo.png.png" style="position: absolute; top: 15px; left: 20px; width: 100px; height: 100px; border-radius: 50%; background: white; z-index: 5; border: 4px solid #fde047; box-shadow: 0 4px 10px rgba(0,0,0,0.5); object-fit: cover;">
 
-                        <div class="live-header" style="margin-bottom: 20px;">
+                        <!-- Single-Line Header -->
+                        <div class="live-header">
                             <h2 id="la-assoc-name">KARKALA BADMINTON ASSOCIATION</h2>
                             <div class="sub-header"><span>PLAYERS</span> AUCTION</div>
                         </div>
 
                         <div class="live-content-area">
+                            <!-- Rectangular Photo Box -->
                             <div class="live-left-panel">
                                 <div class="live-sl-badge" id="la-sl-no">#0</div>
-                                <div class="live-photo-circle" <div class="live-photo-circle" style="width: 250px; height: 320px;">>
+                                <div class="live-photo-circle">
                                     <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
                                 </div>
                             </div>
 
-                            <div class="live-center-panel" style="margin-top: -30px;">
+                            <!-- Elevated Info Ribbons -->
+                            <div class="live-center-panel">
                                 <div class="info-ribbon" id="la-name">WAITING FOR PLAYER</div>
                                 <div class="info-ribbon" id="la-club">LOCATION: ---</div>
                                 <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
                             </div>
 
+                            <!-- Price and Bidder Box -->
                             <div class="live-right-panel">
                                 <div class="live-massive-price" id="la-current-bid" style="font-size: 95px; margin-bottom: 10px;">0</div>
                                 <div class="live-team-box" id="la-bidder-box" style="display: none; width: 160px; height: 160px;">
@@ -651,12 +756,14 @@
                         
                         <div id="la-sold-stamp" class="sold-stamp-overlay">SOLD</div>
 
-                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5;">
-                            <img src="/spa-logo.png.png" style="height: 50px; object-fit: contain; -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%); mask-image: linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%);">
-                            <div style="font-size: 11px; color: #f8fafc; margin-top: 2px; font-weight: bold; letter-spacing: 1px;">Performing the ultimate fair and dynamic player auction experience.</div>
+                        <!-- 4. ENLARGED & EYE-CATCHING LOGO + TAGLINE -->
+                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); text-align: center; z-index: 5; width: 100%;">
+                            <img src="/spa-logo.png.png" style="height: 65px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));">
+                            <div style="font-size: 13px; color: #fde047; margin-top: 3px; font-weight: 900; letter-spacing: 1.2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); text-transform: uppercase;">
+                                Performing the ultimate fair and dynamic player auction experience.
+                            </div>
                         </div>
                     </div>
-
                    <!-- SINGLE-LINE COMPACT BOTTOM PANEL -->
                     <div class="live-bottom-panel" style="width: 100%;">
                         <!-- Added padding-left: 25px to push everything away from the blue sidebar -->
