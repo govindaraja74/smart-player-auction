@@ -322,6 +322,44 @@
             font-size: 18px;
             box-shadow: 2px 0 5px rgba(0,0,0,0.4);
         }
+        /* RIGHT POP-OUT ADMIN MENU */
+        .live-right-admin-menu {
+            position: fixed !important;
+            right: -170px !important;
+            top: 20px;
+            width: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 12px 0 0 12px;
+            border: 2px solid #38bdf8;
+            border-right: none;
+            transition: right 0.3s ease-in-out !important;
+            z-index: 2000 !important;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.6);
+        }
+        .live-right-admin-menu:hover {
+            right: 0 !important;
+        }
+        .live-right-admin-menu::after {
+            content: '◀ MENU';
+            position: absolute;
+            left: -86px;
+            top: 20px;
+            background: #1e73be;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px 0 0 8px;
+            font-weight: 900;
+            font-size: 14px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.5);
+            border: 2px solid #38bdf8;
+            border-right: none;
+        }
         /* OVERRIDES FOR EDGE-TO-EDGE LIVE ROOM & COMPACT BOTTOM PANEL */
         #view-live-room { padding: 0 !important; }
         #view-live-room > div { max-width: 100% !important; width: 100% !important; height: 100vh !important; justify-content: space-between; zoom: 1 !important; }
