@@ -2211,7 +2211,7 @@
                         let cat = cleanRow['category'] || cleanRow['category2'] || cleanRow['cat'] || cleanRow['pool'] || 'Default';
                         let price = cleanRow['baseprice'] || cleanRow['price'] || cleanRow['base'] || 0;
                         let slno = cleanRow['slno'] || cleanRow['serialno'] || cleanRow['sl'] || cleanRow['no'] || (localPlayers.length + 1);
-                  let photoLink = cleanRow['photo'] || cleanRow['uploadrecentphoto'] || cleanRow['uploadrecentphoto2'] || cleanRow['image'] || cleanRow['photourl'] || cleanRow['url'] || row['UPLOAD RECENT PHOTO'] || row['UPLOAD RECENT PHOTO 2'] || '';
+                let photoLink = cleanRow['photo'] || cleanRow['uploadrecentphoto'] || cleanRow['uploadrecentphoto2'] || cleanRow['photorecentphoto2'] || cleanRow['image'] || cleanRow['photourl'] || cleanRow['url'] || row['UPLOAD RECENT PHOTO'] || row['UPLOAD RECENT PHOTO 2'] || row['Upload Recent Photo 2'] || '';
 
                         if (name && String(name).trim() !== '') {
                             localPlayers.push({
