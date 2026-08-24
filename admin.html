@@ -120,8 +120,8 @@
         .live-content-area { display: flex; justify-content: space-between; align-items: center; flex: 1; position: relative; z-index: 2; }
         
         .live-left-panel { position: relative; width: 350px; }
-        .live-photo-circle { width: 280px; height: 280px; border-radius: 50%; border: 10px solid #ea580c; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; }
-        .live-photo-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .live-photo-circle { width: 260px; height: 320px; border-radius: 16px; border: 8px solid #ea580c; overflow: hidden; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; display: flex; align-items: center; justify-content: center;}
+.live-photo-circle img { width: 100%; height: 100%; object-fit: contain; }
         .live-sl-badge { position: absolute; top: 10px; left: -10px; background: #ea580c; color: white; font-size: 36px; padding: 15px 25px; border-radius: 50px; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; z-index: 10; }
 
         .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 20px; font-family: Arial, sans-serif; margin-top: -60px; }
@@ -629,7 +629,7 @@
                         <div class="live-content-area">
                             <div class="live-left-panel">
                                 <div class="live-sl-badge" id="la-sl-no">#0</div>
-                                <div class="live-photo-circle" style="width: 250px; height: 250px;">
+                                <div class="live-photo-circle" <div class="live-photo-circle" style="width: 250px; height: 320px;">>
                                     <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
                                 </div>
                             </div>
@@ -1147,8 +1147,8 @@
                                 <button class="edit-del-btn" style="color:red;" onclick="deletePlayer('${safeId}')">🗑️</button>
                             </div>
                         </div>
-                        <div style="position: relative; width: 90px; height: 90px; margin-bottom: 12px;">
-                            <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0;">
+                      <div style="position: relative; width: 100px; height: 120px; margin-bottom: 12px;">
+    <img src="${photoSrc}" style="width: 100%; height: 100%; border-radius: 8px; object-fit: contain; border: 2px solid #e2e8f0; background: white;">
                             ${teamLogoOverlay}
                         </div>
                         <div style="font-weight: bold; color: #0f172a; text-align: center; font-size: 18px; margin-bottom: 5px; word-break: break-word;">${safeName}</div>
@@ -1514,7 +1514,7 @@
                 const photoSrc = fixGoogleDriveImage(rawPhotoUrl); // 🔥 APPLYING THE FIX HERE 🔥
                 return `
                 <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
-                    <img src="${photoSrc}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid white; margin-bottom: 8px; background: #e2e8f0;">
+                    <img src="${photoSrc}" style="width: 55px; height: 70px; border-radius: 4px; object-fit: contain; border: 2px solid white; margin-bottom: 8px; background: white;">
                     <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${p.name}">${p.name}</div>
                     <div style="font-size: 12px; margin-top: 4px; font-weight: bold; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 12px;">₹${p.soldPrice}</div>
                 </div>`;
