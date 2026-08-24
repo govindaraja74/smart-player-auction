@@ -1242,7 +1242,7 @@
                 const logoInput = document.getElementById('setupLogo');
                 if (logoInput && logoInput.files && logoInput.files.length > 0) {
                     try {
-                        auctionLogoUrl = await compressImage(logoInput.files[0], 250);
+                       auctionLogoUrl = await uploadImageToCloudinary(logoInput.files[0]);
                     } catch (imgErr) {}
                 }
 
@@ -1968,7 +1968,7 @@
                     
                     let logoDataUrl = "";
                     if (logoInput && logoInput.files && logoInput.files[0]) {
-                        logoDataUrl = await compressImage(logoInput.files[0], 120);
+                       logoDataUrl = await uploadImageToCloudinary(logoInput.files[0]);
                     }
                     if (!logoDataUrl) {
                         logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
@@ -2040,7 +2040,7 @@
             if(tIndex > -1) {
                 localTeams[tIndex].name = newName;
                 if(logoInput.files && logoInput.files[0]) {
-                    localTeams[tIndex].logoUrl = await compressImage(logoInput.files[0], 120);
+                    localTeams[tIndex].logoUrl = await uploadImageToCloudinary(logoInput.files[0]);
                 }
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
@@ -2138,7 +2138,7 @@
 
             let photoUrl = "";
             if (photoInput && photoInput.files[0]) {
-                photoUrl = await compressImage(photoInput.files[0], 200);
+              photoUrl = await uploadImageToCloudinary(photoInput.files[0]);
             }
 
             const activeSetup = safeGetStorage('auctionSetup', {});
@@ -2211,7 +2211,7 @@
                 window.allPlayers[pIndex].basePrice = newPrice;
                 window.allPlayers[pIndex].category = newCat;
                 if(photoInput.files && photoInput.files[0]) {
-                    window.allPlayers[pIndex].photoUrl = await compressImage(photoInput.files[0], 200);
+                   window.allPlayers[pIndex].photoUrl = await uploadImageToCloudinary(photoInput.files[0]);
                 }
                 safeSetStorage('auctionPlayers', window.allPlayers);
                 renderPlayersDatabase('all');
