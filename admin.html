@@ -822,6 +822,7 @@
                     <button class="btn-primary" style="background: #ef4444;" onclick="renderPlayersDatabase('unsold')">Unsold</button>
                     <button class="btn-warning" style="background: #f59e0b; color: white; padding: 10px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-left: 5px;" onclick="resetAllPlayersForSecondRound()">🔄 Move Unsold to Available</button>
                     <div style="flex-grow: 1;"></div>
+                    <button class="btn-danger" style="background: #b91c1c; margin-right:10px;" onclick="clearAllPlayers()">🗑️ Clear Roster</button>
                     <button class="btn-danger" style="background: #ef4444; margin-right:10px;" onclick="if(confirm('Are you sure? This will delete all local images to fix memory errors.')) { localStorage.clear(); location.reload(); }">⚠️ Reset Browser Memory</button>
                     <button class="btn-primary" style="background: #a855f7;" onclick="downloadPDF()">📥 Download PDF</button>
                 </div>>
