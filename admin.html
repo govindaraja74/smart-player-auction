@@ -2293,6 +2293,33 @@
             alert("Google Sheets sync requires a backend endpoint setup. Please use the Excel/CSV upload feature instead.");
         }
 
+
+        function clearAllPlayers() {
+            if(!confirm("⚠️ Are you absolutely sure you want to DELETE EVERY PLAYER from the roster? This cannot be undone.")) return;
+
+            let deletedTracker = safeGetStorage('deletedPlayers', []);
+            if (window.allPlayers) {
+                window.allPlayers.forEach(p => {
+                    if(p && p._id && !deletedTracker.includes(p._id)) {
+                        deletedTracker.push(p._id);
+                    }
+                });
+            }
+            safeSetStorage('deletedPlayers', deletedTracker);
+
+            window.allPlayers = [];
+            safeSetStorage('auctionPlayers', []);
+
+            window.selectedPlayersForDelete = [];
+            const bulkBtn = document.getElementById('bulkDeleteBtn');
+            if (bulkBtn) bulkBtn.style.display = 'none';
+
+            renderPlayersDatabase('all');
+            updatePlayerCounterBtn();
+            try { renderFranchiseStandings(); } catch(e) {}
+            
+            alert("✅ The players roster has been completely cleared!");
+        }
         function deletePlayer(id) {
             if(!confirm("Are you sure you want to permanently delete this player?")) return;
             let deletedTracker = safeGetStorage('deletedPlayers', []);
