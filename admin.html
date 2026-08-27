@@ -407,12 +407,25 @@
         #view-franchise-standings.hidden {
             display: none !important;
         }
-        #view-franchise-standings:not(.hidden) {
+       #view-franchise-standings:not(.hidden) {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
             height: 100vh !important;
             display: flex !important;
             flex-direction: column !important;
             background: #110e1b !important; 
             overflow: hidden !important;
+            z-index: 500 !important;
+            padding: 30px 50px !important;
+            box-sizing: border-box !important;
+        }
+
+        #view-franchise-standings h1.dash-title {
+            text-align: center !important;
+            width: 100% !important;
+            margin-bottom: 25px !important;
         }
 
         /* Make the main page header text white */
@@ -1823,8 +1836,8 @@
 
         function navTo(viewId) {
             const sidebar = document.querySelector('.dash-sidebar');
-            if (sidebar) {
-                if (viewId === 'view-live-room') {
+           if (sidebar) {
+                if (viewId === 'view-live-room' || viewId === 'view-franchise-standings') {
                     sidebar.classList.add('live-mode-sidebar');
                 } else {
                     sidebar.classList.remove('live-mode-sidebar');
@@ -2962,6 +2975,12 @@
 
             const found = window.allPlayers.find(p => (p.serialNumber && String(p.serialNumber).toLowerCase() === term) || (p.name && p.name.toLowerCase().includes(term)));
             if(!found) return alert("Player not found in database!");
+
+            // SECURITY CHECK: Prevent drawing Sold or Unsold players
+            if (found.status === 'sold' || found.status === 'unsold') {
+                return alert(`⚠️ ACTION BLOCKED!\n\nThis player is currently marked as ${found.status.toUpperCase()}. You must go to the Players Roster and reset them back to the 'Available' pool before they can be drawn again.`);
+            }
+
             pushPlayerToScreen(found);
         }
 
