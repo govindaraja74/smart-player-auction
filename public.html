@@ -281,12 +281,19 @@
 
 
         // --- REAL-TIME DATA FETCHING FROM MONGODB / SOCKET.IO ---
+      // --- REAL-TIME DATA FETCHING FROM MONGODB / SOCKET.IO ---
         const socket = io();
+        let lastDataString = ""; // Stores the last known state of the database
 
         // Listen for data coming from the cloud
         socket.on('load_saved_auctions', (historyData) => {
             if (historyData && historyData.length > 0) {
                 let cloudData = historyData[0];
+                
+                // SMART CHECK: Only update the screen if the data actually changed!
+                const currentDataString = JSON.stringify(cloudData);
+                if (currentDataString === lastDataString) return; // If identical, stop here. No blinking!
+                lastDataString = currentDataString; // Otherwise, save the new state
                 
                 // Overwrite global variables with latest cloud data
                 globalSetup = cloudData.auctionSetup || {};
@@ -306,10 +313,9 @@
             socket.emit('request_saved_auctions');
         }
 
-        // Run once immediately, then poll the server every 2 seconds to act as a live monitor
+        // Run once immediately, then poll the server every 0.5 seconds for true real-time speed!
         fetchCloudData();
-        setInterval(fetchCloudData, 2000);
-
+        setInterval(fetchCloudData, 500);
 
         // --- RENDERING FUNCTIONS ---
 
