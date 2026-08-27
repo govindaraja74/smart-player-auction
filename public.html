@@ -68,8 +68,15 @@
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
 
         /* ========================================================
-           2. PLAYERS DATABASE STYLES
+           2. PLAYERS DATABASE STYLES & FILTERS
            ======================================================== */
+        .public-filter-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; align-items: center; background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155;}
+        .public-filter-bar select { padding: 10px 15px; border-radius: 6px; background: #0f172a; color: white; border: 1px solid #475569; font-weight: bold; outline: none; cursor: pointer; min-width: 200px; font-size: 14px;}
+        .filter-buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;}
+        .filter-btn { background: #0f172a; color: #cbd5e1; border: 1px solid #475569; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; border-bottom-width: 3px; }
+        .filter-btn:hover { background: #334155; color: white; }
+        .filter-btn.active { background: #334155; color: white; box-shadow: 0 0 10px rgba(255,255,255,0.1); }
+
         .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
         .player-card { background: white; border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; color: #0f172a; font-family: Arial, sans-serif;}
         .player-card-img-box { position: relative; width: 120px; height: 140px; margin-bottom: 12px; }
@@ -141,7 +148,21 @@
 
     <!-- 2. PLAYERS LIST SECTION -->
     <div id="players" class="tab-content">
-        <h2 style="color:white; margin-bottom: 20px; font-weight: 900; text-transform: uppercase;">Players Database</h2>
+        <h2 style="color:white; margin-bottom: 20px; font-weight: 900; text-transform: uppercase; text-align: center;">Players Database</h2>
+        
+        <!-- Interactive Filters -->
+        <div class="public-filter-bar">
+            <select id="publicCategoryFilter" onchange="setPublicPlayerFilter(this.value)">
+                <option value="all">All Categories</option>
+            </select>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setPublicPlayerFilter('all')" id="flt-all">All Players</button>
+                <button class="filter-btn" onclick="setPublicPlayerFilter('available')" id="flt-available" style="border-bottom-color: #3b82f6;">Available</button>
+                <button class="filter-btn" onclick="setPublicPlayerFilter('sold')" id="flt-sold" style="border-bottom-color: #10b981;">Sold</button>
+                <button class="filter-btn" onclick="setPublicPlayerFilter('unsold')" id="flt-unsold" style="border-bottom-color: #ef4444;">Unsold</button>
+            </div>
+        </div>
+
         <div class="player-grid" id="public-players-container">
             <!-- Populated via JS -->
         </div>
@@ -202,6 +223,53 @@
             const letter = nameToUse.charAt(0).toUpperCase() || 'T';
             const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+
+        // Global State for Public Filters
+        let currentPublicFilter = 'all';
+
+        function setPublicPlayerFilter(val) {
+            currentPublicFilter = val;
+            
+            // Reset button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if(val === 'available' || val === 'sold' || val === 'unsold' || val === 'all') {
+                const btn = document.getElementById('flt-' + val);
+                if(btn) btn.classList.add('active');
+                
+                // If a status button is clicked, reset the dropdown UI visually
+                if(val !== 'all' || document.getElementById('publicCategoryFilter').value.startsWith('category:')) {
+                     document.getElementById('publicCategoryFilter').value = 'all';
+                }
+            } else {
+                // If a dropdown category is picked, ensure 'All' is highlighted so users know they aren't hiding statuses
+                document.getElementById('flt-all').classList.add('active');
+            }
+            
+            loadPublicData();
+        }
+
+        function updatePublicCategoryDropdown(players) {
+            const dropdown = document.getElementById('publicCategoryFilter');
+            if (!dropdown) return;
+            
+            const currentSelection = dropdown.value; 
+            const uniqueCats = [...new Set(players.filter(p => p && p.category).map(p => String(p.category).trim()).filter(c => c !== ''))].sort();
+            
+            let html = '<option value="all">All Categories</option>';
+            uniqueCats.forEach(cat => {
+                html += `<option value="category:${cat}">${cat}</option>`;
+            });
+            
+            dropdown.innerHTML = html;
+            
+            // Re-apply selection so it doesn't jump back to "All" when polling
+            if (currentSelection.startsWith('category:') && uniqueCats.includes(currentSelection.replace('category:', ''))) {
+                dropdown.value = currentSelection;
+            } else if (currentPublicFilter.startsWith('category:')) {
+                dropdown.value = currentPublicFilter;
+            }
         }
 
         // --- REAL-TIME DATA RENDERING ---
@@ -278,14 +346,30 @@
 
         // 2. RENDER PLAYERS LIST
         function renderPlayersList(players) {
+            updatePublicCategoryDropdown(players);
+
             const container = document.getElementById('public-players-container');
             if (!players || players.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8;">No players loaded yet.</p>';
+                container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px; font-size: 18px;">No players loaded yet.</div>';
                 return;
             }
 
+            // Apply Filters
+            let filteredPlayers = players;
+            if (currentPublicFilter.startsWith('category:')) {
+                const cat = currentPublicFilter.replace('category:', '');
+                filteredPlayers = players.filter(p => String(p.category || '').trim() === cat);
+            } else if (currentPublicFilter !== 'all') {
+                filteredPlayers = players.filter(p => String(p.status || 'available') === currentPublicFilter);
+            }
+
+            if(filteredPlayers.length === 0) {
+                 container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px; font-size: 18px;">No players found matching this filter.</div>';
+                 return;
+            }
+
             let html = '';
-            players.forEach(p => {
+            filteredPlayers.forEach(p => {
                 const photoSrc = fixGoogleDriveImage(p.photoUrl);
                 let statusBox = '';
                 let teamLogoOverlay = '';
@@ -320,7 +404,7 @@
         function renderStandingsList(teams, players, setup) {
             const container = document.getElementById('public-standings-container');
             if (!teams || teams.length === 0) {
-                container.innerHTML = '<p style="color: #94a3b8; text-align: center;">No franchises loaded yet.</p>';
+                container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; color: #94a3b8; padding: 40px; font-size: 18px;">No franchises loaded yet.</div>';
                 return;
             }
 
@@ -381,6 +465,7 @@
             });
             container.innerHTML = html;
         }
+
         // Instantly catch changes made in the Admin tab!
         window.addEventListener('storage', function(e) {
             loadPublicData();
