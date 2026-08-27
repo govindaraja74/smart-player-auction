@@ -12,13 +12,13 @@
         /* Theme & Reset */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
         :root { --primary: #0284c7; --secondary: #fde047; --dark: #0f172a; --light: #f8fafc; }
-        body { background-color: var(--dark); color: var(--light); padding-top: 80px; }
+        body { background-color: var(--dark); color: var(--light); padding-top: 80px; overflow-x: hidden; }
 
         /* Minimal Navbar */
         .navbar { 
             position: fixed; top: 0; width: 100%; padding: 15px 40px; background: #0f172a; 
             border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; 
-            align-items: center; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            align-items: center; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
         .nav-brand { font-size: 20px; font-weight: 900; color: white; text-transform: uppercase; text-decoration: none; letter-spacing: 1px;}
         .nav-brand span { color: var(--secondary); }
@@ -35,13 +35,58 @@
         .tab-btn.active { background: var(--primary); color: white; border-color: #38bdf8; box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);}
 
         /* Content Sections */
-        .tab-content { display: none; padding: 60px 20px; max-width: 1200px; margin: 0 auto; text-align: center; animation: fadeIn 0.4s ease; }
+        .tab-content { display: none; padding: 40px 20px; max-width: 1200px; margin: 0 auto; animation: fadeIn 0.4s ease; }
         .tab-content.active { display: block; }
-        
-        .tab-content h1 { font-size: 38px; margin-bottom: 15px; color: white; font-weight: 900; text-transform: uppercase;}
-        .tab-content p { color: #94a3b8; font-size: 18px; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ========================================================
+           1. LIVE AUCTION BOARD STYLES
+           ======================================================== */
+        .live-presentation-board {
+            position: relative; background: linear-gradient(135deg, #7f1d1d 0%, #0f172a 100%);
+            border: 4px solid #ef4444; border-radius: 12px; padding: 30px; min-height: 600px;
+            display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            font-family: 'Arial Black', Impact, sans-serif;
+        }
+        .live-header { display: flex; justify-content: flex-start; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; position: relative; z-index: 2; padding-left: 140px; width: 100%; box-sizing: border-box; }
+        .live-header h2 { color: #fde047; font-size: clamp(26px, 3vw, 40px); margin: 0; text-transform: uppercase; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); line-height: 1.2; }
+        .live-header .sub-header { display: inline-flex; align-items: center; font-size: clamp(28px, 3vw, 40px); font-weight: bold; color: white; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
+        .live-header .sub-header span { background: #ef4444; padding: 5px 15px; border-radius: 6px; margin-right: 10px; box-shadow: 2px 2px 5px rgba(0,0,0,0.5); }
+        .live-content-area { display: flex; justify-content: space-between; align-items: center; flex: 1; position: relative; z-index: 2; }
+        .live-left-panel { position: relative; width: 350px; display: flex; justify-content: center; align-items: center; margin-top: -20px; }
+        .live-photo-circle { width: 280px !important; height: 350px !important; border-radius: 16px !important; border: 8px solid #ea580c !important; overflow: hidden !important; background: white !important; box-shadow: 0 10px 25px rgba(0,0,0,0.6); margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+        .live-photo-circle img { width: 100%; height: 100%; object-fit: cover !important; object-position: top center !important; background: white; }
+        .live-sl-badge { position: absolute; top: -20px; left: 5px; background: #ea580c; color: white; font-size: 32px; padding: 10px 22px; border-radius: 50px; box-shadow: 2px 4px 10px rgba(0,0,0,0.5); border: 4px solid #fff; z-index: 10; }
+        .live-center-panel { flex: 1; padding: 0 30px; display: flex; flex-direction: column; gap: 18px; font-family: Arial, sans-serif; margin-top: -170px !important; z-index: 3; }
+        .info-ribbon { border: 3px solid #ea580c; border-left: none; border-radius: 0 40px 40px 0; padding: 12px 30px; font-size: 26px; font-weight: bold; color: white; width: fit-content; min-width: 400px; max-width: 95%; background: rgba(0,0,0,0.6); box-shadow: inset 0 0 15px rgba(234,88,12,0.3); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .live-right-panel { width: 450px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .live-massive-price { font-size: 110px; color: #fde047; line-height: 1; margin-bottom: 20px; text-shadow: 4px 4px 0px #b45309, 0 10px 20px rgba(0,0,0,0.8); white-space: nowrap; }
+        .live-team-box { width: 200px; height: 200px; background: white; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); padding: 15px; box-sizing: border-box; }
+        .live-team-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        .live-team-name-disp { font-size: 28px; color: white; text-transform: uppercase; display: none; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); font-family: Arial, sans-serif; font-weight: 900;}
+        .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
+        .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
+
+        /* ========================================================
+           2. PLAYERS DATABASE STYLES
+           ======================================================== */
+        .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .player-card { background: white; border-radius: 8px; padding: 15px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; color: #0f172a; font-family: Arial, sans-serif;}
+        .player-card-img-box { position: relative; width: 120px; height: 140px; margin-bottom: 12px; }
+        .player-card img { width: 100%; height: 100%; border-radius: 8px; object-fit: cover; border: 2px solid #e2e8f0; background: white; }
+        .player-card .team-logo-overlay { position: absolute; bottom: -10px; right: -10px; width: 45px; height: 45px; border-radius: 50%; border: 3px solid white; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); object-fit: cover; }
+        .status-box { color: white; padding: 6px; text-align: center; font-weight: bold; border-radius: 4px; margin-top: 10px; font-size: 13px; width: 100%; }
+
+        /* ========================================================
+           3. FRANCHISE STANDINGS STYLES
+           ======================================================== */
+        .standings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .standing-card { background: #ffffff; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; justify-content: space-evenly; box-shadow: 0 4px 15px rgba(0,0,0,0.3); color: #0f172a; font-family: Arial, sans-serif;}
+        .standing-card-header { display: flex; flex-direction: row; align-items: center; gap: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 10px; }
+        .standing-card-header img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid #e2e8f0; flex-shrink: 0; }
+        .standing-card-header h2 { font-size: 18px; font-weight: 900; margin: 0; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #1e73be;}
+        .standing-stat-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 14px; color: #475569; }
+        .standing-stat-row strong { font-weight: 900; font-size: 15px; }
     </style>
 </head>
 <body>
@@ -59,46 +104,68 @@
         <button class="tab-btn" onclick="switchTab('standings')" id="btn-standings">Standings</button>
     </div>
 
-    <!-- Live Auction Section -->
+    <!-- 1. LIVE AUCTION SECTION -->
     <div id="live" class="tab-content active">
-        <h1>Live Auction Room</h1>
-        <p>The auction is about to begin! Player bidding will be displayed here in real-time.</p>
-        <br><br>
-        <h3 style="color: #475569;">[ Live Auction Display will be integrated here ]</h3>
+        <div class="live-presentation-board" id="public-live-board" style="display: none;">
+            <div class="live-header">
+                <h2 id="la-assoc-name">KARKALA BADMINTON ASSOCIATION</h2>
+                <div class="sub-header"><span>PLAYERS</span> AUCTION</div>
+            </div>
+            <div class="live-content-area">
+                <div class="live-left-panel">
+                    <div class="live-sl-badge" id="la-sl-no">#0</div>
+                    <div class="live-photo-circle">
+                        <img id="la-photo" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png">
+                    </div>
+                </div>
+                <div class="live-center-panel">
+                    <div class="info-ribbon" id="la-name">WAITING FOR PLAYER</div>
+                    <div class="info-ribbon" id="la-club">LOCATION: ---</div>
+                    <div class="info-ribbon" id="la-cat">CATEGORY: ---</div>
+                </div>
+                <div class="live-right-panel">
+                    <div class="live-massive-price" id="la-current-bid">0</div>
+                    <div class="live-team-box" id="la-bidder-box" style="display: none;">
+                        <img id="la-bidder-logo" src="">
+                    </div>
+                    <div class="live-team-name-disp" id="la-bidder-name">Team Name</div>
+                </div>
+            </div>
+            <div id="la-sold-stamp" class="sold-stamp-overlay">SOLD</div>
+        </div>
+        <div id="live-waiting-msg" style="text-align: center; color: #94a3b8; padding: 100px 0; font-size: 20px;">
+            <h2>The auction is currently paused or has not started yet.</h2>
+            <p>Real-time data will appear here automatically when the admin initiates a bid.</p>
+        </div>
     </div>
 
-    <!-- Players List Section -->
+    <!-- 2. PLAYERS LIST SECTION -->
     <div id="players" class="tab-content">
-        <h1>Players Database</h1>
-        <p>Browse all available and sold players for the tournament.</p>
-        <br><br>
-        <h3 style="color: #475569;">[ Player Rosters will be integrated here ]</h3>
+        <h2 style="color:white; margin-bottom: 20px; font-weight: 900; text-transform: uppercase;">Players Database</h2>
+        <div class="player-grid" id="public-players-container">
+            <!-- Populated via JS -->
+        </div>
     </div>
 
-    <!-- Standings Section -->
+    <!-- 3. STANDINGS SECTION -->
     <div id="standings" class="tab-content">
-        <h1>Franchise Standings</h1>
-        <p>Track team budgets, squad sizes, and remaining purse money.</p>
-        <br><br>
-        <h3 style="color: #475569;">[ Team Budgets will be integrated here ]</h3>
+        <h2 style="color:white; margin-bottom: 20px; font-weight: 900; text-transform: uppercase; text-align: center;">Franchise Standings</h2>
+        <div class="standings-grid" id="public-standings-container">
+            <!-- Populated via JS -->
+        </div>
     </div>
 
-    <!-- JavaScript to handle the automatic tab switching -->
+    <!-- ========================================================
+         JAVASCRIPT FOR TAB SWITCHING & REAL-TIME SYNC
+         ======================================================== -->
     <script>
+        // Tab Management
         function switchTab(tabId) {
-            window.history.pushState(null, null, '#' + tabId); // Update URL
-            showTab(tabId);
-        }
-
-        function showTab(tabId) {
-            // Hide all tabs
+            window.history.pushState(null, null, '#' + tabId);
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            // Show selected tab
             const content = document.getElementById(tabId);
             const button = document.getElementById('btn-' + tabId);
-            
             if(content && button) {
                 content.classList.add('active');
                 button.classList.add('active');
@@ -108,16 +175,202 @@
             }
         }
 
-        // When the page first loads, check if there is a hashtag in the URL
         function handleLoad() {
             let hash = window.location.hash.substring(1); 
-            if (hash === 'live' || hash === 'players' || hash === 'standings') {
-                showTab(hash);
+            if (hash === 'live' || hash === 'players' || hash === 'standings') switchTab(hash);
+        }
+        window.addEventListener('DOMContentLoaded', handleLoad);
+        window.addEventListener('hashchange', handleLoad);
+
+
+        // Helper: Convert Google Drive Images correctly
+        function fixGoogleDriveImage(url) {
+            if (!url || url.trim() === '') return 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png';
+            if (url.includes('drive.google.com')) {
+                let fileId = '';
+                if (url.includes('id=')) fileId = url.split('id=')[1].split('&')[0];
+                else if (url.includes('/d/')) fileId = url.split('/d/')[1].split('/')[0];
+                if (fileId) return `https://lh3.googleusercontent.com/d/${fileId}`;
+            }
+            return url;
+        }
+
+        // Helper: Generate placeholder team logo
+        function getTeamLogo(team, defaultName = 'Team') {
+            if (team && typeof team.logoUrl === 'string' && team.logoUrl.startsWith('data:image')) return team.logoUrl;
+            const nameToUse = (team && team.name && typeof team.name === 'string' && team.name.trim().length > 0) ? team.name.trim() : defaultName;
+            const letter = nameToUse.charAt(0).toUpperCase() || 'T';
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" rx="50" fill="%231e73be"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="50" font-weight="bold" fill="white" font-family="Arial">${letter}</text></svg>`;
+            return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+        }
+
+        // --- REAL-TIME DATA RENDERING ---
+        function loadPublicData() {
+            // Read directly from the browser's local memory exactly where the Admin saves it
+            let rawSetup = localStorage.getItem('auctionSetup');
+            let rawPlayers = localStorage.getItem('auctionPlayers');
+            let rawTeams = localStorage.getItem('auctionTeams');
+            let rawLiveState = localStorage.getItem('liveAuctionState');
+
+            const setup = rawSetup ? JSON.parse(rawSetup) : {};
+            const players = rawPlayers ? JSON.parse(rawPlayers) : [];
+            const teams = rawTeams ? JSON.parse(rawTeams) : [];
+            const liveState = rawLiveState ? JSON.parse(rawLiveState) : null;
+
+            renderLiveRoom(liveState, setup, teams);
+            renderPlayersList(players);
+            renderStandingsList(teams, players, setup);
+        }
+
+        // 1. RENDER LIVE ROOM
+        function renderLiveRoom(state, setup, teams) {
+            const board = document.getElementById('public-live-board');
+            const waitingMsg = document.getElementById('live-waiting-msg');
+
+            if (!state || !state.player) {
+                board.style.display = 'none';
+                waitingMsg.style.display = 'block';
+                return;
+            }
+
+            board.style.display = 'flex';
+            waitingMsg.style.display = 'none';
+
+            // Populate Board
+            document.getElementById('la-assoc-name').innerText = setup.name || 'KARKALA BADMINTON ASSOCIATION';
+            document.getElementById('la-sl-no').innerText = state.player.serialNumber || '0';
+            document.getElementById('la-name').innerText = state.player.name;
+            document.getElementById('la-cat').innerText = state.player.category || 'N/A';
+            document.getElementById('la-current-bid').innerText = state.currentBid || state.player.basePrice || 0;
+            document.getElementById('la-photo').src = fixGoogleDriveImage(state.player.photoUrl);
+
+            const bidderBox = document.getElementById('la-bidder-box');
+            const bidderName = document.getElementById('la-bidder-name');
+            const stamp = document.getElementById('la-sold-stamp');
+
+            // Handle Bidders
+            if (state.teamId) {
+                const team = teams.find(t => (t._id === state.teamId || t.id === state.teamId));
+                bidderBox.style.display = 'flex';
+                bidderName.style.display = 'block';
+                bidderName.innerText = team ? team.name : 'Unknown Team';
+                document.getElementById('la-bidder-logo').src = team ? getTeamLogo(team, team.name) : '';
+            } else {
+                bidderBox.style.display = 'none';
+                bidderName.style.display = 'none';
+            }
+
+            // Handle Stamps
+            if (state.player.status === 'sold') {
+                stamp.innerText = "SOLD";
+                stamp.style.borderColor = "white";
+                stamp.style.color = "white";
+                stamp.classList.add('active');
+            } else if (state.player.status === 'unsold') {
+                stamp.innerText = "UNSOLD";
+                stamp.style.borderColor = "#ef4444";
+                stamp.style.color = "#ef4444";
+                stamp.classList.add('active');
+            } else {
+                stamp.classList.remove('active');
             }
         }
 
-        window.addEventListener('DOMContentLoaded', handleLoad);
-        window.addEventListener('hashchange', handleLoad);
+        // 2. RENDER PLAYERS LIST
+        function renderPlayersList(players) {
+            const container = document.getElementById('public-players-container');
+            if (!players || players.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8;">No players loaded yet.</p>';
+                return;
+            }
+
+            let html = '';
+            players.forEach(p => {
+                const photoSrc = fixGoogleDriveImage(p.photoUrl);
+                let statusBox = '';
+                let teamLogoOverlay = '';
+
+                if (p.status === 'sold') {
+                    statusBox = `<div class="status-box" style="background: #10b981;">SOLD: ₹${p.soldPrice || p.basePrice || 0}</div>`;
+                    if (p.teamLogo) teamLogoOverlay = `<img src="${p.teamLogo}" class="team-logo-overlay">`;
+                } else if (p.status === 'unsold') {
+                    statusBox = `<div class="status-box" style="background: #ef4444;">UNSOLD</div>`;
+                } else {
+                    statusBox = `<div class="status-box" style="background: #3b82f6;">AVAILABLE</div>`;
+                }
+
+                html += `
+                <div class="player-card">
+                    <div style="width: 100%; display: flex; justify-content: space-between; margin-bottom: 10px;">
+                        <span style="background: #e2e8f0; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">#${p.serialNumber || '-'}</span>
+                    </div>
+                    <div class="player-card-img-box">
+                        <img src="${photoSrc}">
+                        ${teamLogoOverlay}
+                    </div>
+                    <div style="font-weight: 900; font-size: 18px; text-align: center; margin-bottom: 5px;">${p.name}</div>
+                    <div style="color: #64748b; font-size: 13px; text-align: center;">Cat: <strong>${p.category || '-'}</strong><br>Base: ₹${p.basePrice || 0}</div>
+                    ${statusBox}
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // 3. RENDER STANDINGS LIST
+        function renderStandingsList(teams, players, setup) {
+            const container = document.getElementById('public-standings-container');
+            if (!teams || teams.length === 0) {
+                container.innerHTML = '<p style="color: #94a3b8; text-align: center;">No franchises loaded yet.</p>';
+                return;
+            }
+
+            const globalBudget = parseInt(setup.budget) || 0;
+            const maxPlayers = parseInt(setup.maxPlayers || 0);
+            const basePrice = parseInt(setup.minBid) || 0;
+
+            let html = '';
+            teams.forEach(t => {
+                const teamPlayers = players.filter(p => p.status === 'sold' && p.teamId === (t._id || t.id));
+                const totalSpent = teamPlayers.reduce((sum, p) => sum + (parseInt(p.soldPrice) || 0), 0);
+                const teamBudget = parseInt(t.budget) > 0 ? parseInt(t.budget) : globalBudget;
+                const purse = teamBudget - totalSpent;
+                const playersNeeded = Math.max(0, maxPlayers - teamPlayers.length);
+                const remainingNeededForReserve = Math.max(0, playersNeeded - 1);
+                const reserveFund = remainingNeededForReserve * basePrice;
+                const maxBid = Math.max(0, purse - reserveFund);
+
+                html += `
+                <div class="standing-card">
+                    <div class="standing-card-header">
+                        <img src="${getTeamLogo(t, t.name)}">
+                        <h2>${t.name || 'Unnamed Team'}</h2>
+                    </div>
+                    <div class="standing-stat-row">
+                        <span>Players Needed:</span> <strong>${playersNeeded}</strong>
+                    </div>
+                    <div class="standing-stat-row">
+                        <span>Purse Remaining:</span> <strong style="color: #059669;">₹${purse}</strong>
+                    </div>
+                    <div class="standing-stat-row">
+                        <span>Reserve Fund:</span> <strong style="color: #dc2626;">₹${reserveFund}</strong>
+                    </div>
+                    <div class="standing-stat-row">
+                        <span>Max Possible Bid:</span> <strong style="color: #2563eb;">₹${maxBid}</strong>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // Instantly catch changes made in the Admin tab!
+        window.addEventListener('storage', function(e) {
+            loadPublicData();
+        });
+
+        // Run once on load, and set a safety interval just in case
+        loadPublicData();
+        setInterval(loadPublicData, 1500);
+
     </script>
 </body>
 </html>
