@@ -177,8 +177,10 @@
     </div>
 
     <!-- ========================================================
-         JAVASCRIPT FOR TAB SWITCHING & REAL-TIME SYNC
+         JAVASCRIPT FOR TAB SWITCHING & REAL-TIME SYNC VIA CLOUD
          ======================================================== -->
+    <!-- 🔥 Include Socket.io to pull from Cloud instead of LocalStorage! 🔥 -->
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         // Tab Management
         function switchTab(tabId) {
@@ -225,9 +227,13 @@
             return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
         }
 
-        // Global State for Public Filters
+        // Global State Variables for rendering
+        let globalPlayers = [];
+        let globalTeams = [];
+        let globalSetup = {};
         let currentPublicFilter = 'all';
 
+        // --- FILTER LOGIC ---
         function setPublicPlayerFilter(val) {
             currentPublicFilter = val;
             
@@ -247,7 +253,8 @@
                 document.getElementById('flt-all').classList.add('active');
             }
             
-            loadPublicData();
+            // Instantly re-render with the new filter using our global memory
+            renderPlayersList(globalPlayers);
         }
 
         function updatePublicCategoryDropdown(players) {
@@ -264,7 +271,7 @@
             
             dropdown.innerHTML = html;
             
-            // Re-apply selection so it doesn't jump back to "All" when polling
+            // Re-apply selection so it doesn't jump back to "All" when polling the server
             if (currentSelection.startsWith('category:') && uniqueCats.includes(currentSelection.replace('category:', ''))) {
                 dropdown.value = currentSelection;
             } else if (currentPublicFilter.startsWith('category:')) {
@@ -272,23 +279,38 @@
             }
         }
 
-        // --- REAL-TIME DATA RENDERING ---
-        function loadPublicData() {
-            // Read directly from the browser's local memory exactly where the Admin saves it
-            let rawSetup = localStorage.getItem('auctionSetup');
-            let rawPlayers = localStorage.getItem('auctionPlayers');
-            let rawTeams = localStorage.getItem('auctionTeams');
-            let rawLiveState = localStorage.getItem('liveAuctionState');
 
-            const setup = rawSetup ? JSON.parse(rawSetup) : {};
-            const players = rawPlayers ? JSON.parse(rawPlayers) : [];
-            const teams = rawTeams ? JSON.parse(rawTeams) : [];
-            const liveState = rawLiveState ? JSON.parse(rawLiveState) : null;
+        // --- REAL-TIME DATA FETCHING FROM MONGODB / SOCKET.IO ---
+        const socket = io();
 
-            renderLiveRoom(liveState, setup, teams);
-            renderPlayersList(players);
-            renderStandingsList(teams, players, setup);
+        // Listen for data coming from the cloud
+        socket.on('load_saved_auctions', (historyData) => {
+            if (historyData && historyData.length > 0) {
+                let cloudData = historyData[0];
+                
+                // Overwrite global variables with latest cloud data
+                globalSetup = cloudData.auctionSetup || {};
+                globalPlayers = cloudData.auctionPlayers || [];
+                globalTeams = cloudData.auctionTeams || [];
+                const liveState = cloudData.liveAuctionState || null;
+
+                renderLiveRoom(liveState, globalSetup, globalTeams);
+                renderPlayersList(globalPlayers);
+                renderStandingsList(globalTeams, globalPlayers, globalSetup);
+            }
+        });
+
+        // Request data from the server
+        function fetchCloudData() {
+            socket.emit('request_saved_auctions');
         }
+
+        // Run once immediately, then poll the server every 2 seconds to act as a live monitor across any browser/device!
+        fetchCloudData();
+        setInterval(fetchCloudData, 2000);
+
+
+        // --- RENDERING FUNCTIONS ---
 
         // 1. RENDER LIVE ROOM
         function renderLiveRoom(state, setup, teams) {
@@ -400,7 +422,7 @@
             container.innerHTML = html;
         }
 
-        // 3. RENDER STANDINGS LIST
+        // 3. RENDER STANDINGS LIST (WITH ROSTERS)
         function renderStandingsList(teams, players, setup) {
             const container = document.getElementById('public-standings-container');
             if (!teams || teams.length === 0) {
@@ -465,15 +487,6 @@
             });
             container.innerHTML = html;
         }
-
-        // Instantly catch changes made in the Admin tab!
-        window.addEventListener('storage', function(e) {
-            loadPublicData();
-        });
-
-        // Run once on load, and set a safety interval just in case
-        loadPublicData();
-        setInterval(loadPublicData, 1500);
 
     </script>
 </body>
