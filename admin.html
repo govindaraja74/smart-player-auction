@@ -1314,10 +1314,18 @@
             } catch (err) {}
         }
 
-        function downloadPDF() {
+       function downloadPDF() {
             const element = document.getElementById('pdf-content');
             if (typeof html2pdf !== 'undefined') {
-                html2pdf().set({ margin: 0.5, filename: 'Auction_Roster.pdf', jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } }).from(element).save();
+                const opt = {
+                    margin:       0.5,
+                    filename:     'Auction_Roster.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true }, 
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, 
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(element).save();
             } else {
                 window.print();
             }
