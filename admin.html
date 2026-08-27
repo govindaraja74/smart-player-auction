@@ -1647,12 +1647,13 @@
             let html = '<div id="franchise-roster-pdf-content" style="background: #0f172a; padding: 15px; border-radius: 8px; color: white;">';
 
             // Helper function to draw a player card with an image
+        // Helper function to draw a player card with an image
             const getPlayerCardHTML = (p) => {
                 const rawPhotoUrl = (p.photoUrl && typeof p.photoUrl === 'string' && p.photoUrl.length > 5) ? p.photoUrl : '';
-                const photoSrc = fixGoogleDriveImage(rawPhotoUrl); // 🔥 APPLYING THE FIX HERE 🔥
+                const photoSrc = fixGoogleDriveImage(rawPhotoUrl); 
                 return `
-                <div style="background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
-                    <img src="${photoSrc}" style="width: 55px; height: 70px; border-radius: 4px; object-fit: contain; border: 2px solid white; margin-bottom: 8px; background: white;">
+                <div style="page-break-inside: avoid; break-inside: avoid; background: #10b981; color: white; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px solid #059669; box-shadow: 0 2px 4px rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
+                    <img src="${photoSrc}" crossorigin="anonymous" style="width: 55px; height: 70px; border-radius: 4px; object-fit: contain; border: 2px solid white; margin-bottom: 8px; background: white;">
                     <div style="font-weight: bold; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%;" title="${p.name}">${p.name}</div>
                     <div style="font-size: 12px; margin-top: 4px; font-weight: bold; background: rgba(0,0,0,0.2); padding: 3px 8px; border-radius: 12px;">₹${p.soldPrice}</div>
                 </div>`;
@@ -1732,15 +1733,19 @@
             openModal('modal-franchise-roster');
         }
 
-        function downloadFranchiseRosterPDF(teamName) {
+       function downloadFranchiseRosterPDF(teamName) {
             const element = document.getElementById('franchise-roster-pdf-content');
             if (typeof html2pdf !== 'undefined') {
-                const safeName = teamName.replace(/[^a-zA-Z0-9]/g, '_'); // Safe filename
-                html2pdf().set({ 
-                    margin: 0.5, 
-                    filename: safeName + '_Roster.pdf', 
-                    jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' } 
-                }).from(element).save();
+                const safeName = teamName.replace(/[^a-zA-Z0-9]/g, '_'); 
+                const opt = {
+                    margin:       0.5,
+                    filename:     safeName + '_Roster.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true }, 
+                    pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }, 
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+                };
+                html2pdf().set(opt).from(element).save();
             } else {
                 alert("PDF library failed to load. Please try refreshing the page.");
             }
