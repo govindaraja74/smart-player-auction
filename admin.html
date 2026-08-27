@@ -388,6 +388,20 @@
             text-overflow: ellipsis;
             width: 90%;
         }
+        /* Red visual indicator when a franchise cannot bid */
+        #la-franchise-strip .franchise-btn.red-shadow {
+            border-color: #ef4444 !important;
+            background: linear-gradient(145deg, #450a0a, #0f172a) !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8) !important;
+            opacity: 0.5 !important;
+        }
+
+        /* Turns the actual franchise logo red and grays it out */
+        #la-franchise-strip .franchise-btn.red-shadow img {
+            border-color: #ef4444 !important;
+            filter: grayscale(100%);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.8) !important;
+        }
 
       /* 16-TEAM ULTIMATE WHITE CARD GRID */
         #view-franchise-standings.hidden {
