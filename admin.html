@@ -2178,7 +2178,7 @@ function showFranchiseRoster(teamId) {
             renderAuctionDetailLists();
         }
 
-        async function addMultipleTeams() {
+       async function addMultipleTeams() {
             try {
                 const num = parseInt(document.getElementById('numOfTeams').value) || 0;
                 const btn = document.getElementById('addTeamBtn');
@@ -2187,8 +2187,7 @@ function showFranchiseRoster(teamId) {
 
                 let localTeams = safeGetStorage('auctionTeams', []);
                 if (!Array.isArray(localTeams)) localTeams = [];
-                const deletedTeamsTracker = safeGetStorage('deletedTeams', []);
-                localTeams = localTeams.filter(t => !deletedTeamsTracker.includes(t._id));
+                let deletedTeamsTracker = safeGetStorage('deletedTeams', []);
 
                 const activeSetup = safeGetStorage('auctionSetup', {});
                 const activeTourneyId = activeSetup.id || 'KBL2026';
@@ -2199,17 +2198,23 @@ function showFranchiseRoster(teamId) {
                     const logoInput = document.getElementById('tLogo_'+i);
                     if(!nameInput || !nameInput.value.trim()) continue;
 
+                    let safeName = String(nameInput.value).trim();
+                    let safeNameLower = safeName.toLowerCase();
+
+                    // FIX: Un-blacklist the team name if it was previously deleted
+                    deletedTeamsTracker = deletedTeamsTracker.filter(name => name !== safeNameLower);
+
                     let logoDataUrl = "";
                     if (logoInput && logoInput.files && logoInput.files[0]) {
-                       logoDataUrl = await uploadImageToCloudinary(logoInput.files[0]);
+                       try { logoDataUrl = await uploadImageToCloudinary(logoInput.files[0]); } catch(e){}
                     }
                     if (!logoDataUrl) {
-                        logoDataUrl = getTeamLogo({ name: nameInput.value }, nameInput.value);
+                        logoDataUrl = getTeamLogo({ name: safeName }, safeName);
                     }
 
                     let newTeam = {
                         _id: 'team_' + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000),
-                        name: String(nameInput.value).trim(),
+                        name: safeName,
                         logoUrl: logoDataUrl,
                         budget: Number(budget),
                         purseRemaining: Number(budget),
@@ -2218,6 +2223,7 @@ function showFranchiseRoster(teamId) {
                     localTeams.push(newTeam);
                 }
 
+                safeSetStorage('deletedTeams', deletedTeamsTracker); // Save un-blacklisted array
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
                 document.getElementById('numOfTeams').value = ''; 
@@ -2269,11 +2275,20 @@ function showFranchiseRoster(teamId) {
             if(!newName || newName.trim() === "") return alert("Name is required");
 
             let localTeams = safeGetStorage('auctionTeams', []);
+            let deletedTeamsTracker = safeGetStorage('deletedTeams', []);
+
             let tIndex = localTeams.findIndex(t => t._id === id || t.id === id);
             if(tIndex > -1) {
+                // FIX: Un-blacklist the name if they renamed a team to a previously deleted name
+                const safeNameLower = newName.trim().toLowerCase();
+                deletedTeamsTracker = deletedTeamsTracker.filter(deletedItem => deletedItem !== safeNameLower);
+                safeSetStorage('deletedTeams', deletedTeamsTracker);
+
                 localTeams[tIndex].name = newName;
                 if(logoInput.files && logoInput.files[0]) {
-                    localTeams[tIndex].logoUrl = await uploadImageToCloudinary(logoInput.files[0]);
+                    try {
+                        localTeams[tIndex].logoUrl = await uploadImageToCloudinary(logoInput.files[0]);
+                    } catch(e) {}
                 }
                 safeSetStorage('auctionTeams', localTeams);
                 window.allTeams = localTeams;
