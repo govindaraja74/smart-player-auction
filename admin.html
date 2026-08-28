@@ -2808,21 +2808,29 @@
             saveLiveState();
         }
 
-        function applyManualBid() {
+    function applyManualBid() {
             if (!livePlayerActive) return alert("⚠️ No player is currently on the auction block!");
             const manInput = document.getElementById('la-manual-bid');
             if (!manInput || manInput.value === '') return alert("⚠️ Please enter or select an amount in the Custom Bid box.");
 
             const manBid = parseInt(manInput.value);
-            if (isNaN(manBid)) return alert("Please enter a valid number.");
+            if (isNaN(manBid)) {
+                manInput.value = ''; // Clears invalid text
+                return alert("Please enter a valid number.");
+            }
+            
             let currentPrice = parseInt(liveCurrentBid) || 0;
 
-            if (manBid <= currentPrice) return alert("Manual custom bid must be higher than current bid.");
+            if (manBid <= currentPrice) {
+                manInput.value = ''; // Clears the input automatically
+                return alert("Manual custom bid must be higher than current bid.");
+            }
 
             if (liveCurrentTeamId) {
                 const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
                 if (!check.allowed) {
                     let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
+                    manInput.value = ''; // Clears the input automatically upon error
                     return alert("🛑 Insufficient Funds! Leading franchise cannot afford this bid: " + formattedReason);
                 }
             }
@@ -2845,7 +2853,6 @@
             populateCustomBidDropdown();
             saveLiveState();
         }
-
         function undoLastBid() {
             if(liveBidHistory.length === 0) return; 
             const lastState = liveBidHistory.pop();
