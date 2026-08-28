@@ -3029,19 +3029,37 @@
             if (!window.allPlayers || window.allPlayers.length === 0) {
                 return alert("No players found! Please add players in the Roster first.");
             }
+
+            // Get official active category names
+            const rawCats = safeGetStorage('auctionCats', []);
+            const validCategoryNames = rawCats.map(c => String(typeof c === 'object' ? c.name : c).trim().toLowerCase()).filter(Boolean);
+
             let activeCategories = getAvailableCategories();
+            
             const availablePlayers = window.allPlayers.filter(p => {
                 const status = String(p.status || 'available').toLowerCase();
                 const isAvailable = (status === 'available' || status === '');
                 if (!isAvailable) return false;
+
+                // STRICT SECURITY CHECK: Must have a valid category assigned
+                const pCat = String(p.category || '').trim().toLowerCase();
+                if (!pCat || pCat === '' || pCat === 'undefined' || pCat === 'null') {
+                    return false; // Skip players with no category
+                }
+
+                // If categories are defined in the setup, ensure the player's category matches an active official category
+                if (validCategoryNames.length > 0 && !validCategoryNames.includes(pCat)) {
+                    return false; // Skip players whose category isn't part of the official list
+                }
+
                 if (activeCategories && activeCategories.length > 0) {
-                    const pCat = String(p.category || '').trim().toLowerCase();
                     return activeCategories.includes(pCat);
                 }
                 return true;
             });
+
             if(availablePlayers.length === 0) {
-                return alert("⚠️ WARNING: No available players found in the active categories!");
+                return alert("⚠️ WARNING: No valid available players found with proper categories! Players without categories are locked from being drawn.");
             }
             const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
             pushPlayerToScreen(randomPlayer);
