@@ -2808,8 +2808,15 @@
             saveLiveState();
         }
 
-    function applyManualBid() {
+  function applyManualBid() {
             if (!livePlayerActive) return alert("⚠️ No player is currently on the auction block!");
+            
+            // NEW SECURITY CHECK: Must have a franchise selected first
+            if (!liveCurrentTeamId) {
+                document.getElementById('la-manual-bid').value = '';
+                return alert("⚠️ Please select a bidding franchise first before applying a custom bid!");
+            }
+
             const manInput = document.getElementById('la-manual-bid');
             if (!manInput || manInput.value === '') return alert("⚠️ Please enter or select an amount in the Custom Bid box.");
 
@@ -2826,13 +2833,12 @@
                 return alert("Manual custom bid must be higher than current bid.");
             }
 
-            if (liveCurrentTeamId) {
-                const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
-                if (!check.allowed) {
-                    let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
-                    manInput.value = ''; // Clears the input automatically upon error
-                    return alert("🛑 Insufficient Funds! Leading franchise cannot afford this bid: " + formattedReason);
-                }
+            // Since we already guaranteed a team is selected above, we can check their funds directly
+            const check = canTeamBid(liveCurrentTeamId, manBid, livePlayerActive.category);
+            if (!check.allowed) {
+                let formattedReason = String(check.reason).replace('_', ' ').toUpperCase();
+                manInput.value = ''; // Clears the input automatically upon error
+                return alert("🛑 Insufficient Funds! Leading franchise cannot afford this bid: " + formattedReason);
             }
 
             liveBidHistory.push({
