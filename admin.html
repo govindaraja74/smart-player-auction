@@ -3012,7 +3012,7 @@
             safeSetStorage('savedLivePlayer', livePlayerActive);
         }
 
-        function nextRandomPlayer() {
+     function nextRandomPlayer() {
             if (livePlayerActive && livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
                 return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before drawing the next player.");
             }
@@ -3041,30 +3041,32 @@
                 const isAvailable = (status === 'available' || status === '');
                 if (!isAvailable) return false;
 
-                // STRICT SECURITY CHECK: Must have a valid category assigned
+                // STRICT SECURITY CHECK 1: Must have a valid category assigned
                 const pCat = String(p.category || '').trim().toLowerCase();
                 if (!pCat || pCat === '' || pCat === 'undefined' || pCat === 'null') {
                     return false; // Skip players with no category
                 }
 
-                // If categories are defined in the setup, ensure the player's category matches an active official category
+                // STRICT SECURITY CHECK 2: Category must exist in the official setup list
                 if (validCategoryNames.length > 0 && !validCategoryNames.includes(pCat)) {
-                    return false; // Skip players whose category isn't part of the official list
+                    return false; // Skip players with random/unwanted categories
                 }
 
-                if (activeCategories && activeCategories.length > 0) {
-                    return activeCategories.includes(pCat);
+                // STRICT SECURITY CHECK 3: Category must not be full across all teams
+                if (activeCategories !== null && !activeCategories.includes(pCat)) {
+                    return false; // Skip players whose category limits have already been reached
                 }
-                return true;
+
+                return true; // Only draw if they pass ALL checks
             });
 
             if(availablePlayers.length === 0) {
-                return alert("⚠️ WARNING: No valid available players found with proper categories! Players without categories are locked from being drawn.");
+                return alert("⚠️ WARNING: No valid available players found! \n\nEither all remaining players belong to full categories, or they have unregistered/blank categories.");
             }
+            
             const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
             pushPlayerToScreen(randomPlayer);
         }
-
         function manualSearchPlayer() {
             if (livePlayerActive && livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
                 return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before searching for a new player.");
