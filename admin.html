@@ -620,6 +620,8 @@
             }
         }
        </style>
+<!-- Fireworks Engine -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body onload="setTimeout(safeInit, 300)">
     <!-- Login Screen -->
@@ -2934,6 +2936,31 @@ function showFranchiseRoster(teamId) {
             }, 850);
         }
 
+        function triggerFireworks() {
+            if (typeof confetti === 'undefined') return;
+            const duration = 2500; // Lasts for 2.5 seconds
+            const end = Date.now() + duration;
+
+            (function frame() {
+                // "Flower Pots" shooting up from the bottom corners
+                confetti({ particleCount: 6, angle: 60, spread: 55, origin: { x: 0, y: 1 }, colors: ['#fde047', '#ef4444', '#10b981'], zIndex: 9999 });
+                confetti({ particleCount: 6, angle: 120, spread: 55, origin: { x: 1, y: 1 }, colors: ['#fde047', '#ef4444', '#10b981'], zIndex: 9999 });
+
+                // "Sky Blasters" randomly bursting in the upper area
+                if (Math.random() < 0.15) {
+                    confetti({
+                        particleCount: 50, spread: 100,
+                        origin: { y: Math.random() * 0.4, x: Math.random() * 0.8 + 0.1 },
+                        zIndex: 9999
+                    });
+                }
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
         function finalizeSale(resultType) {
             if(!livePlayerActive) return alert("No player on screen!");
             let localPlayers = safeGetStorage('auctionPlayers', []);
@@ -2968,7 +2995,9 @@ function showFranchiseRoster(teamId) {
                 document.getElementById('la-sold-stamp').style.borderColor = "white";
                 document.getElementById('la-sold-stamp').style.color = "white";
                 document.getElementById('la-sold-stamp').classList.add('active');
+                
                 animateSoldPhoto();
+                triggerFireworks(); // 🎇 THE NEW FIREWORKS TRIGGER!
 
             } else if(resultType === 'unsold') {
                 livePlayerActive.status = 'unsold';
@@ -2988,7 +3017,7 @@ function showFranchiseRoster(teamId) {
                 document.getElementById('la-sold-stamp').style.color = "#ef4444";
                 document.getElementById('la-sold-stamp').classList.add('active');
             }
-          updateLiveControls();
+            updateLiveControls();
             saveLiveState();
 
             // Trigger check to see if rosters are full
