@@ -3089,7 +3089,7 @@ function showFranchiseRoster(teamId) {
             const randomPlayer = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
             pushPlayerToScreen(randomPlayer);
         }
-        function manualSearchPlayer() {
+       function manualSearchPlayer() {
             if (livePlayerActive && livePlayerActive.status !== 'sold' && livePlayerActive.status !== 'unsold') {
                 return alert("⚠️ ACTION LOCKED! \n\nYou must mark the current player as SOLD or UNSOLD before searching for a new player.");
             }
@@ -3100,9 +3100,30 @@ function showFranchiseRoster(teamId) {
             const found = window.allPlayers.find(p => (p.serialNumber && String(p.serialNumber).toLowerCase() === term) || (p.name && p.name.toLowerCase().includes(term)));
             if(!found) return alert("Player not found in database!");
 
-            // SECURITY CHECK: Prevent drawing Sold or Unsold players
+            // SECURITY CHECK 1: Prevent drawing Sold or Unsold players
             if (found.status === 'sold' || found.status === 'unsold') {
                 return alert(`⚠️ ACTION BLOCKED!\n\nThis player is currently marked as ${found.status.toUpperCase()}. You must go to the Players Roster and reset them back to the 'Available' pool before they can be drawn again.`);
+            }
+
+            // NEW SECURITY CHECKS: Apply strict category limits to Manual Search
+            const rawCats = safeGetStorage('auctionCats', []);
+            const validCategoryNames = rawCats.map(c => String(typeof c === 'object' ? c.name : c).trim().toLowerCase()).filter(Boolean);
+            
+            if (validCategoryNames.length > 0) {
+                const pCat = String(found.category || '').trim().toLowerCase();
+                let activeCategories = getAvailableCategories();
+
+                if (!pCat || pCat === '' || pCat === 'undefined' || pCat === 'null') {
+                    return alert("⚠️ ACTION BLOCKED! \n\nThis player has no category assigned. Please update their category in the Players Roster first.");
+                }
+
+                if (!validCategoryNames.includes(pCat)) {
+                    return alert(`⚠️ ACTION BLOCKED! \n\nThis player's category ("${found.category}") does not match any official active categories. Please fix it in the Players Roster.`);
+                }
+
+                if (activeCategories !== null && !activeCategories.includes(pCat)) {
+                    return alert(`⚠️ ACTION BLOCKED! \n\nThe category "${found.category}" is already full across all franchises. This player cannot be drawn.`);
+                }
             }
 
             pushPlayerToScreen(found);
