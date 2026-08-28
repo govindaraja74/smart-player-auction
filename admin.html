@@ -1709,7 +1709,7 @@
             container.innerHTML = html;
         }
 
- function showFranchiseRoster(teamId) {
+function showFranchiseRoster(teamId) {
             const team = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
             if (!team) return;
 
@@ -1749,17 +1749,17 @@
                     rosterByCat[c].push(p);
                 });
 
+                // NEW: Track exactly how many global empty slots we are allowed to visually draw
+                let remainingGlobalEmptySlots = fin.playersNeeded;
+
                 allCats.forEach(cat => {
                     const catName = typeof cat === 'object' ? cat.name : cat;
                     const normalizedCatName = String(catName).trim().toLowerCase();
                     const limit = typeof cat === 'object' ? parseInt(cat.maxPlayers) || 0 : 0;
 
                     const boughtPlayers = rosterByCat[normalizedCatName] || [];
-                    
-                    // THE FIX: Guarantee that ALL bought players are shown, even if they exceed the category limit!
                     const totalSlots = Math.max(limit, boughtPlayers.length);
 
-                    // Skip drawing empty category rows if there is no limit set and no players exist
                     if (totalSlots === 0 && boughtPlayers.length === 0) return;
 
                     html += `<h4 style="color: #38bdf8; margin: 15px 0 10px; border-bottom: 1px solid #334155; padding-bottom: 5px; text-transform: uppercase;">${catName}</h4>`;
@@ -1769,11 +1769,14 @@
                         if (i < boughtPlayers.length) {
                             html += getPlayerCardHTML(boughtPlayers[i]);
                         } else {
-                            // EMPTY BOX
-                            html += `
-                            <div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
-                                <span style="font-size: 12px; font-style: italic;">Empty Slot</span>
-                            </div>`;
+                            // NEW: Only draw the empty slot box if the team actually has overall roster space left!
+                            if (remainingGlobalEmptySlots > 0) {
+                                html += `
+                                <div style="background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; width: 140px; text-align: center; border: 1px dashed #475569; display: flex; align-items: center; justify-content: center; min-height: 110px; box-sizing: border-box;">
+                                    <span style="font-size: 12px; font-style: italic;">Empty Slot</span>
+                                </div>`;
+                                remainingGlobalEmptySlots--;
+                            }
                         }
                     }
                     html += `</div>`;
@@ -1791,7 +1794,6 @@
                 }
 
             } else {
-                // Fallback if no categories exist at all
                 if (fin.roster.length === 0) {
                     html += '<p style="color: #94a3b8;">No players bought yet.</p>';
                 } else {
@@ -1801,7 +1803,6 @@
                 }
             }
 
-            // Append Financial Summary Footer and close the PDF wrapper
             html += `
                 <div style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #334155; display: flex; flex-direction: column; gap: 12px; font-size: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1818,7 +1819,6 @@
             rosterContainer.innerHTML = html;
             openModal('modal-franchise-roster');
         }
-
        function downloadFranchiseRosterPDF(teamName) {
             const element = document.getElementById('franchise-roster-pdf-content');
             if (typeof html2pdf !== 'undefined') {
