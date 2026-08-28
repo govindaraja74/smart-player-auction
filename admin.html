@@ -550,6 +550,75 @@
             box-sizing: border-box !important;
             margin: 0 !important;
         }
+        /* ========================================================
+           MOBILE RESPONSIVENESS (PHONES & TABLETS)
+           ======================================================== */
+        @media (max-width: 900px) {
+            /* Stack the live presentation board vertically */
+            .live-content-area {
+                flex-direction: column !important;
+                margin-top: 0 !important;
+                gap: 20px !important;
+            }
+            .live-left-panel, .live-center-panel, .live-right-panel {
+                width: 100% !important;
+                margin-top: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Shrink headers and photos */
+            .live-header {
+                padding-left: 0 !important;
+                justify-content: center !important;
+                text-align: center;
+                margin-bottom: 15px !important;
+            }
+            .live-photo-circle {
+                width: 200px !important;
+                height: 250px !important;
+            }
+            
+            /* Adjust Info Ribbons to fit screen */
+            .info-ribbon {
+                width: 100% !important;
+                min-width: 0 !important;
+                font-size: 16px !important;
+                padding: 10px 15px !important;
+                border-radius: 8px !important;
+                border-left: 3px solid #ea580c !important;
+                text-align: center;
+            }
+            
+            /* Shrink Massive Price */
+            .live-massive-price {
+                font-size: 70px !important;
+            }
+            
+            /* Make the bottom control panel wrap cleanly */
+            .live-bottom-panel > div > div {
+                flex-wrap: wrap !important;
+                justify-content: center !important;
+                gap: 10px !important;
+            }
+            
+            /* Allow the Franchise Strip to scroll horizontally on small screens */
+            #la-franchise-strip {
+                justify-content: flex-start !important;
+                overflow-x: auto !important;
+                padding-bottom: 15px !important;
+            }
+            #la-franchise-strip .franchise-btn {
+                min-width: 100px !important;
+            }
+            
+            /* Fix menu buttons overlapping */
+            .live-right-admin-menu {
+                top: 80px !important;
+            }
+            .live-mode-sidebar {
+                z-index: 3000 !important;
+            }
+        }
        </style>
 </head>
 <body onload="setTimeout(safeInit, 300)">
