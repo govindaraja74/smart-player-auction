@@ -1675,7 +1675,7 @@
             });
         }
 
-        function renderFranchiseStandings() {
+     function renderFranchiseStandings() {
             const container = document.getElementById('standings-franchises-list');
             if (!container) return;
             const activeTeams = getActiveTeams();
@@ -1689,26 +1689,29 @@
                 const logo = getTeamLogo(t, 'Team ' + (i + 1));
                 const safeName = t.name ? String(t.name) : 'Unnamed';
                 html += `
-                <div class="ad-card" style="width: 300px; padding: 20px; cursor: pointer; text-align: center; border: 2px solid #cbd5e1; background: white;" onclick="showFranchiseRoster('${t._id || t.id}')">
-                    <img src="${logo}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 15px; border: 3px solid #1e73be; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    <h3 style="margin: 0 0 15px 0; color: #1e73be; font-size: 22px;">${safeName}</h3>
-                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
-                        <span>Needed Players:</span> <strong>${fin.playersNeeded}</strong>
+                <div class="ad-card" style="width: 100%; box-sizing: border-box; padding: 12px; cursor: pointer; text-align: center; border: 2px solid #cbd5e1; background: white; display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-height: 220px;" onclick="showFranchiseRoster('${t._id || t.id}')">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <img src="${logo}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid #1e73be; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="margin: 0 0 10px 0; color: #1e73be; font-size: 16px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">${safeName}</h3>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
-                        <span>Amount Remaining:</span> <strong style="color: #10b981;">₹${fin.purse}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0;">
-                        <span>Reserve Fund:</span> <strong style="color: #ef4444;">₹${fin.reserve}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 15px; color: #334155;">
-                        <span>Max Possible Bid:</span> <strong style="color: #3b82f6;">₹${fin.maxBid}</strong>
+                    <div style="width: 100%;">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #334155; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #e2e8f0;">
+                            <span>Needed Players:</span> <strong>${fin.playersNeeded}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #334155; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #e2e8f0;">
+                            <span>Amount Remaining:</span> <strong style="color: #10b981;">₹${fin.purse}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #334155; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px solid #e2e8f0;">
+                            <span>Reserve Fund:</span> <strong style="color: #ef4444;">₹${fin.reserve}</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 12px; color: #334155;">
+                            <span>Max Possible Bid:</span> <strong style="color: #3b82f6;">₹${fin.maxBid}</strong>
+                        </div>
                     </div>
                 </div>`;
             });
             container.innerHTML = html;
         }
-
 function showFranchiseRoster(teamId) {
             const team = getActiveTeams().find(t => (t._id === teamId || t.id === teamId));
             if (!team) return;
