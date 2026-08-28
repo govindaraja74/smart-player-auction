@@ -434,17 +434,18 @@
             color: #ffffff !important;
         }
 
-        /* 1. The Main Grid Container */
+  /* 1. The Main Grid Container */
         #view-franchise-standings > div:nth-of-type(2),
         #view-franchise-standings .standings-container,
         #view-franchise-standings div[style*="flex-wrap"] {
             flex: 1 !important;
             display: grid !important;
             grid-template-columns: repeat(4, 1fr) !important; 
-            grid-auto-rows: minmax(0, 1fr) !important; 
-            gap: 12px !important;
+            grid-auto-rows: auto !important; /* Allows rows to size naturally */
+            gap: 15px !important;
             padding: 5px 20px 20px 20px !important;
-            overflow: hidden !important;
+            overflow-y: auto !important; /* Enables vertical scrolling for many teams */
+            align-content: start !important; /* Packs cards to the top instead of stretching */
         }
 
         /* 2. THE ENTIRE CARD (Makes the parent container white to hold everything) */
@@ -453,16 +454,15 @@
         #view-franchise-standings div[style*="flex-wrap"] > div {
             background: #ffffff !important; 
             border-radius: 8px !important;
-            padding: 8px 12px !important;
+            padding: 12px 15px !important;
             display: flex !important;
             flex-direction: column !important;
-            justify-content: space-evenly !important;
+            justify-content: space-between !important;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
-            height: 100% !important;
-            min-height: 0 !important;
-            overflow: hidden !important;
+            height: auto !important; /* Lets it grow */
+            min-height: 200px !important; /* Prevents it from shrinking too much */
+            overflow: visible !important;
         }
-
         /* 3. The Header (Turns .box into a side-by-side row) */
         #view-franchise-standings .box {
             background: transparent !important; 
