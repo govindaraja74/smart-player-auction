@@ -2752,7 +2752,24 @@ function showFranchiseRoster(teamId) {
             liveBidHistory = [];
             document.getElementById('la-sl-no').innerText = p.serialNumber || '0';
             document.getElementById('la-name').innerText = p.name;
-            document.getElementById('la-cat').innerText = p.category || 'N/A';
+           // Smart Category Text Sizer
+            const catEl = document.getElementById('la-cat');
+            if (catEl) {
+                catEl.innerText = p.category || 'N/A';
+                
+                // If text is super long, shrink it and add ...
+                if (p.category && p.category.length > 22) {
+                    catEl.style.fontSize = "16px";
+                    catEl.style.whiteSpace = "nowrap";
+                    catEl.style.overflow = "hidden";
+                    catEl.style.textOverflow = "ellipsis";
+                    catEl.title = p.category; 
+                } else {
+                    catEl.style.fontSize = ""; 
+                    catEl.style.whiteSpace = "normal";
+                    catEl.style.overflow = "visible";
+                }
+            }
             document.getElementById('la-club').innerText = p.club || p.team || 'N/A';
             document.getElementById('la-current-bid').innerText = liveCurrentBid;
 
