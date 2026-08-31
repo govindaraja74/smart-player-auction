@@ -96,7 +96,7 @@
         </div>
     </div>
 
-<!-- ========================================== -->
+    <!-- ========================================== -->
     <!-- ORGANIZER: MANAGEMENT CONSOLES             -->
     <!-- ========================================== -->
     <div style="text-align: center; margin-top: 30px; display: flex; justify-content: center; gap: 15px;">
@@ -124,7 +124,6 @@
     </div>
 
     <!-- 2. Fixture Manager (Hidden) -->
-   <!-- 2. Fixture Manager (Hidden) -->
     <div id="fixtureManager" style="display: none; max-width: 900px; margin: 20px auto; background: #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: white;">
         <h2 style="text-align: center; color: #eab308; margin-top: 0; margin-bottom: 20px;">MANAGE TODAY'S FIXTURES</h2>
         
@@ -172,10 +171,7 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MAIN SYSTEM LOGIC & DATA HANDLING          -->
-    <!-- ========================================== -->
-  <!-- QR Code Modal Overlay -->
+    <!-- QR Code Modal Overlay -->
     <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
         <div style="background: #1e293b; padding: 30px; border-radius: 12px; max-width: 500px; width: 100%; text-align: center; color: white; border: 1px solid #334155;">
             <h2 style="color: #fde047; margin-top: 0;">Umpire Login QR Codes</h2>
@@ -186,7 +182,6 @@
     </div>
 
     <script>
-        let currentScoreA = 0; let currentScoreB = 0;
         let allCategories = []; let scheduledOrder = [];
         let manualFixtures = []; let auctionTeamsList = [];
         let currentFilter = null;
@@ -197,13 +192,6 @@
             loadManualFixtures();
             updateCourtDropdowns();
             renderUmpireCourtPortals();
-
-            // Check if URL has a direct court login query (e.g. league.html?court=COURT+1)
-            const urlParams = new URLSearchParams(window.location.search);
-            const targetCourt = urlParams.get('court');
-            if(targetCourt) {
-                loginUmpireDirect(targetCourt);
-            }
         };
 
         function renderUmpireCourtPortals() {
@@ -214,11 +202,14 @@
             container.innerHTML = '';
             
             for(let i = 1; i <= count; i++) {
+                let courtName = `COURT ${i}`;
+                let loginUrl = `umpire.html?court=${encodeURIComponent(courtName)}`;
+                
                 container.innerHTML += `
-                <button onclick="loginUmpireDirect('COURT ${i}')" style="background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
-                    <span>⚖️ Court ${i} Umpire Login</span>
-                    <span style="color: #38bdf8; font-size: 12px;">Launch ➔</span>
-                </button>`;
+                <a href="${loginUrl}" target="_blank" style="background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; text-decoration: none;">
+                    <span>⚖️ Court ${i} Scoreboard</span>
+                    <span style="color: #38bdf8; font-size: 12px;">Open ➔</span>
+                </a>`;
             }
         }
 
@@ -237,8 +228,8 @@
 
             for(let i = 1; i <= count; i++) {
                 let courtName = `COURT ${i}`;
-                let loginUrl = window.location.origin + window.location.pathname + `?court=${encodeURIComponent(courtName)}`;
-                // Using a public QR API to generate crisp QR codes instantly
+                // Point QR exactly to the new umpire file
+                let loginUrl = window.location.origin + `/umpire.html?court=${encodeURIComponent(courtName)}`;
                 let qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(loginUrl)}`;
                 
                 qrContainer.innerHTML += `
@@ -276,8 +267,8 @@
             auctionTeamsList.forEach(team => {
                 optionsHtml += `<option value="${team.name}">${team.name.toUpperCase()}</option>`;
             });
-            let uA = document.getElementById('setupTeamA'); let uB = document.getElementById('setupTeamB');
-            if(uA) uA.innerHTML = optionsHtml; if(uB) uB.innerHTML = optionsHtml;
+            let fA = document.getElementById('fixTeamA'); let fB = document.getElementById('fixTeamB');
+            if(fA) fA.innerHTML = optionsHtml; if(fB) fB.innerHTML = optionsHtml;
         }
 
         function loadOrderOfPlayData() {
@@ -467,49 +458,6 @@
                 </div>`;
             });
         }
-
-        function loginUmpireDirect(courtName) {
-            document.querySelector('.portal-grid').style.display = 'none'; 
-            let fixtures = document.getElementById('leagueFixtures');
-            if(fixtures) fixtures.style.display = 'none';
-            
-            // Look for the next scheduled match assigned to this court
-            let match = manualFixtures.find(f => f.court === courtName);
-            
-            document.getElementById('umpireDashboard').style.display = 'block';
-            document.getElementById('matchCourt').innerText = courtName;
-            
-            if(match) {
-                document.getElementById('matchCategory').innerText = match.category;
-                document.getElementById('teamAPlayers').innerText = match.teamA;
-                document.getElementById('teamBPlayers').innerText = match.teamB;
-            } else {
-                document.getElementById('matchCategory').innerText = "General Match";
-                document.getElementById('teamAPlayers').innerText = "Team A";
-                document.getElementById('teamBPlayers').innerText = "Team B";
-            }
-        }
-
-        function updateScore(team, amt) {
-            if (team === 'A') { currentScoreA = Math.max(0, currentScoreA + amt); document.getElementById('scoreA').innerText = currentScoreA; } 
-            else { currentScoreB = Math.max(0, currentScoreB + amt); document.getElementById('scoreB').innerText = currentScoreB; }
-        }
-        function endMatch() { 
-            if(confirm("Are you sure you want to end this match and sync results?")) {
-                logoutUmpire(); 
-            }
-        }
-        function logoutUmpire() {
-            currentScoreA = 0; currentScoreB = 0;
-            document.getElementById('scoreA').innerText = "0"; document.getElementById('scoreB').innerText = "0";
-            document.getElementById('umpireDashboard').style.display = 'none';
-            let fixtures = document.getElementById('leagueFixtures');
-            if(fixtures) fixtures.style.display = 'block';
-            document.querySelector('.portal-grid').style.display = ''; 
-            
-            // Clean URL query parameters if they logged in via QR
-            if(window.location.search) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        }
     </script>
+</body>
+</html>
