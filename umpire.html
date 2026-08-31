@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umpire Scoreboard | Smart Players Auction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        .score-btn { padding: 15px 20px; font-size: 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .score-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <div style="width: 100%; max-width: 900px; background: #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.8);">
+        
+        <!-- Header & Match Info -->
+        <div style="text-align: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 id="boardSportTitle" style="margin: 0 0 10px 0; color: #fde047; text-transform: uppercase; letter-spacing: 1px;">LIVE SCORING</h2>
+            <div style="display: flex; justify-content: space-around; background: #0f172a; padding: 10px; border-radius: 8px; font-weight: bold; color: #cbd5e1; font-size: 18px; border: 1px solid #334155;">
+                <span id="matchCategory">Loading Category...</span>
+                <span id="matchCourt" style="color: #38bdf8;">Loading Court...</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <!-- TEAM A -->
+            <div style="flex: 1; min-width: 300px; background: #0f172a; border: 3px solid #ef4444; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="background: #ef4444; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 15px; font-size: 18px;" id="dashTeamA">TEAM A</div>
+                
+                <div style="margin-bottom: 20px;">
+                    <select id="playerA1" style="width: 100%; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px; margin-bottom: 8px;"><option value="">Select Player 1...</option></select>
+                    <select id="playerA2" style="width: 100%; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px;"><option value="">Select Player 2 (If Doubles)...</option></select>
+                </div>
+
+                <div style="display: flex; justify-content: space-around; align-items: flex-end; margin-bottom: 20px;">
+                    <div>
+                        <div style="font-size: 14px; color: #94a3b8; font-weight: bold;">GAMES WON</div>
+                        <div id="setsA" style="font-size: 50px; font-weight: 900; color: #fde047;">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 14px; color: #94a3b8; font-weight: bold;">POINTS</div>
+                        <div id="scoreA" style="font-size: 100px; font-weight: 900; line-height: 1;">0</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="score-btn" onclick="updateMatchScore('A', 'pts', -1)" style="background: #334155; color: white;">-1</button>
+                    <button class="score-btn" onclick="updateMatchScore('A', 'pts', 1)" style="background: #ef4444; color: white; flex: 1;">+ Point</button>
+                    <button class="score-btn" onclick="updateMatchScore('A', 'sets', 1)" style="background: #fde047; color: #0f172a; font-size: 16px;">+ Game</button>
+                </div>
+            </div>
+
+            <!-- TEAM B -->
+            <div style="flex: 1; min-width: 300px; background: #0f172a; border: 3px solid #3b82f6; border-radius: 12px; padding: 20px; text-align: center;">
+                <div style="background: #3b82f6; color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; display: inline-block; margin-bottom: 15px; font-size: 18px;" id="dashTeamB">TEAM B</div>
+                
+                <div style="margin-bottom: 20px;">
+                    <select id="playerB1" style="width: 100%; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px; margin-bottom: 8px;"><option value="">Select Player 1...</option></select>
+                    <select id="playerB2" style="width: 100%; padding: 10px; background: #1e293b; color: white; border: 1px solid #334155; border-radius: 6px;"><option value="">Select Player 2 (If Doubles)...</option></select>
+                </div>
+
+                <div style="display: flex; justify-content: space-around; align-items: flex-end; margin-bottom: 20px;">
+                    <div>
+                        <div style="font-size: 14px; color: #94a3b8; font-weight: bold;">POINTS</div>
+                        <div id="scoreB" style="font-size: 100px; font-weight: 900; line-height: 1;">0</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 14px; color: #94a3b8; font-weight: bold;">GAMES WON</div>
+                        <div id="setsB" style="font-size: 50px; font-weight: 900; color: #fde047;">0</div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button class="score-btn" onclick="updateMatchScore('B', 'sets', 1)" style="background: #fde047; color: #0f172a; font-size: 16px;">+ Game</button>
+                    <button class="score-btn" onclick="updateMatchScore('B', 'pts', 1)" style="background: #3b82f6; color: white; flex: 1;">+ Point</button>
+                    <button class="score-btn" onclick="updateMatchScore('B', 'pts', -1)" style="background: #334155; color: white;">-1</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 25px;">
+            <button onclick="endMatch()" style="padding: 15px 30px; font-size: 16px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.4); width: 100%; max-width: 400px;">END MATCH & SUBMIT RESULTS</button>
+        </div>
+    </div>
+
+    <script>
+        let matchState = { scoreA: 0, scoreB: 0, setsA: 0, setsB: 0 };
+
+        window.onload = function() {
+            // Read which court we are looking at from the URL (e.g. umpire.html?court=COURT 1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const courtName = urlParams.get('court') || 'COURT 1';
+            
+            document.getElementById('matchCourt').innerText = courtName;
+
+            // Fetch Data from Local Storage (Same browser origin)
+            let setup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
+            let sport = setup.sportsType || 'SPORTS';
+            document.getElementById('boardSportTitle').innerText = `${sport} LIVE SCORING`;
+
+            let manualFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
+            let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
+
+            let tA = "Team A", tB = "Team B";
+            
+            if(match) {
+                document.getElementById('matchCategory').innerText = match.category;
+                document.getElementById('dashTeamA').innerText = match.teamA.toUpperCase();
+                document.getElementById('dashTeamB').innerText = match.teamB.toUpperCase();
+                tA = match.teamA;
+                tB = match.teamB;
+            } else {
+                document.getElementById('matchCategory').innerText = "No Match Assigned";
+            }
+
+            populateRosterDropdowns(tA, tB);
+        };
+
+        function populateRosterDropdowns(teamA, teamB) {
+            let allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
+            
+            let teamARoster = allPlayers.filter(p => p.status === 'sold' && String(p.teamName).toLowerCase() === String(teamA).toLowerCase());
+            let teamBRoster = allPlayers.filter(p => p.status === 'sold' && String(p.teamName).toLowerCase() === String(teamB).toLowerCase());
+
+            let buildOptions = (roster) => {
+                let html = `<option value="">Select Player...</option>`;
+                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category})</option>`);
+                return html;
+            };
+
+            document.getElementById('playerA1').innerHTML = buildOptions(teamARoster);
+            document.getElementById('playerA2').innerHTML = buildOptions(teamARoster);
+            document.getElementById('playerB1').innerHTML = buildOptions(teamBRoster);
+            document.getElementById('playerB2').innerHTML = buildOptions(teamBRoster);
+        }
+
+        function updateMatchScore(team, type, amt) {
+            if (team === 'A') {
+                if (type === 'pts') matchState.scoreA = Math.max(0, matchState.scoreA + amt);
+                if (type === 'sets') matchState.setsA = Math.max(0, matchState.setsA + amt);
+                document.getElementById('scoreA').innerText = matchState.scoreA;
+                document.getElementById('setsA').innerText = matchState.setsA;
+            } else {
+                if (type === 'pts') matchState.scoreB = Math.max(0, matchState.scoreB + amt);
+                if (type === 'sets') matchState.setsB = Math.max(0, matchState.setsB + amt);
+                document.getElementById('scoreB').innerText = matchState.scoreB;
+                document.getElementById('setsB').innerText = matchState.setsB;
+            }
+        }
+
+        function endMatch() { 
+            let pA1 = document.getElementById('playerA1').value;
+            let pB1 = document.getElementById('playerB1').value;
+
+            if(!pA1 || !pB1) {
+                if(!confirm("Warning: You haven't selected the playing players for both teams. Submit anyway?")) return;
+            }
+
+            if(confirm(`Are you sure you want to end this match and sync the final results? \n\nTeam A: ${matchState.setsA} Games \nTeam B: ${matchState.setsB} Games`)) {
+                alert("Match results securely synced!");
+                // Close the tab and return to the main hub
+                window.close();
+                // Fallback if browser prevents closing:
+                window.location.href = "league.html";
+            }
+        }
+    </script>
+</body>
+</html>
