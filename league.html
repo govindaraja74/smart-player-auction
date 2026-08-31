@@ -86,10 +86,101 @@
                 <p>Login to access digital score sheets, log match events, and update the live scoreboard.</p>
                 <input type="text" placeholder="Umpire ID">
                 <input type="password" placeholder="Passcode">
-                <button class="login-btn" style="background: var(--secondary); color: #0f172a;">Secure Login</button>
+                <button class="login-btn" style="background: var(--secondary); color: #0f172a;" onclick="loginUmpire()">Secure Login</button>
             </div>
         </div>
     </div>
 
+    <!-- UMPIRE SCORECARD (HIDDEN BY DEFAULT) -->
+    <div id="umpireDashboard" style="display: none; max-width: 800px; margin: 40px auto; background: #1e293b; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); color: white;">
+        
+        <!-- Match Header -->
+        <div style="text-align: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 20px;">
+            <h2 style="margin: 0 0 10px 0; color: #fde047;">LIVE SCORING</h2>
+            <div style="display: flex; justify-content: space-around; background: #0f172a; padding: 10px; border-radius: 8px; font-weight: bold; color: #cbd5e1;">
+                <span id="matchCategory">Category: MEN'S INTERMEDIATE</span>
+                <span id="matchCourt" style="color: #38bdf8;">Court Allotted: COURT 1</span>
+            </div>
+        </div>
+
+        <!-- Scoring Section -->
+        <div style="display: flex; gap: 20px;">
+            
+            <!-- Team A -->
+            <div style="flex: 1; background: #0f172a; border: 2px solid #ef4444; border-radius: 8px; padding: 20px; text-align: center;">
+                <h3 style="margin-top: 0; color: #ef4444;">TEAM A</h3>
+                <p id="teamAPlayers" style="font-size: 14px; margin-bottom: 15px;">Manoj Kumar & Gurudatt M N</p>
+                <div id="scoreA" style="font-size: 80px; font-weight: 900; line-height: 1;">0</div>
+                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="updateScore('A', -1)" style="padding: 10px 20px; font-size: 20px; background: #334155; color: white; border: none; border-radius: 5px; cursor: pointer;">-1</button>
+                    <button onclick="updateScore('A', 1)" style="padding: 10px 20px; font-size: 20px; background: #ef4444; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">+1</button>
+                </div>
+            </div>
+
+            <!-- Team B -->
+            <div style="flex: 1; background: #0f172a; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; text-align: center;">
+                <h3 style="margin-top: 0; color: #3b82f6;">TEAM B</h3>
+                <p id="teamBPlayers" style="font-size: 14px; margin-bottom: 15px;">Aditya Bhat & Dayanand Reddy</p>
+                <div id="scoreB" style="font-size: 80px; font-weight: 900; line-height: 1;">0</div>
+                <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="updateScore('B', -1)" style="padding: 10px 20px; font-size: 20px; background: #334155; color: white; border: none; border-radius: 5px; cursor: pointer;">-1</button>
+                    <button onclick="updateScore('B', 1)" style="padding: 10px 20px; font-size: 20px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">+1</button>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- Controls -->
+        <div style="text-align: center; margin-top: 25px;">
+            <button onclick="alert('Match result synced to server!')" style="padding: 12px 25px; font-size: 16px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">END MATCH & SUBMIT</button>
+            <button onclick="logoutUmpire()" style="padding: 12px 25px; font-size: 16px; background: transparent; color: #94a3b8; border: 1px solid #94a3b8; border-radius: 5px; cursor: pointer; margin-left: 10px;">LOGOUT</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScoreA = 0;
+        let currentScoreB = 0;
+
+        function loginUmpire() {
+            const passcodeInput = document.querySelectorAll('input[type="password"]')[1].value; 
+            
+            if (passcodeInput === "umpire123") {
+                // Hide the main portal grid and show the dashboard
+                document.querySelector('.portal-grid').style.display = 'none'; 
+                document.getElementById('umpireDashboard').style.display = 'block';
+                
+                // Load dummy match data
+                document.getElementById('matchCategory').innerText = "Category: MEN'S INTERMEDIATE";
+                document.getElementById('matchCourt').innerText = "Court Allotted: COURT 1";
+                document.getElementById('teamAPlayers').innerText = "Manoj Kumar & Gurudatt M N";
+                document.getElementById('teamBPlayers').innerText = "Aditya Bhat & Dayanand Reddy";
+            } else {
+                alert("⚠️ Invalid Umpire Passcode.");
+            }
+        }
+
+        function updateScore(team, amount) {
+            if (team === 'A') {
+                currentScoreA += amount;
+                if (currentScoreA < 0) currentScoreA = 0; 
+                document.getElementById('scoreA').innerText = currentScoreA;
+            } else {
+                currentScoreB += amount;
+                if (currentScoreB < 0) currentScoreB = 0;
+                document.getElementById('scoreB').innerText = currentScoreB;
+            }
+        }
+
+        function logoutUmpire() {
+            currentScoreA = 0;
+            currentScoreB = 0;
+            document.getElementById('scoreA').innerText = "0";
+            document.getElementById('scoreB').innerText = "0";
+            
+            document.getElementById('umpireDashboard').style.display = 'none';
+            document.querySelector('.portal-grid').style.display = ''; // Returns to normal grid view
+            document.querySelectorAll('input[type="password"]')[1].value = "";
+        }
+    </script>
 </body>
 </html>
