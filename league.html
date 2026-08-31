@@ -79,14 +79,19 @@
               <a href="/franchise.html"><button class="login-btn">Secure Login</button></a>
             </div>
 
-            <!-- Umpire Login -->
+        <!-- Umpire Portal (Multi-Court & QR Code Enabled) -->
             <div class="portal-card">
                 <div class="portal-icon">⚖️</div>
-                <h2>Umpire Portal</h2>
-                <p>Login to access digital score sheets, log match events, and update the live scoreboard.</p>
-                <input type="text" placeholder="Umpire ID">
-                <input type="password" placeholder="Passcode">
-               <button class="login-btn" style="background: var(--secondary); color: #0f172a;" onclick="loginUmpire()">Secure Login</button>
+                <h2>Umpire Portals</h2>
+                <p>Select your court or scan your court's QR code to access your live match score sheet.</p>
+                
+                <div id="umpireCourtLinks" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <!-- Auto-generated court login buttons -->
+                </div>
+
+                <div style="text-align: center; border-top: 1px solid #334155; padding-top: 15px;">
+                    <button onclick="toggleQRModal()" style="background: transparent; color: #38bdf8; border: 1px solid #38bdf8; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold;">📱 Generate Umpire QR Codes</button>
+                </div>
             </div>
         </div>
     </div>
