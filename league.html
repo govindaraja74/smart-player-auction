@@ -170,6 +170,16 @@
     <!-- ========================================== -->
     <!-- MAIN SYSTEM LOGIC & DATA HANDLING          -->
     <!-- ========================================== -->
+  <!-- QR Code Modal Overlay -->
+    <div id="qrModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #1e293b; padding: 30px; border-radius: 12px; max-width: 500px; width: 100%; text-align: center; color: white; border: 1px solid #334155;">
+            <h2 style="color: #fde047; margin-top: 0;">Umpire Login QR Codes</h2>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">Scan the QR code for your respective court using any phone camera to log in instantly.</p>
+            <div id="qrCodesContainer" style="display: flex; flex-direction: column; gap: 15px; max-height: 300px; overflow-y: auto; margin-bottom: 20px;"></div>
+            <button onclick="toggleQRModal()" style="background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Close</button>
+        </div>
+    </div>
+
     <script>
         let currentScoreA = 0; let currentScoreB = 0;
         let allCategories = []; let scheduledOrder = [];
@@ -181,10 +191,66 @@
             loadOrderOfPlayData();
             loadManualFixtures();
             updateCourtDropdowns();
+            renderUmpireCourtPortals();
+
+            // Check if URL has a direct court login query (e.g. league.html?court=COURT+1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetCourt = urlParams.get('court');
+            if(targetCourt) {
+                loginUmpireDirect(targetCourt);
+            }
         };
+
+        function renderUmpireCourtPortals() {
+            const container = document.getElementById('umpireCourtLinks');
+            if(!container) return;
+            
+            const count = parseInt(localStorage.getItem('leagueCourtCount')) || 3;
+            container.innerHTML = '';
+            
+            for(let i = 1; i <= count; i++) {
+                container.innerHTML += `
+                <button onclick="loginUmpireDirect('COURT ${i}')" style="background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                    <span>⚖️ Court ${i} Umpire Login</span>
+                    <span style="color: #38bdf8; font-size: 12px;">Launch ➔</span>
+                </button>`;
+            }
+        }
+
+        function toggleQRModal() {
+            const modal = document.getElementById('qrModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            if(modal.style.display === 'flex') {
+                generateQRCodes();
+            }
+        }
+
+        function generateQRCodes() {
+            const count = parseInt(localStorage.getItem('leagueCourtCount')) || 3;
+            const qrContainer = document.getElementById('qrCodesContainer');
+            qrContainer.innerHTML = '';
+
+            for(let i = 1; i <= count; i++) {
+                let courtName = `COURT ${i}`;
+                let loginUrl = window.location.origin + window.location.pathname + `?court=${encodeURIComponent(courtName)}`;
+                // Using a public QR API to generate crisp QR codes instantly
+                let qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(loginUrl)}`;
+                
+                qrContainer.innerHTML += `
+                <div style="background: #0f172a; padding: 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #334155;">
+                    <div style="text-align: left;">
+                        <strong style="color: #38bdf8; font-size: 16px;">Court ${i}</strong>
+                        <p style="font-size: 11px; color: #94a3b8; margin-top: 3px;">Scan to open score sheet</p>
+                    </div>
+                    <img src="${qrApi}" alt="QR Code" style="width: 70px; height: 70px; background: white; padding: 4px; border-radius: 4px;">
+                </div>`;
+            }
+        }
 
         function updateCourtDropdowns() {
             const count = parseInt(document.getElementById('activeCourtsCount').value) || 3;
+            localStorage.setItem('leagueCourtCount', count);
+            
             let courtOptions = '';
             for(let i = 1; i <= count; i++) {
                 courtOptions += `<option value="COURT ${i}">Court ${i}</option>`;
@@ -192,8 +258,7 @@
             let fixCourt = document.getElementById('fixCourt');
             if(fixCourt) fixCourt.innerHTML = courtOptions;
             
-            let setupCourt = document.getElementById('setupCourt');
-            if(setupCourt) setupCourt.innerHTML = courtOptions;
+            renderUmpireCourtPortals();
         }
 
         function loadTeamsForFixtures() {
@@ -321,7 +386,7 @@
             let fA = document.getElementById('fixTeamA'); let fB = document.getElementById('fixTeamB');
             if(fA) fA.innerHTML = teamOptions; if(fB) fB.innerHTML = teamOptions;
         }
-    function addManualFixture() {
+        function addManualFixture() {
             let cat = document.getElementById('fixCategory').value;
             let tA = document.getElementById('fixTeamA').value;
             let tB = document.getElementById('fixTeamB').value;
@@ -330,18 +395,9 @@
             if(!cat || !tA || !tB) return alert("Please select a Category and both Teams.");
             if(tA === tB) return alert("Team A and Team B cannot be the same.");
 
-            // Prevent exact duplicate fixture entries
-            let isDuplicate = manualFixtures.some(f => f.category === cat && f.court === court && ((f.teamA === tA && f.teamB === tB) || (f.teamA === tB && f.teamB === tA)));
-            if(isDuplicate) {
-                if(!confirm(`⚠️ A match between ${tA.toUpperCase()} and ${tB.toUpperCase()} on ${court} for ${cat} is already added. Do you want to add it again anyway?`)) {
-                    return;
-                }
-            }
-
             manualFixtures.push({ category: cat, teamA: tA, teamB: tB, court: court });
             renderFixtureManagerList();
 
-            // Reset team dropdowns for the next combination to show a fresh full list
             document.getElementById('fixTeamA').value = "";
             document.getElementById('fixTeamB').value = "";
         }
@@ -407,21 +463,28 @@
             });
         }
 
-        function loginUmpire() {
-            if (document.querySelectorAll('input[type="password"]')[1].value === "umpire123") {
-                document.querySelector('.portal-grid').style.display = 'none'; 
-                document.getElementById('leagueFixtures').style.display = 'none';
-                document.getElementById('umpireSetup').style.display = 'block';
-            } else { alert("⚠️ Invalid Umpire Passcode."); }
-        }
-        function startScoring() {
-            document.getElementById('umpireSetup').style.display = 'none';
+        function loginUmpireDirect(courtName) {
+            document.querySelector('.portal-grid').style.display = 'none'; 
+            let fixtures = document.getElementById('leagueFixtures');
+            if(fixtures) fixtures.style.display = 'none';
+            
+            // Look for the next scheduled match assigned to this court
+            let match = manualFixtures.find(f => f.court === courtName);
+            
             document.getElementById('umpireDashboard').style.display = 'block';
-            document.getElementById('matchCategory').innerText = `${document.getElementById('setupEvent').value} (${document.getElementById('setupFormat').value})`;
-            document.getElementById('matchCourt').innerText = document.getElementById('setupCourt').value;
-            document.getElementById('teamAPlayers').innerText = document.getElementById('setupTeamA').value || 'Team A';
-            document.getElementById('teamBPlayers').innerText = document.getElementById('setupTeamB').value || 'Team B';
+            document.getElementById('matchCourt').innerText = courtName;
+            
+            if(match) {
+                document.getElementById('matchCategory').innerText = match.category;
+                document.getElementById('teamAPlayers').innerText = match.teamA;
+                document.getElementById('teamBPlayers').innerText = match.teamB;
+            } else {
+                document.getElementById('matchCategory').innerText = "General Match";
+                document.getElementById('teamAPlayers').innerText = "Team A";
+                document.getElementById('teamBPlayers').innerText = "Team B";
+            }
         }
+
         function updateScore(team, amt) {
             if (team === 'A') { currentScoreA = Math.max(0, currentScoreA + amt); document.getElementById('scoreA').innerText = currentScoreA; } 
             else { currentScoreB = Math.max(0, currentScoreB + amt); document.getElementById('scoreB').innerText = currentScoreB; }
@@ -435,10 +498,13 @@
             currentScoreA = 0; currentScoreB = 0;
             document.getElementById('scoreA').innerText = "0"; document.getElementById('scoreB').innerText = "0";
             document.getElementById('umpireDashboard').style.display = 'none';
-            document.getElementById('umpireSetup').style.display = 'none';
+            let fixtures = document.getElementById('leagueFixtures');
+            if(fixtures) fixtures.style.display = 'block';
             document.querySelector('.portal-grid').style.display = ''; 
-            document.getElementById('leagueFixtures').style.display = 'block';
-            document.querySelectorAll('input[type="password"]')[1].value = "";
+            
+            // Clean URL query parameters if they logged in via QR
+            if(window.location.search) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         }
     </script>
-</html>
