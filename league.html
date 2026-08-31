@@ -235,11 +235,11 @@
         };
 
         // --- ORDER OF PLAY LOGIC ---
-      function loadOrderOfPlayData() {
+   function loadOrderOfPlayData() {
             allCategories = [];
             try {
-                // 1. Primary Check: Look in the dedicated categories list
-                let rawCats = localStorage.getItem('auctionCategories');
+                // 1. Try standard category folders
+                let rawCats = localStorage.getItem('auctionCategories') || localStorage.getItem('categories');
                 if(rawCats) {
                     let parsedCats = JSON.parse(rawCats);
                     if(Array.isArray(parsedCats)) {
@@ -247,13 +247,28 @@
                     }
                 }
 
-                // 2. Fallback Check: Look inside the general setup data
+                // 2. Try the general setup folder
                 if(allCategories.length === 0) {
                     let setupData = localStorage.getItem('auctionSetup');
                     if(setupData) {
                         let parsed = JSON.parse(setupData);
-                        if(parsed.categories) {
+                        if(parsed.categories && Array.isArray(parsed.categories)) {
                             allCategories = parsed.categories.map(c => c.name || c.category || c);
+                        }
+                    }
+                }
+
+                // 3. ULTIMATE FALLBACK: Extract directly from your Players list!
+                if(allCategories.length === 0) {
+                    let playersData = localStorage.getItem('auctionPlayers') || localStorage.getItem('players') || localStorage.getItem('allPlayers');
+                    if(playersData) {
+                        let parsedPlayers = JSON.parse(playersData);
+                        if(Array.isArray(parsedPlayers)) {
+                            let uniqueCats = new Set();
+                            parsedPlayers.forEach(p => {
+                                if(p.category) uniqueCats.add(p.category.trim());
+                            });
+                            allCategories = Array.from(uniqueCats);
                         }
                     }
                 }
@@ -265,7 +280,8 @@
                 console.error("Error loading categories", e); 
             }
 
-            // Clean up formatting and remove already scheduled items from the available pool
+            // Clean up formatting, remove duplicates, and filter out already scheduled items
+            allCategories = [...new Set(allCategories)];
             allCategories = allCategories.filter(cat => cat && String(cat).trim() !== '' && !scheduledOrder.includes(cat));
             
             renderOrderManager();
