@@ -91,46 +91,15 @@
         </div>
     </div>
 
-  <!-- ========================================== -->
+<!-- ========================================== -->
     <!-- LEAGUE FIXTURES & COURT ALLOTMENT (PUBLIC) -->
     <!-- ========================================== -->
     <div id="leagueFixtures" style="max-width: 1000px; margin: 50px auto; padding: 0 20px;">
         <h2 style="text-align: center; color: #fde047; margin-bottom: 25px; letter-spacing: 1px;">TODAY'S FIXTURES</h2>
         
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-            
-            <!-- Match 1 -->
-            <div style="background: #1e293b; border-left: 4px solid #38bdf8; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #94a3b8;">
-                    <span>Match 1 • Men's 30+</span>
-                    <span style="color: #38bdf8;">COURT 1</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 18px;">
-                    <div style="text-align: center; width: 40%;">Smashers</div>
-                    <div style="color: #64748b; font-size: 14px;">VS</div>
-                    <div style="text-align: center; width: 40%;">Warriors</div>
-                </div>
-                <div style="text-align: center; margin-top: 15px;">
-                    <span style="background: #334155; padding: 4px 10px; border-radius: 20px; font-size: 12px; color: #cbd5e1;">UPCOMING</span>
-                </div>
-            </div>
-
-            <!-- Match 2 (Live) -->
-            <div style="background: #1e293b; border-left: 4px solid #10b981; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #94a3b8;">
-                    <span>Match 2 • Men's Intermediate</span>
-                    <span style="color: #10b981;">COURT 2</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 18px;">
-                    <div style="text-align: center; width: 40%;">Royals</div>
-                    <div style="color: #64748b; font-size: 14px;">VS</div>
-                    <div style="text-align: center; width: 40%;">Titans</div>
-                </div>
-                <div style="text-align: center; margin-top: 15px;">
-                    <span style="background: #065f46; color: #34d399; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">🔴 LIVE NOW</span>
-                </div>
-            </div>
-
+        <!-- This container will be auto-filled by JavaScript using Auction Data -->
+        <div id="fixturesContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <!-- Fixtures load here -->
         </div>
     </div>
 
@@ -164,11 +133,15 @@
             </div>
         </div>
 
-        <label style="display: block; margin-top: 20px; color: #ef4444; font-weight: bold;">Team A Player(s):</label>
-        <input type="text" id="setupTeamA" placeholder="e.g. Manoj & Gurudatt" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #ef4444; border-radius: 5px; box-sizing: border-box; font-size: 16px;">
+        <label style="display: block; margin-top: 20px; color: #ef4444; font-weight: bold;">Team A Franchise:</label>
+        <select id="setupTeamA" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #ef4444; border-radius: 5px; font-size: 16px;">
+            <!-- Auto-populated from Auction Data -->
+        </select>
 
-        <label style="display: block; margin-top: 15px; color: #3b82f6; font-weight: bold;">Team B Player(s):</label>
-        <input type="text" id="setupTeamB" placeholder="e.g. Aditya & Dayanand" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #3b82f6; border-radius: 5px; box-sizing: border-box; font-size: 16px;">
+        <label style="display: block; margin-top: 15px; color: #3b82f6; font-weight: bold;">Team B Franchise:</label>
+        <select id="setupTeamB" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #3b82f6; border-radius: 5px; font-size: 16px;">
+             <!-- Auto-populated from Auction Data -->
+        </select>
 
         <button onclick="startScoring()" style="width: 100%; padding: 15px; margin-top: 30px; background: #10b981; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px;">START MATCH SCORING ➔</button>
         <button onclick="logoutUmpire()" style="width: 100%; padding: 10px; margin-top: 10px; background: transparent; color: #94a3b8; border: none; cursor: pointer;">Cancel & Logout</button>
@@ -188,7 +161,7 @@
         <div style="display: flex; gap: 20px;">
             <div style="flex: 1; background: #0f172a; border: 2px solid #ef4444; border-radius: 8px; padding: 20px; text-align: center;">
                 <h3 style="margin-top: 0; color: #ef4444;">TEAM A</h3>
-                <p id="teamAPlayers" style="font-size: 14px; margin-bottom: 15px; height: 35px;">Player 1</p>
+                <p id="teamAPlayers" style="font-size: 18px; font-weight: bold; margin-bottom: 15px; height: 35px; text-transform: uppercase;">Team A</p>
                 <div id="scoreA" style="font-size: 80px; font-weight: 900; line-height: 1;">0</div>
                 <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
                     <button onclick="updateScore('A', -1)" style="padding: 10px 20px; font-size: 20px; background: #334155; color: white; border: none; border-radius: 5px; cursor: pointer;">-1</button>
@@ -198,7 +171,7 @@
 
             <div style="flex: 1; background: #0f172a; border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; text-align: center;">
                 <h3 style="margin-top: 0; color: #3b82f6;">TEAM B</h3>
-                <p id="teamBPlayers" style="font-size: 14px; margin-bottom: 15px; height: 35px;">Player 2</p>
+                <p id="teamBPlayers" style="font-size: 18px; font-weight: bold; margin-bottom: 15px; height: 35px; text-transform: uppercase;">Team B</p>
                 <div id="scoreB" style="font-size: 80px; font-weight: 900; line-height: 1;">0</div>
                 <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
                     <button onclick="updateScore('B', -1)" style="padding: 10px 20px; font-size: 20px; background: #334155; color: white; border: none; border-radius: 5px; cursor: pointer;">-1</button>
@@ -212,16 +185,74 @@
         </div>
     </div>
 
-    <!-- 3. SCORING LOGIC -->
+    <!-- 3. SCORING & DYNAMIC DATA LOGIC -->
     <script>
         let currentScoreA = 0;
         let currentScoreB = 0;
+
+        // Auto-run this when the page loads to grab the Auction Teams
+        window.onload = function() {
+            loadAuctionDataIntoFixtures();
+        };
+
+        function loadAuctionDataIntoFixtures() {
+            const fixturesContainer = document.getElementById('fixturesContainer');
+            const teamSelectA = document.getElementById('setupTeamA');
+            const teamSelectB = document.getElementById('setupTeamB');
+
+            let auctionTeams = [];
+            try {
+                // Safely grab the saved franchises from the auction database
+                let rawData = localStorage.getItem('auctionTeams');
+                if(rawData) auctionTeams = JSON.parse(rawData);
+            } catch(e) {}
+
+            if (auctionTeams.length === 0) {
+                fixturesContainer.innerHTML = '<p style="text-align:center; color:#94a3b8; grid-column: 1 / -1;">No franchises found. Please complete the setup in the Admin Dashboard.</p>';
+                return;
+            }
+
+            // 1. Populate the Umpire Dropdowns
+            let optionsHtml = '<option value="">Select a Franchise...</option>';
+            auctionTeams.forEach(team => {
+                optionsHtml += `<option value="${team.name}">${team.name.toUpperCase()}</option>`;
+            });
+            if (teamSelectA) teamSelectA.innerHTML = optionsHtml;
+            if (teamSelectB) teamSelectB.innerHTML = optionsHtml;
+
+            // 2. Generate the Public Fixture Cards automatically
+            let fixturesHtml = '';
+            for (let i = 0; i < auctionTeams.length; i += 2) {
+                let team1 = auctionTeams[i];
+                let team2 = auctionTeams[i+1];
+                
+                if (team1 && team2) {
+                    let matchNum = (i/2) + 1;
+                    fixturesHtml += `
+                    <div style="background: #1e293b; border-left: 4px solid #38bdf8; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #94a3b8;">
+                            <span>Match ${matchNum} • League Phase</span>
+                            <span style="color: #38bdf8;">COURT ${matchNum}</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 18px;">
+                            <div style="text-align: center; width: 40%; text-transform: uppercase;">${team1.name}</div>
+                            <div style="color: #64748b; font-size: 14px;">VS</div>
+                            <div style="text-align: center; width: 40%; text-transform: uppercase;">${team2.name}</div>
+                        </div>
+                        <div style="text-align: center; margin-top: 15px;">
+                            <span style="background: #334155; padding: 4px 10px; border-radius: 20px; font-size: 12px; color: #cbd5e1;">UPCOMING</span>
+                        </div>
+                    </div>`;
+                }
+            }
+            fixturesContainer.innerHTML = fixturesHtml;
+        }
 
         function loginUmpire() {
             const passcodeInput = document.querySelectorAll('input[type="password"]')[1].value; 
             if (passcodeInput === "umpire123") {
                 document.querySelector('.portal-grid').style.display = 'none'; 
-                document.getElementById('leagueFixtures').style.display = 'none'; // Hides fixtures
+                document.getElementById('leagueFixtures').style.display = 'none';
                 document.getElementById('umpireSetup').style.display = 'block';
             } else {
                 alert("⚠️ Invalid Umpire Passcode.");
@@ -272,7 +303,7 @@
             document.getElementById('umpireDashboard').style.display = 'none';
             document.getElementById('umpireSetup').style.display = 'none';
             document.querySelector('.portal-grid').style.display = ''; 
-            document.getElementById('leagueFixtures').style.display = 'block'; // Shows fixtures again
+            document.getElementById('leagueFixtures').style.display = 'block';
             document.querySelectorAll('input[type="password"]')[1].value = "";
         }
     </script>
