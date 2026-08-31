@@ -1842,8 +1842,9 @@ function showFranchiseRoster(teamId) {
             }
         }
 
-        function getTeamLogo(team, defaultName = 'Team') {
-            if (team && typeof team.logoUrl === 'string' && team.logoUrl.startsWith('data:image')) {
+      function getTeamLogo(team, defaultName = 'Team') {
+            // FIX: Now accepts BOTH Cloudinary links (http) and local Base64 links (data:image)
+            if (team && typeof team.logoUrl === 'string' && team.logoUrl.length > 5) {
                 return team.logoUrl;
             }
             const nameToUse = (team && team.name && typeof team.name === 'string' && team.name.trim().length > 0) ? team.name.trim() : defaultName;
