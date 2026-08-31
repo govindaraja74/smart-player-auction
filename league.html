@@ -92,12 +92,53 @@
     </div>
 
 <!-- ========================================== -->
+    <!-- ORGANIZER: ORDER OF PLAY CONFIGURATOR      -->
+    <!-- ========================================== -->
+    <div style="text-align: center; margin-top: 30px;">
+        <button onclick="toggleOrderOfPlay()" style="background: #3b82f6; color: white; border: none; padding: 10px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 16px;">⚙️ Manage Order of Play</button>
+    </div>
+
+    <!-- Hidden Configurator UI -->
+    <div id="orderOfPlayManager" style="display: none; max-width: 900px; margin: 20px auto; background: #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: white;">
+        <h2 style="text-align: center; color: #fde047; margin-top: 0; margin-bottom: 25px;">ORDER OF PLAY CHART</h2>
+        
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <!-- Left Side: Available Categories -->
+            <div style="flex: 1; min-width: 300px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
+                <h3 style="color: #38bdf8; margin-top: 0; text-align: center;">Available Categories</h3>
+                <p style="font-size: 12px; color: #64748b; text-align: center; margin-bottom: 15px;">Click a category to add it to the schedule.</p>
+                <div id="availableCatsList" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Auto-populated -->
+                </div>
+            </div>
+
+            <!-- Right Side: Scheduled Chart -->
+            <div style="flex: 1; min-width: 300px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #10b981;">
+                <h3 style="color: #10b981; margin-top: 0; text-align: center;">Order of Play Chart</h3>
+                <p style="font-size: 12px; color: #64748b; text-align: center; margin-bottom: 15px;">Click an item here to remove it.</p>
+                <div id="scheduledCatsList" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Auto-populated -->
+                </div>
+                
+                <button onclick="saveOrderOfPlay()" style="width: 100%; padding: 12px; margin-top: 25px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px;">💾 Save & Publish Chart</button>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="toggleOrderOfPlay()" style="background: transparent; color: #94a3b8; border: 1px solid #94a3b8; padding: 8px 16px; border-radius: 5px; cursor: pointer;">Close Manager</button>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- LEAGUE FIXTURES & COURT ALLOTMENT (PUBLIC) -->
     <!-- ========================================== -->
-    <div id="leagueFixtures" style="max-width: 1000px; margin: 50px auto; padding: 0 20px;">
-        <h2 style="text-align: center; color: #fde047; margin-bottom: 25px; letter-spacing: 1px;">TODAY'S FIXTURES</h2>
+    <div id="leagueFixtures" style="max-width: 1000px; margin: 30px auto 50px auto; padding: 0 20px;">
         
-        <!-- This container will be auto-filled by JavaScript using Auction Data -->
+        <!-- Public Order of Play Display (Appears once saved) -->
+        <div id="publicOrderOfPlay" style="display: none; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; margin-bottom: 30px; background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155;">
+            <!-- Auto-populated timeline -->
+        </div>
+
+        <h2 style="text-align: center; color: #fde047; margin-bottom: 25px; letter-spacing: 1px;">TODAY'S FIXTURES</h2>
         <div id="fixturesContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
             <!-- Fixtures load here -->
         </div>
@@ -134,14 +175,10 @@
         </div>
 
         <label style="display: block; margin-top: 20px; color: #ef4444; font-weight: bold;">Team A Franchise:</label>
-        <select id="setupTeamA" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #ef4444; border-radius: 5px; font-size: 16px;">
-            <!-- Auto-populated from Auction Data -->
-        </select>
+        <select id="setupTeamA" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #ef4444; border-radius: 5px; font-size: 16px;"></select>
 
         <label style="display: block; margin-top: 15px; color: #3b82f6; font-weight: bold;">Team B Franchise:</label>
-        <select id="setupTeamB" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #3b82f6; border-radius: 5px; font-size: 16px;">
-             <!-- Auto-populated from Auction Data -->
-        </select>
+        <select id="setupTeamB" style="width: 100%; padding: 12px; margin-top: 5px; background: #0f172a; color: white; border: 1px solid #3b82f6; border-radius: 5px; font-size: 16px;"></select>
 
         <button onclick="startScoring()" style="width: 100%; padding: 15px; margin-top: 30px; background: #10b981; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px;">START MATCH SCORING ➔</button>
         <button onclick="logoutUmpire()" style="width: 100%; padding: 10px; margin-top: 10px; background: transparent; color: #94a3b8; border: none; cursor: pointer;">Cancel & Logout</button>
@@ -185,16 +222,102 @@
         </div>
     </div>
 
-    <!-- 3. SCORING & DYNAMIC DATA LOGIC -->
+    <!-- 3. MAIN DATA LOGIC -->
     <script>
         let currentScoreA = 0;
         let currentScoreB = 0;
+        let allCategories = [];
+        let scheduledOrder = [];
 
-        // Auto-run this when the page loads to grab the Auction Teams
         window.onload = function() {
             loadAuctionDataIntoFixtures();
+            loadOrderOfPlayData();
         };
 
+        // --- ORDER OF PLAY LOGIC ---
+        function loadOrderOfPlayData() {
+            try {
+                let setupData = localStorage.getItem('auctionSetup');
+                if(setupData) {
+                    let parsed = JSON.parse(setupData);
+                    if(parsed.categories) {
+                        // Extract just the category names from the auction setup
+                        allCategories = parsed.categories.map(c => c.name || c);
+                    }
+                }
+                
+                let savedOrder = localStorage.getItem('leagueOrderOfPlay');
+                if(savedOrder) scheduledOrder = JSON.parse(savedOrder);
+            } catch(e){}
+
+            // Remove already scheduled items from the available pool
+            allCategories = allCategories.filter(cat => !scheduledOrder.includes(cat));
+            
+            renderOrderManager();
+            renderPublicOrder();
+        }
+
+        function toggleOrderOfPlay() {
+            const mgr = document.getElementById('orderOfPlayManager');
+            mgr.style.display = mgr.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addToOrder(catIndex) {
+            let cat = allCategories.splice(catIndex, 1)[0];
+            scheduledOrder.push(cat);
+            renderOrderManager();
+        }
+
+        function removeFromOrder(catIndex) {
+            let cat = scheduledOrder.splice(catIndex, 1)[0];
+            allCategories.push(cat);
+            renderOrderManager();
+        }
+
+        function renderOrderManager() {
+            const availList = document.getElementById('availableCatsList');
+            const orderList = document.getElementById('scheduledCatsList');
+            
+            availList.innerHTML = '';
+            allCategories.forEach((cat, index) => {
+                availList.innerHTML += `<div onclick="addToOrder(${index})" style="background: #334155; padding: 12px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between; border-left: 4px solid #38bdf8;"><span>${cat}</span> <span>➕</span></div>`;
+            });
+            if(allCategories.length === 0) availList.innerHTML = '<p style="color:#64748b; text-align:center;">No more categories available.</p>';
+
+            orderList.innerHTML = '';
+            scheduledOrder.forEach((cat, index) => {
+                orderList.innerHTML += `<div onclick="removeFromOrder(${index})" style="background: #10b981; color: #0f172a; font-weight: bold; padding: 12px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between;"><span>${index + 1}. ${cat}</span> <span>❌</span></div>`;
+            });
+            if(scheduledOrder.length === 0) orderList.innerHTML = '<p style="color:#64748b; text-align:center;">Click a category on the left to add it to the schedule.</p>';
+        }
+
+        function saveOrderOfPlay() {
+            localStorage.setItem('leagueOrderOfPlay', JSON.stringify(scheduledOrder));
+            alert("Order of play saved and published successfully!");
+            renderPublicOrder();
+            toggleOrderOfPlay();
+        }
+
+        function renderPublicOrder() {
+            const publicBar = document.getElementById('publicOrderOfPlay');
+            if(!publicBar) return;
+            
+            if(scheduledOrder.length === 0) {
+                publicBar.style.display = 'none';
+                return;
+            }
+            
+            publicBar.style.display = 'flex';
+            publicBar.innerHTML = '<div style="font-weight:bold; color:#fde047; margin-right: 10px;">ORDER OF PLAY:</div>';
+            scheduledOrder.forEach((cat, index) => {
+                publicBar.innerHTML += `<div style="background: #1e293b; padding: 8px 15px; border-radius: 20px; font-size: 14px; border: 1px solid #38bdf8; white-space: nowrap;">${index + 1}. ${cat}</div>`;
+                if(index < scheduledOrder.length - 1) {
+                    publicBar.innerHTML += `<span style="color: #64748b; font-size: 12px;">▶</span>`; // Arrow separator
+                }
+            });
+        }
+
+        // --- FIXTURES & UMPIRE LOGIC ---
         function loadAuctionDataIntoFixtures() {
             const fixturesContainer = document.getElementById('fixturesContainer');
             const teamSelectA = document.getElementById('setupTeamA');
@@ -202,7 +325,6 @@
 
             let auctionTeams = [];
             try {
-                // Safely grab the saved franchises from the auction database
                 let rawData = localStorage.getItem('auctionTeams');
                 if(rawData) auctionTeams = JSON.parse(rawData);
             } catch(e) {}
@@ -212,7 +334,6 @@
                 return;
             }
 
-            // 1. Populate the Umpire Dropdowns
             let optionsHtml = '<option value="">Select a Franchise...</option>';
             auctionTeams.forEach(team => {
                 optionsHtml += `<option value="${team.name}">${team.name.toUpperCase()}</option>`;
@@ -220,7 +341,6 @@
             if (teamSelectA) teamSelectA.innerHTML = optionsHtml;
             if (teamSelectB) teamSelectB.innerHTML = optionsHtml;
 
-            // 2. Generate the Public Fixture Cards automatically
             let fixturesHtml = '';
             for (let i = 0; i < auctionTeams.length; i += 2) {
                 let team1 = auctionTeams[i];
