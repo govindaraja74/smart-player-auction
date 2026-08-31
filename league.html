@@ -91,6 +91,49 @@
         </div>
     </div>
 
+  <!-- ========================================== -->
+    <!-- LEAGUE FIXTURES & COURT ALLOTMENT (PUBLIC) -->
+    <!-- ========================================== -->
+    <div id="leagueFixtures" style="max-width: 1000px; margin: 50px auto; padding: 0 20px;">
+        <h2 style="text-align: center; color: #fde047; margin-bottom: 25px; letter-spacing: 1px;">TODAY'S FIXTURES</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            
+            <!-- Match 1 -->
+            <div style="background: #1e293b; border-left: 4px solid #38bdf8; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #94a3b8;">
+                    <span>Match 1 • Men's 30+</span>
+                    <span style="color: #38bdf8;">COURT 1</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 18px;">
+                    <div style="text-align: center; width: 40%;">Smashers</div>
+                    <div style="color: #64748b; font-size: 14px;">VS</div>
+                    <div style="text-align: center; width: 40%;">Warriors</div>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <span style="background: #334155; padding: 4px 10px; border-radius: 20px; font-size: 12px; color: #cbd5e1;">UPCOMING</span>
+                </div>
+            </div>
+
+            <!-- Match 2 (Live) -->
+            <div style="background: #1e293b; border-left: 4px solid #10b981; border-radius: 8px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 14px; font-weight: bold; color: #94a3b8;">
+                    <span>Match 2 • Men's Intermediate</span>
+                    <span style="color: #10b981;">COURT 2</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; color: white; font-weight: bold; font-size: 18px;">
+                    <div style="text-align: center; width: 40%;">Royals</div>
+                    <div style="color: #64748b; font-size: 14px;">VS</div>
+                    <div style="text-align: center; width: 40%;">Titans</div>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <span style="background: #065f46; color: #34d399; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold;">🔴 LIVE NOW</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
     <!-- 1. UMPIRE MATCH SETUP SCREEN -->
     <div id="umpireSetup" style="display: none; max-width: 500px; margin: 40px auto; background: #1e293b; border-radius: 12px; padding: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); color: white;">
         <h2 style="text-align: center; color: #38bdf8; margin-top: 0; margin-bottom: 25px;">Match Configuration</h2>
@@ -178,6 +221,7 @@
             const passcodeInput = document.querySelectorAll('input[type="password"]')[1].value; 
             if (passcodeInput === "umpire123") {
                 document.querySelector('.portal-grid').style.display = 'none'; 
+                document.getElementById('leagueFixtures').style.display = 'none'; // Hides fixtures
                 document.getElementById('umpireSetup').style.display = 'block';
             } else {
                 alert("⚠️ Invalid Umpire Passcode.");
@@ -185,18 +229,15 @@
         }
 
         function startScoring() {
-            // Grab Umpire's Settings
             const court = document.getElementById('setupCourt').value;
             const eventType = document.getElementById('setupEvent').value;
             const format = document.getElementById('setupFormat').value;
             const teamA = document.getElementById('setupTeamA').value || 'Team A';
             const teamB = document.getElementById('setupTeamB').value || 'Team B';
 
-            // Transition to Scorecard
             document.getElementById('umpireSetup').style.display = 'none';
             document.getElementById('umpireDashboard').style.display = 'block';
 
-            // Push settings to the display
             document.getElementById('matchCategory').innerText = `${eventType} (${format})`;
             document.getElementById('matchCourt').innerText = court;
             document.getElementById('teamAPlayers').innerText = teamA;
@@ -221,7 +262,6 @@
         }
 
         function logoutUmpire() {
-            // Reset scores and inputs
             currentScoreA = 0;
             currentScoreB = 0;
             document.getElementById('scoreA').innerText = "0";
@@ -229,10 +269,10 @@
             document.getElementById('setupTeamA').value = "";
             document.getElementById('setupTeamB').value = "";
             
-            // Return to main screen
             document.getElementById('umpireDashboard').style.display = 'none';
             document.getElementById('umpireSetup').style.display = 'none';
             document.querySelector('.portal-grid').style.display = ''; 
+            document.getElementById('leagueFixtures').style.display = 'block'; // Shows fixtures again
             document.querySelectorAll('input[type="password"]')[1].value = "";
         }
     </script>
