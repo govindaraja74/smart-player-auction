@@ -321,7 +321,7 @@
             let fA = document.getElementById('fixTeamA'); let fB = document.getElementById('fixTeamB');
             if(fA) fA.innerHTML = teamOptions; if(fB) fB.innerHTML = teamOptions;
         }
-        function addManualFixture() {
+    function addManualFixture() {
             let cat = document.getElementById('fixCategory').value;
             let tA = document.getElementById('fixTeamA').value;
             let tB = document.getElementById('fixTeamB').value;
@@ -330,8 +330,20 @@
             if(!cat || !tA || !tB) return alert("Please select a Category and both Teams.");
             if(tA === tB) return alert("Team A and Team B cannot be the same.");
 
+            // Prevent exact duplicate fixture entries
+            let isDuplicate = manualFixtures.some(f => f.category === cat && f.court === court && ((f.teamA === tA && f.teamB === tB) || (f.teamA === tB && f.teamB === tA)));
+            if(isDuplicate) {
+                if(!confirm(`⚠️ A match between ${tA.toUpperCase()} and ${tB.toUpperCase()} on ${court} for ${cat} is already added. Do you want to add it again anyway?`)) {
+                    return;
+                }
+            }
+
             manualFixtures.push({ category: cat, teamA: tA, teamB: tB, court: court });
             renderFixtureManagerList();
+
+            // Reset team dropdowns for the next combination to show a fresh full list
+            document.getElementById('fixTeamA').value = "";
+            document.getElementById('fixTeamB').value = "";
         }
         function removeManualFixture(index) {
             manualFixtures.splice(index, 1);
