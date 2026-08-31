@@ -235,28 +235,42 @@
         };
 
         // --- ORDER OF PLAY LOGIC ---
-        function loadOrderOfPlayData() {
+      function loadOrderOfPlayData() {
+            allCategories = [];
             try {
-                let setupData = localStorage.getItem('auctionSetup');
-                if(setupData) {
-                    let parsed = JSON.parse(setupData);
-                    if(parsed.categories) {
-                        // Extract just the category names from the auction setup
-                        allCategories = parsed.categories.map(c => c.name || c);
+                // 1. Primary Check: Look in the dedicated categories list
+                let rawCats = localStorage.getItem('auctionCategories');
+                if(rawCats) {
+                    let parsedCats = JSON.parse(rawCats);
+                    if(Array.isArray(parsedCats)) {
+                        allCategories = parsedCats.map(c => c.name || c.category || c); 
+                    }
+                }
+
+                // 2. Fallback Check: Look inside the general setup data
+                if(allCategories.length === 0) {
+                    let setupData = localStorage.getItem('auctionSetup');
+                    if(setupData) {
+                        let parsed = JSON.parse(setupData);
+                        if(parsed.categories) {
+                            allCategories = parsed.categories.map(c => c.name || c.category || c);
+                        }
                     }
                 }
                 
+                // Load the saved schedule if it exists
                 let savedOrder = localStorage.getItem('leagueOrderOfPlay');
                 if(savedOrder) scheduledOrder = JSON.parse(savedOrder);
-            } catch(e){}
+            } catch(e) { 
+                console.error("Error loading categories", e); 
+            }
 
-            // Remove already scheduled items from the available pool
-            allCategories = allCategories.filter(cat => !scheduledOrder.includes(cat));
+            // Clean up formatting and remove already scheduled items from the available pool
+            allCategories = allCategories.filter(cat => cat && String(cat).trim() !== '' && !scheduledOrder.includes(cat));
             
             renderOrderManager();
             renderPublicOrder();
         }
-
         function toggleOrderOfPlay() {
             const mgr = document.getElementById('orderOfPlayManager');
             mgr.style.display = mgr.style.display === 'none' ? 'block' : 'none';
