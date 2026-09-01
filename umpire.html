@@ -3,81 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umpire Scoreboard | Smart Players Auction</title>
+    <title>Umpire Scoreboard | BWF Official Style</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        body { background-color: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         
-        .board-container { width: 100%; max-width: 1300px; background: #fff; color: #000; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); overflow-x: auto; }
-        
-        .header-info { text-align: center; margin-bottom: 30px; }
-        .header-info h2 { margin: 0 0 10px 0; text-transform: uppercase; font-weight: 900; font-size: 24px; color: #000; }
-        .badge { background: #0f172a; color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 16px; margin: 0 5px; display: inline-block; font-weight: bold;}
-        
-        .score-table { border-collapse: collapse; margin-bottom: 40px; width: 100%; background: white; color: black; }
-        .score-table td { border: 2px solid black; text-align: center; font-weight: bold; height: 40px; }
-        
-        .team-label { 
-            font-size: 18px; 
-            width: 300px; 
-            text-align: left !important; 
-            vertical-align: bottom;
-            padding-left: 5px; 
-            padding-bottom: 2px;
-            border-top: none !important; 
-            border-left: none !important; 
-            border-right: none !important; 
-            border-bottom: 2px solid black !important;
-            text-transform: uppercase;
+        .scoreboard { 
+            background: #111; border: 2px solid #333; border-radius: 12px; width: 100%; max-width: 1000px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9); padding: 30px; 
         }
         
-        .num-cell { width: 30px; font-size: 14px; background: #f8fafc; }
-        
-        .input-cell { padding: 0; border: 2px solid black; border-left: 2px solid black !important; }
-        .input-cell select { 
-            width: 100%; 
-            height: 100%; 
-            border: none; 
-            outline: none; 
-            font-size: 14px; 
-            padding: 0 5px; 
-            font-weight: bold; 
-            background: transparent; 
-            cursor: pointer;
-        }
-        
-        .mark-cell { cursor: pointer; color: #dc2626; font-size: 22px; user-select: none; }
-        .mark-cell:hover { background: #f1f5f9; }
+        /* Header section */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 25px; }
+        .header h1 { color: #fde047; margin: 0; font-size: 26px; text-transform: uppercase; letter-spacing: 2px; font-weight: 900;}
+        .badges { display: flex; gap: 10px; }
+        .cat-badge { background: #222; color: #fff; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 14px; border: 1px solid #444;}
+        .court-badge { background: #0ea5e9; color: #fff; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 14px; }
 
-        .action-footer { margin-top: 10px; text-align: center; }
-        .end-btn { padding: 15px 35px; font-size: 16px; background: #10b981; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        /* Team Rows */
+        .team-row { 
+            display: flex; align-items: stretch; background: #1a1a1a; margin-bottom: 20px; 
+            border-radius: 8px; border-left: 10px solid #555; overflow: hidden;
+        }
+        .team-a { border-left-color: #e11d48; }
+        .team-b { border-left-color: #2563eb; }
+
+        /* Left Side: Info & Players */
+        .team-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+        .team-name { font-size: 28px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .player-select { 
+            background: #000; color: #fff; border: 1px solid #444; padding: 12px; margin-bottom: 8px; 
+            width: 100%; border-radius: 4px; font-size: 14px; font-weight: 600; outline: none; appearance: none;
+        }
+
+        /* Middle: Scores */
+        .scores-area { display: flex; align-items: center; background: #0f0f0f; padding: 0 30px; border-left: 2px solid #222; border-right: 2px solid #222;}
+        
+        .game-col { text-align: center; margin-right: 30px; }
+        .col-label { display: block; font-size: 12px; color: #888; text-transform: uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 1px;}
+        .game-box { 
+            background: #000; border: 2px solid #444; color: #fde047; font-size: 40px; 
+            font-weight: 900; width: 70px; height: 70px; display: flex; justify-content: center; align-items: center; border-radius: 6px; 
+        }
+
+        .point-col { text-align: center; }
+        .point-box { color: #fff; font-size: 110px; font-weight: 900; width: 140px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums;}
+
+        /* Right Side: Umpire Controls */
+        .controls { display: flex; flex-direction: column; padding: 20px; gap: 10px; justify-content: center; background: #111; width: 160px;}
+        .controls button { 
+            border: none; font-weight: 900; cursor: pointer; border-radius: 6px; 
+            text-transform: uppercase; transition: 0.1s; width: 100%;
+        }
+        .controls button:active { transform: scale(0.95); }
+        .btn-pt { background: #10b981; color: white; padding: 20px 10px; font-size: 22px; flex-grow: 1;}
+        .btn-game { background: #fde047; color: #000; padding: 12px 10px; font-size: 14px; }
+        .btn-sub { background: #333; color: white; padding: 10px; font-size: 14px; }
+
+        /* Footer */
+        .footer-actions { text-align: center; margin-top: 40px; }
+        .end-btn { 
+            background: #ef4444; color: white; border: none; padding: 18px 50px; font-size: 18px; 
+            font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
     </style>
 </head>
 <body>
 
-    <div class="board-container">
+    <div class="scoreboard">
         
-        <div class="header-info">
-            <h2 id="boardSportTitle">LIVE SCORING</h2>
-            <div>
-                <span class="badge" id="matchCategory">Loading Category...</span>
-                <span class="badge" style="background: #38bdf8; color: #000;" id="matchCourt">Loading Court...</span>
+        <div class="header">
+            <h1 id="boardSportTitle">BWF OFFICIAL SCORING</h1>
+            <div class="badges">
+                <span class="cat-badge" id="matchCategory">Loading...</span>
+                <span class="court-badge" id="matchCourt">Loading...</span>
             </div>
         </div>
 
-        <div id="tableContainer">
-            <!-- Tables injected by JavaScript -->
+        <!-- TEAM A -->
+        <div class="team-row team-a">
+            <div class="team-info">
+                <div class="team-name" id="dashTeamA" style="color: #e11d48;">TEAM A</div>
+                <select class="player-select" id="playerA1"><option value="">Select Player 1...</option></select>
+                <select class="player-select" id="playerA2"><option value="">Select Player 2 (If Doubles)...</option></select>
+            </div>
+            
+            <div class="scores-area">
+                <div class="game-col">
+                    <span class="col-label">Games</span>
+                    <div class="game-box" id="setsA">0</div>
+                </div>
+                <div class="point-col">
+                    <span class="col-label">Points</span>
+                    <div class="point-box" id="scoreA">0</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-pt" onclick="modScore('A', 'pts', 1)">+ POINT</button>
+                <button class="btn-game" onclick="modScore('A', 'sets', 1)">+ GAME</button>
+                <button class="btn-sub" onclick="modScore('A', 'pts', -1)">- 1 Point</button>
+            </div>
         </div>
 
-        <div class="action-footer">
+        <!-- TEAM B -->
+        <div class="team-row team-b">
+            <div class="team-info">
+                <div class="team-name" id="dashTeamB" style="color: #38bdf8;">TEAM B</div>
+                <select class="player-select" id="playerB1"><option value="">Select Player 1...</option></select>
+                <select class="player-select" id="playerB2"><option value="">Select Player 2 (If Doubles)...</option></select>
+            </div>
+            
+            <div class="scores-area">
+                <div class="game-col">
+                    <span class="col-label">Games</span>
+                    <div class="game-box" id="setsB">0</div>
+                </div>
+                <div class="point-col">
+                    <span class="col-label">Points</span>
+                    <div class="point-box" id="scoreB">0</div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-pt" onclick="modScore('B', 'pts', 1)">+ POINT</button>
+                <button class="btn-game" onclick="modScore('B', 'sets', 1)">+ GAME</button>
+                <button class="btn-sub" onclick="modScore('B', 'pts', -1)">- 1 Point</button>
+            </div>
+        </div>
+
+        <div class="footer-actions">
             <button class="end-btn" onclick="endMatch()">END MATCH & SUBMIT RESULTS</button>
         </div>
         
     </div>
 
     <script>
-        const MAX_POINTS = 30;
+        let matchState = { scoreA: 0, scoreB: 0, setsA: 0, setsB: 0 };
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -87,72 +151,43 @@
 
             let setup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
             let sport = setup.sportsType || 'SPORTS';
-            document.getElementById('boardSportTitle').innerText = `${sport} LIVE SCORE SHEET`;
+            document.getElementById('boardSportTitle').innerText = `${sport} OFFICIAL SCORING`;
 
             let manualFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
             let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
 
-            let tA = "TEAM A", tB = "TEAM B";
+            let tA = "Team A", tB = "Team B", activeCategory = "";
             
             if(match) {
-                document.getElementById('matchCategory').innerText = match.category;
+                activeCategory = match.category;
+                document.getElementById('matchCategory').innerText = activeCategory;
+                document.getElementById('dashTeamA').innerText = match.teamA;
+                document.getElementById('dashTeamB').innerText = match.teamB;
                 tA = match.teamA;
                 tB = match.teamB;
             } else {
                 document.getElementById('matchCategory').innerText = "No Match Assigned";
             }
 
-            renderTables(tA, tB);
-            populateRosterDropdowns(tA, tB);
+            populateRosterDropdowns(tA, tB, activeCategory);
         };
 
-        function renderTables(teamA, teamB) {
-            let container = document.getElementById('tableContainer');
-            container.innerHTML = generateTableHTML('A', teamA) + generateTableHTML('B', teamB);
-        }
-
-        function generateTableHTML(id, teamName) {
-            let html = `<table class="score-table"><tr><td class="team-label">${teamName}</td>`;
-            
-            // Top Row (Numbers 1 to 30)
-            for(let i = 1; i <= MAX_POINTS; i++) {
-                html += `<td class="num-cell">${i}</td>`;
-            }
-            html += `</tr><tr><td class="input-cell"><select id="player${id}1"><option value="">Select Player...</option></select></td>`;
-            
-            // Player 1 Mark Cells
-            for(let i = 1; i <= MAX_POINTS; i++) {
-                html += `<td class="mark-cell" onclick="toggleX(this)"></td>`;
-            }
-            html += `</tr><tr><td class="input-cell"><select id="player${id}2"><option value="">Select Player...</option></select></td>`;
-            
-            // Player 2 Mark Cells
-            for(let i = 1; i <= MAX_POINTS; i++) {
-                html += `<td class="mark-cell" onclick="toggleX(this)"></td>`;
-            }
-            html += `</tr></table>`;
-            
-            return html;
-        }
-
-        function toggleX(cell) {
-            if (cell.innerText === 'X') {
-                cell.innerText = '';
-            } else {
-                cell.innerText = 'X';
-            }
-        }
-
-        function populateRosterDropdowns(teamA, teamB) {
+        function populateRosterDropdowns(teamA, teamB, category) {
             let allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             
-            // Filters only by team name, removing the category restriction
-            let teamARoster = allPlayers.filter(p => p.status === 'sold' && String(p.teamName).toLowerCase() === String(teamA).toLowerCase());
-            let teamBRoster = allPlayers.filter(p => p.status === 'sold' && String(p.teamName).toLowerCase() === String(teamB).toLowerCase());
+            // Strictly filters players by Sold Status + Team + Specific Match Category
+            let filterRoster = (teamName) => allPlayers.filter(p => 
+                p.status === 'sold' && 
+                String(p.teamName).toLowerCase() === String(teamName).toLowerCase() && 
+                String(p.category).trim().toLowerCase() === String(category).trim().toLowerCase()
+            );
+
+            let teamARoster = filterRoster(teamA);
+            let teamBRoster = filterRoster(teamB);
 
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
-                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category})</option>`);
+                roster.forEach(p => html += `<option value="${p.name}">${p.name}</option>`);
                 return html;
             };
 
@@ -162,15 +197,29 @@
             document.getElementById('playerB2').innerHTML = buildOptions(teamBRoster);
         }
 
+        function modScore(team, type, amt) {
+            if (team === 'A') {
+                if (type === 'pts') matchState.scoreA = Math.max(0, matchState.scoreA + amt);
+                if (type === 'sets') matchState.setsA = Math.max(0, matchState.setsA + amt);
+                document.getElementById('scoreA').innerText = matchState.scoreA;
+                document.getElementById('setsA').innerText = matchState.setsA;
+            } else {
+                if (type === 'pts') matchState.scoreB = Math.max(0, matchState.scoreB + amt);
+                if (type === 'sets') matchState.setsB = Math.max(0, matchState.setsB + amt);
+                document.getElementById('scoreB').innerText = matchState.scoreB;
+                document.getElementById('setsB').innerText = matchState.setsB;
+            }
+        }
+
         function endMatch() { 
             let pA1 = document.getElementById('playerA1').value;
             let pB1 = document.getElementById('playerB1').value;
 
             if(!pA1 || !pB1) {
-                if(!confirm("Warning: You haven't selected players for both teams. Submit anyway?")) return;
+                if(!confirm("Warning: You haven't selected the playing players for both teams. Submit anyway?")) return;
             }
 
-            if(confirm(`Are you sure you want to end this match and sync the final results?`)) {
+            if(confirm(`Are you sure you want to end this match?\n\nTeam A: ${matchState.setsA} Games (${matchState.scoreA} Pts)\nTeam B: ${matchState.setsB} Games (${matchState.scoreB} Pts)`)) {
                 alert("Match results securely synced!");
                 window.close();
                 window.location.href = "league.html";
