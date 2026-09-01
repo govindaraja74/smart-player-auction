@@ -7,11 +7,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background-color: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+        body { background-color: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; overflow-x: auto; }
         
         .scoreboard { 
             background: #111; border: 2px solid #333; border-radius: 12px; width: 100%; max-width: 1000px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9); padding: 30px; 
+            min-width: 800px; /* Forces the horizontal layout on mobile */
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9); padding: 25px; 
         }
         
         /* Header section */
@@ -31,79 +32,42 @@
 
         /* Left Side: Info & Players */
         .team-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
-        .team-name { font-size: 28px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .team-name { font-size: 24px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
         .player-select { 
-            background: #000; color: #fff; border: 1px solid #444; padding: 12px; margin-bottom: 8px; 
-            width: 100%; border-radius: 4px; font-size: 14px; font-weight: 600; outline: none; appearance: none;
+            background: #000; color: #fff; border: 1px solid #444; padding: 10px; margin-bottom: 8px; 
+            width: 100%; border-radius: 4px; font-size: 13px; font-weight: 600; outline: none; appearance: none;
         }
 
         /* Middle: Scores */
-        .scores-area { display: flex; align-items: center; justify-content: center; background: #0f0f0f; padding: 0 30px; border-left: 2px solid #222; border-right: 2px solid #222;}
+        .scores-area { display: flex; align-items: center; background: #0f0f0f; padding: 0 25px; border-left: 2px solid #222; border-right: 2px solid #222;}
         
-        .game-col { text-align: center; margin-right: 30px; }
+        .game-col { text-align: center; margin-right: 25px; }
         .col-label { display: block; font-size: 12px; color: #888; text-transform: uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 1px;}
         .game-box { 
-            background: #000; border: 2px solid #444; color: #fde047; font-size: 40px; 
-            font-weight: 900; width: 70px; height: 70px; display: flex; justify-content: center; align-items: center; border-radius: 6px; 
+            background: #000; border: 2px solid #444; color: #fde047; font-size: 35px; 
+            font-weight: 900; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 6px; 
         }
 
         .point-col { text-align: center; }
-        .point-box { color: #fff; font-size: 110px; font-weight: 900; width: 140px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums;}
+        .point-box { color: #fff; font-size: 90px; font-weight: 900; width: 120px; text-align: center; line-height: 1; font-variant-numeric: tabular-nums;}
 
         /* Right Side: Umpire Controls */
-        .controls { display: flex; flex-direction: column; padding: 20px; gap: 10px; justify-content: center; background: #111; width: 160px;}
+        .controls { display: flex; flex-direction: column; padding: 15px; gap: 8px; justify-content: center; background: #111; width: 150px;}
         .controls button { 
             border: none; font-weight: 900; cursor: pointer; border-radius: 6px; 
             text-transform: uppercase; transition: 0.1s; width: 100%;
         }
         .controls button:active { transform: scale(0.95); }
-        .btn-pt { background: #10b981; color: white; padding: 20px 10px; font-size: 22px; flex-grow: 1;}
-        .btn-game { background: #fde047; color: #000; padding: 12px 10px; font-size: 14px; }
-        .btn-sub { background: #333; color: white; padding: 10px; font-size: 14px; }
+        .btn-pt { background: #10b981; color: white; padding: 18px 10px; font-size: 20px; flex-grow: 1;}
+        .btn-game { background: #fde047; color: #000; padding: 10px; font-size: 13px; }
+        .btn-sub { background: #333; color: white; padding: 10px; font-size: 12px; }
 
         /* Footer */
-        .footer-actions { text-align: center; margin-top: 40px; }
+        .footer-actions { text-align: center; margin-top: 30px; }
         .end-btn { 
-            background: #ef4444; color: white; border: none; padding: 18px 50px; font-size: 18px; 
+            background: #ef4444; color: white; border: none; padding: 15px 40px; font-size: 16px; 
             font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
-        }
-
-        /* Mobile Responsiveness for Phones */
-        @media (max-width: 800px) {
-            body { padding: 0; align-items: flex-start; }
-            .scoreboard { padding: 15px; border-radius: 0; border: none; }
-            .header { flex-direction: column; gap: 12px; text-align: center; }
-            
-            .team-row { 
-                flex-direction: column; /* Stacks vertically on phone */
-                border-left: none; border-top: 8px solid #555; 
-            }
-            .team-a { border-top-color: #e11d48; }
-            .team-b { border-top-color: #2563eb; }
-            
-            .team-info { padding: 15px; text-align: center; }
-            .team-name { font-size: 24px; }
-            
-            .scores-area { 
-                border-left: none; border-right: none; 
-                border-top: 2px solid #222; border-bottom: 2px solid #222; 
-                padding: 20px 10px; 
-            }
-            .point-box { font-size: 80px; width: 100px; }
-            .game-box { width: 55px; height: 55px; font-size: 30px; }
-            .game-col { margin-right: 15px; }
-
-            .controls { 
-                flex-direction: row; /* Buttons go side-by-side on phone */
-                flex-wrap: wrap; 
-                width: 100%; padding: 15px; gap: 10px;
-            }
-            .btn-pt { width: 100%; flex: unset; padding: 15px; order: 1;} /* Point button full width */
-            .btn-game { flex: 1; padding: 12px; order: 2;}
-            .btn-sub { flex: 1; padding: 12px; order: 3;}
-            
-            .end-btn { width: 100%; padding: 15px; font-size: 16px; }
         }
     </style>
 </head>
@@ -211,7 +175,6 @@
         function populateRosterDropdowns(teamA, teamB) {
             let allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             
-            // Only filters by sold status and team name (showing all categories)
             let teamARoster = allPlayers.filter(p => 
                 p.status === 'sold' && 
                 String(p.teamName).toLowerCase() === String(teamA).toLowerCase()
@@ -236,13 +199,11 @@
 
         function modScore(team, type, amt) {
             if (team === 'A') {
-                // Capped points at 30
                 if (type === 'pts') matchState.scoreA = Math.min(30, Math.max(0, matchState.scoreA + amt));
                 if (type === 'sets') matchState.setsA = Math.max(0, matchState.setsA + amt);
                 document.getElementById('scoreA').innerText = matchState.scoreA;
                 document.getElementById('setsA').innerText = matchState.setsA;
             } else {
-                // Capped points at 30
                 if (type === 'pts') matchState.scoreB = Math.min(30, Math.max(0, matchState.scoreB + amt));
                 if (type === 'sets') matchState.setsB = Math.max(0, matchState.setsB + amt);
                 document.getElementById('scoreB').innerText = matchState.scoreB;
