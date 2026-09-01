@@ -449,10 +449,22 @@
                 </div>`;
             });
         }
+async function saveManualFixtures() {
+            if(!confirm("Are you sure you want to save and publish these fixtures to the Cloud Database?")) return;
+            localStorage.setItem('leagueManualFixtures', JSON.stringify(manualFixtures)); // Keep local backup
+            
+            try {
+                await fetch('/api/fixtures', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(manualFixtures)
+                });
+            } catch (error) {
+                console.error("Cloud Sync Failed", error);
+                alert("Warning: Could not sync to MongoDB. Check server connection.");
+            }
 
-        function saveManualFixtures() {
-            if(!confirm("Are you sure you want to save and publish these fixtures?")) return;
-            localStorage.setItem('leagueManualFixtures', JSON.stringify(manualFixtures));
+            renderPublicFixtures(currentFilter); 
             toggleFixtureManager();
         }
     </script>
