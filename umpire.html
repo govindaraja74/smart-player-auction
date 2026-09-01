@@ -7,11 +7,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        body { background-color: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; overflow-x: auto; }
+        body { background-color: #000; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 15px; }
         
         .scoreboard { 
             background: #111; border: 2px solid #333; border-radius: 12px; width: 100%; max-width: 1000px; 
-            min-width: 800px; /* Forces the horizontal layout on mobile */
             box-shadow: 0 10px 40px rgba(0,0,0,0.9); padding: 25px; 
         }
         
@@ -31,8 +30,8 @@
         .team-b { border-left-color: #2563eb; }
 
         /* Left Side: Info & Players */
-        .team-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
-        .team-name { font-size: 24px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
+        .team-info { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .team-name { font-size: 24px; font-weight: 900; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         .player-select { 
             background: #000; color: #fff; border: 1px solid #444; padding: 10px; margin-bottom: 8px; 
             width: 100%; border-radius: 4px; font-size: 13px; font-weight: 600; outline: none; appearance: none;
@@ -69,6 +68,41 @@
             font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
+
+        /* Responsive UI for Mobile Phones */
+        @media (max-width: 768px) {
+            body { padding: 5px; }
+            .scoreboard { padding: 10px; border: none; }
+            .header { padding-bottom: 10px; margin-bottom: 10px; }
+            .header h1 { font-size: 16px; }
+            .cat-badge, .court-badge { font-size: 10px; padding: 4px 8px; }
+            
+            .team-row { margin-bottom: 10px; border-left-width: 5px; }
+            .team-info { padding: 8px; }
+            .team-name { font-size: 14px; margin-bottom: 5px; }
+            .player-select { font-size: 10px; padding: 6px; margin-bottom: 4px; }
+            
+            .scores-area { padding: 0 8px; }
+            .game-col { margin-right: 10px; }
+            .col-label { font-size: 8px; margin-bottom: 4px; }
+            .game-box { width: 35px; height: 35px; font-size: 20px; }
+            .point-box { width: 65px; font-size: 45px; }
+            
+            .controls { width: 90px; padding: 5px; gap: 5px; }
+            .btn-pt { font-size: 12px; padding: 10px 5px; }
+            .btn-game, .btn-sub { font-size: 9px; padding: 6px 2px; }
+            
+            .footer-actions { margin-top: 15px; }
+            .end-btn { padding: 10px 20px; font-size: 12px; }
+        }
+
+        @media (orientation: portrait) {
+            body::before {
+                content: "⚠️ PLEASE ROTATE YOUR PHONE TO LANDSCAPE";
+                display: block; position: absolute; top: 10px; left: 0; width: 100%; text-align: center; 
+                color: #fde047; font-weight: 900; font-size: 12px; z-index: 100;
+            }
+        }
     </style>
 </head>
 <body>
@@ -78,7 +112,7 @@
         <div class="header">
             <h1 id="boardSportTitle">BWF OFFICIAL SCORING</h1>
             <div class="badges">
-                <span class="cat-badge" id="matchCategory">Loading...</span>
+                <span class="cat-badge" id="matchCategory">Loading Data...</span>
                 <span class="court-badge" id="matchCourt">Loading...</span>
             </div>
         </div>
@@ -144,46 +178,46 @@
     <script>
         let matchState = { scoreA: 0, scoreB: 0, setsA: 0, setsB: 0 };
 
-        window.onload = function() {
+        window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const courtName = urlParams.get('court') || 'COURT 1';
             
             document.getElementById('matchCourt').innerText = courtName;
+            document.getElementById('boardSportTitle').innerText = `SPORTS OFFICIAL SCORING`;
 
-            let setup = JSON.parse(localStorage.getItem('auctionSetup') || '{}');
-            let sport = setup.sportsType || 'SPORTS';
-            document.getElementById('boardSportTitle').innerText = `${sport} OFFICIAL SCORING`;
+            try {
+                // Fetch Fixtures & Players directly from MongoDB
+                const fixtureRes = await fetch('/api/fixtures');
+                const manualFixtures = await fixtureRes.json();
+                
+                const playerRes = await fetch('/api/players/sold');
+                const allPlayers = await playerRes.json();
 
-            let manualFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
-            let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
+                let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
+                let tA = "Team A", tB = "Team B";
+                
+                if(match) {
+                    document.getElementById('matchCategory').innerText = match.category;
+                    document.getElementById('dashTeamA').innerText = match.teamA;
+                    document.getElementById('dashTeamB').innerText = match.teamB;
+                    tA = match.teamA;
+                    tB = match.teamB;
+                } else {
+                    document.getElementById('matchCategory').innerText = "No Match Assigned";
+                }
 
-            let tA = "Team A", tB = "Team B";
-            
-            if(match) {
-                document.getElementById('matchCategory').innerText = match.category;
-                document.getElementById('dashTeamA').innerText = match.teamA;
-                document.getElementById('dashTeamB').innerText = match.teamB;
-                tA = match.teamA;
-                tB = match.teamB;
-            } else {
-                document.getElementById('matchCategory').innerText = "No Match Assigned";
+                populateRosterDropdowns(tA, tB, allPlayers);
+
+            } catch (err) {
+                console.error("Database connection failed", err);
+                document.getElementById('matchCategory').innerText = "CONNECTION ERROR";
+                alert("Could not connect to the database. Ensure the server is running.");
             }
-
-            populateRosterDropdowns(tA, tB);
         };
 
-        function populateRosterDropdowns(teamA, teamB) {
-            let allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
-            
-            let teamARoster = allPlayers.filter(p => 
-                p.status === 'sold' && 
-                String(p.teamName).toLowerCase() === String(teamA).toLowerCase()
-            );
-            
-            let teamBRoster = allPlayers.filter(p => 
-                p.status === 'sold' && 
-                String(p.teamName).toLowerCase() === String(teamB).toLowerCase()
-            );
+        function populateRosterDropdowns(teamA, teamB, allPlayers) {
+            let teamARoster = allPlayers.filter(p => String(p.teamName).toLowerCase() === String(teamA).toLowerCase());
+            let teamBRoster = allPlayers.filter(p => String(p.teamName).toLowerCase() === String(teamB).toLowerCase());
 
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
