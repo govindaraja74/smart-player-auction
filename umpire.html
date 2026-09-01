@@ -38,7 +38,7 @@
         }
 
         /* Middle: Scores */
-        .scores-area { display: flex; align-items: center; background: #0f0f0f; padding: 0 30px; border-left: 2px solid #222; border-right: 2px solid #222;}
+        .scores-area { display: flex; align-items: center; justify-content: center; background: #0f0f0f; padding: 0 30px; border-left: 2px solid #222; border-right: 2px solid #222;}
         
         .game-col { text-align: center; margin-right: 30px; }
         .col-label { display: block; font-size: 12px; color: #888; text-transform: uppercase; font-weight: 800; margin-bottom: 8px; letter-spacing: 1px;}
@@ -67,6 +67,43 @@
             background: #ef4444; color: white; border: none; padding: 18px 50px; font-size: 18px; 
             font-weight: 900; border-radius: 8px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Mobile Responsiveness for Phones */
+        @media (max-width: 800px) {
+            body { padding: 0; align-items: flex-start; }
+            .scoreboard { padding: 15px; border-radius: 0; border: none; }
+            .header { flex-direction: column; gap: 12px; text-align: center; }
+            
+            .team-row { 
+                flex-direction: column; /* Stacks vertically on phone */
+                border-left: none; border-top: 8px solid #555; 
+            }
+            .team-a { border-top-color: #e11d48; }
+            .team-b { border-top-color: #2563eb; }
+            
+            .team-info { padding: 15px; text-align: center; }
+            .team-name { font-size: 24px; }
+            
+            .scores-area { 
+                border-left: none; border-right: none; 
+                border-top: 2px solid #222; border-bottom: 2px solid #222; 
+                padding: 20px 10px; 
+            }
+            .point-box { font-size: 80px; width: 100px; }
+            .game-box { width: 55px; height: 55px; font-size: 30px; }
+            .game-col { margin-right: 15px; }
+
+            .controls { 
+                flex-direction: row; /* Buttons go side-by-side on phone */
+                flex-wrap: wrap; 
+                width: 100%; padding: 15px; gap: 10px;
+            }
+            .btn-pt { width: 100%; flex: unset; padding: 15px; order: 1;} /* Point button full width */
+            .btn-game { flex: 1; padding: 12px; order: 2;}
+            .btn-sub { flex: 1; padding: 12px; order: 3;}
+            
+            .end-btn { width: 100%; padding: 15px; font-size: 16px; }
         }
     </style>
 </head>
