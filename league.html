@@ -184,10 +184,18 @@
         let manualFixtures = []; let auctionTeamsList = [];
         let currentFilter = null;
 
-        window.onload = function() {
+     window.onload = function() {
             loadTeamsForFixtures();
             loadOrderOfPlayData();
             loadManualFixtures();
+            
+            // Restore the saved court count before generating the lists
+            let savedCount = localStorage.getItem('leagueCourtCount');
+            let courtSelect = document.getElementById('activeCourtsCount');
+            if (savedCount && courtSelect) {
+                courtSelect.value = savedCount;
+            }
+            
             updateCourtDropdowns();
             renderUmpireCourtPortals();
         };
