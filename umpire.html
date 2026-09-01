@@ -9,43 +9,48 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
         body { background-color: #0f172a; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
         
-        .board-container { width: 100%; max-width: 1200px; background: #fff; color: #000; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); overflow-x: auto; }
+        .board-container { width: 100%; max-width: 1300px; background: #fff; color: #000; border-radius: 8px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); overflow-x: auto; }
         
-        .header-info { text-align: center; margin-bottom: 20px; border-bottom: 3px solid #000; padding-bottom: 10px; }
+        .header-info { text-align: center; margin-bottom: 30px; }
         .header-info h2 { margin: 0 0 10px 0; text-transform: uppercase; font-weight: 900; font-size: 24px; color: #000; }
-        .badge { background: #0f172a; color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 16px; margin: 0 5px; display: inline-block; }
+        .badge { background: #0f172a; color: #fff; padding: 5px 12px; border-radius: 4px; font-size: 16px; margin: 0 5px; display: inline-block; font-weight: bold;}
+        
+        .score-table { border-collapse: collapse; margin-bottom: 40px; width: 100%; background: white; color: black; }
+        .score-table td { border: 2px solid black; text-align: center; font-weight: bold; height: 40px; }
+        
+        .team-label { 
+            font-size: 18px; 
+            width: 300px; 
+            text-align: left !important; 
+            vertical-align: bottom;
+            padding-left: 5px; 
+            padding-bottom: 2px;
+            border-top: none !important; 
+            border-left: none !important; 
+            border-right: none !important; 
+            border-bottom: 2px solid black !important;
+            text-transform: uppercase;
+        }
+        
+        .num-cell { width: 30px; font-size: 14px; background: #f8fafc; }
+        
+        .input-cell { padding: 0; border: 2px solid black; border-left: 2px solid black !important; }
+        .input-cell select { 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+            outline: none; 
+            font-size: 14px; 
+            padding: 0 5px; 
+            font-weight: bold; 
+            background: transparent; 
+            cursor: pointer;
+        }
+        
+        .mark-cell { cursor: pointer; color: #dc2626; font-size: 22px; user-select: none; }
+        .mark-cell:hover { background: #f1f5f9; }
 
-        .sheet-wrapper { display: flex; flex-direction: column; border: 4px solid #000; width: 100%; min-width: 900px; }
-        
-        .team-row { display: flex; border-bottom: 4px solid #000; align-items: stretch; }
-        .team-row:last-child { border-bottom: none; }
-        .team-row.team-b { background-color: #fffacd; } /* Yellow tint for Team 2 */
-        
-        .team-side { width: 280px; padding: 10px; border-right: 4px solid #000; display: flex; flex-direction: column; justify-content: center; gap: 5px; }
-        .team-side h3 { margin: 0; font-size: 18px; text-transform: uppercase; font-weight: 900; }
-        .team-side select { width: 100%; padding: 6px; font-size: 12px; border: 1px solid #000; font-weight: bold; background: #fff; }
-        
-        .controls { display: flex; gap: 5px; margin-top: 5px; }
-        .controls button { flex: 1; padding: 5px; font-weight: bold; cursor: pointer; border: 1px solid #000; font-size: 14px; }
-        .controls .btn-add { background: #10b981; color: white; border-color: #059669; }
-        .controls .btn-sub { background: #ef4444; color: white; border-color: #b91c1c; }
-        
-        .track-side { flex-grow: 1; display: flex; }
-        
-        .score-cell { flex: 1; border-right: 2px solid #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; cursor: pointer; user-select: none; transition: 0.1s; min-height: 80px;}
-        .score-cell:last-child { border-right: none; }
-        .score-cell:hover { background: rgba(0,0,0,0.1); }
-        
-        /* The "Crossed Off" Visual */
-        .score-cell.crossed { position: relative; color: #aaa; }
-        .score-cell.crossed::after { content: ''; position: absolute; width: 100%; height: 3px; background: #dc2626; transform: rotate(45deg); }
-        .score-cell.crossed::before { content: ''; position: absolute; width: 100%; height: 3px; background: #dc2626; transform: rotate(-45deg); }
-
-        .total-side { width: 80px; border-left: 4px solid #000; display: flex; flex-direction: column; background: #fff; }
-        .total-header { font-size: 16px; font-weight: 900; border-bottom: 2px solid #000; width: 100%; text-align: center; padding: 4px 0; }
-        .total-score { flex-grow: 1; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; }
-        
-        .action-footer { margin-top: 25px; text-align: center; }
+        .action-footer { margin-top: 10px; text-align: center; }
         .end-btn { padding: 15px 35px; font-size: 16px; background: #10b981; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
     </style>
 </head>
@@ -61,45 +66,8 @@
             </div>
         </div>
 
-        <div class="sheet-wrapper">
-            <!-- TEAM A ROW -->
-            <div class="team-row team-a">
-                <div class="team-side">
-                    <h3 id="dashTeamA" style="color: #ef4444;">TEAM A</h3>
-                    <select id="playerA1"><option value="">Select Player 1...</option></select>
-                    <select id="playerA2"><option value="">Select Player 2 (If Doubles)...</option></select>
-                    <div class="controls">
-                        <button class="btn-sub" onclick="modScore('A', -1)">- 1</button>
-                        <button class="btn-add" onclick="modScore('A', 1)">+ POINT</button>
-                    </div>
-                </div>
-                <div class="track-side" id="trackA">
-                    <!-- Numbers 1-30 generated by JS -->
-                </div>
-                <div class="total-side">
-                    <div class="total-header">TOTAL</div>
-                    <div class="total-score" id="totalA">0</div>
-                </div>
-            </div>
-
-            <!-- TEAM B ROW -->
-            <div class="team-row team-b">
-                <div class="team-side">
-                    <h3 id="dashTeamB" style="color: #3b82f6;">TEAM B</h3>
-                    <select id="playerB1"><option value="">Select Player 1...</option></select>
-                    <select id="playerB2"><option value="">Select Player 2 (If Doubles)...</option></select>
-                    <div class="controls">
-                        <button class="btn-sub" onclick="modScore('B', -1)">- 1</button>
-                        <button class="btn-add" onclick="modScore('B', 1)">+ POINT</button>
-                    </div>
-                </div>
-                <div class="track-side" id="trackB">
-                    <!-- Numbers 1-30 generated by JS -->
-                </div>
-                <div class="total-side">
-                    <div class="total-score" id="totalB">0</div>
-                </div>
-            </div>
+        <div id="tableContainer">
+            <!-- Tables injected by JavaScript -->
         </div>
 
         <div class="action-footer">
@@ -109,10 +77,7 @@
     </div>
 
     <script>
-        let scoreA = 0; 
-        let scoreB = 0;
         const MAX_POINTS = 30;
-        let activeCategory = "";
 
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -127,42 +92,67 @@
             let manualFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
             let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
 
-            let tA = "Team A", tB = "Team B";
+            let tA = "TEAM A", tB = "TEAM B";
             
             if(match) {
-                activeCategory = match.category;
-                document.getElementById('matchCategory').innerText = activeCategory;
-                document.getElementById('dashTeamA').innerText = match.teamA;
-                document.getElementById('dashTeamB').innerText = match.teamB;
+                document.getElementById('matchCategory').innerText = match.category;
                 tA = match.teamA;
                 tB = match.teamB;
             } else {
                 document.getElementById('matchCategory').innerText = "No Match Assigned";
             }
 
-            populateRosterDropdowns(tA, tB, activeCategory);
-            renderTracks();
+            renderTables(tA, tB);
+            populateRosterDropdowns(tA, tB);
         };
 
-        function populateRosterDropdowns(teamA, teamB, category) {
+        function renderTables(teamA, teamB) {
+            let container = document.getElementById('tableContainer');
+            container.innerHTML = generateTableHTML('A', teamA) + generateTableHTML('B', teamB);
+        }
+
+        function generateTableHTML(id, teamName) {
+            let html = `<table class="score-table"><tr><td class="team-label">${teamName}</td>`;
+            
+            // Top Row (Numbers 1 to 30)
+            for(let i = 1; i <= MAX_POINTS; i++) {
+                html += `<td class="num-cell">${i}</td>`;
+            }
+            html += `</tr><tr><td class="input-cell"><select id="player${id}1"><option value="">Select Player...</option></select></td>`;
+            
+            // Player 1 Mark Cells
+            for(let i = 1; i <= MAX_POINTS; i++) {
+                html += `<td class="mark-cell" onclick="toggleX(this)"></td>`;
+            }
+            html += `</tr><tr><td class="input-cell"><select id="player${id}2"><option value="">Select Player...</option></select></td>`;
+            
+            // Player 2 Mark Cells
+            for(let i = 1; i <= MAX_POINTS; i++) {
+                html += `<td class="mark-cell" onclick="toggleX(this)"></td>`;
+            }
+            html += `</tr></table>`;
+            
+            return html;
+        }
+
+        function toggleX(cell) {
+            if (cell.innerText === 'X') {
+                cell.innerText = '';
+            } else {
+                cell.innerText = 'X';
+            }
+        }
+
+        function populateRosterDropdowns(teamA, teamB) {
             let allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             
-            // STRICT FILTERING: Only show players who are SOLD + on the specific TEAM + in the exact MATCH CATEGORY
-            let teamARoster = allPlayers.filter(p => 
-                p.status === 'sold' && 
-                String(p.teamName).toLowerCase() === String(teamA).toLowerCase() && 
-                String(p.category) === String(category)
-            );
-            
-            let teamBRoster = allPlayers.filter(p => 
-                p.status === 'sold' && 
-                String(p.teamName).toLowerCase() === String(teamB).toLowerCase() && 
-                String(p.category) === String(category)
-            );
+            // Filters only by team name, removing the category restriction
+            let teamARoster = allPlayers.filter(p => p.status === 'sold' && String(p.teamName).toLowerCase() === String(teamA).toLowerCase());
+            let teamBRoster = allPlayers.filter(p => p.status === 'sold' && String(p.teamName).toLowerCase() === String(teamB).toLowerCase());
 
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
-                roster.forEach(p => html += `<option value="${p.name}">${p.name}</option>`);
+                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category})</option>`);
                 return html;
             };
 
@@ -172,45 +162,15 @@
             document.getElementById('playerB2').innerHTML = buildOptions(teamBRoster);
         }
 
-        function renderTracks() {
-            let htmlA = '';
-            let htmlB = '';
-            
-            for(let i = 1; i <= MAX_POINTS; i++) {
-                let classA = i <= scoreA ? 'score-cell crossed' : 'score-cell';
-                let classB = i <= scoreB ? 'score-cell crossed' : 'score-cell';
-                
-                htmlA += `<div class="${classA}" onclick="setScore('A', ${i})">${i}</div>`;
-                htmlB += `<div class="${classB}" onclick="setScore('B', ${i})">${i}</div>`;
-            }
-            
-            document.getElementById('trackA').innerHTML = htmlA;
-            document.getElementById('trackB').innerHTML = htmlB;
-            document.getElementById('totalA').innerText = scoreA;
-            document.getElementById('totalB').innerText = scoreB;
-        }
-
-        function setScore(team, val) {
-            if (team === 'A') scoreA = val;
-            if (team === 'B') scoreB = val;
-            renderTracks();
-        }
-
-        function modScore(team, amt) {
-            if (team === 'A') scoreA = Math.max(0, Math.min(MAX_POINTS, scoreA + amt));
-            if (team === 'B') scoreB = Math.max(0, Math.min(MAX_POINTS, scoreB + amt));
-            renderTracks();
-        }
-
         function endMatch() { 
             let pA1 = document.getElementById('playerA1').value;
             let pB1 = document.getElementById('playerB1').value;
 
             if(!pA1 || !pB1) {
-                if(!confirm("Warning: You haven't selected the playing players for both teams. Submit anyway?")) return;
+                if(!confirm("Warning: You haven't selected players for both teams. Submit anyway?")) return;
             }
 
-            if(confirm(`Are you sure you want to end this match and sync the final results?\n\nTeam A Score: ${scoreA}\nTeam B Score: ${scoreB}`)) {
+            if(confirm(`Are you sure you want to end this match and sync the final results?`)) {
                 alert("Match results securely synced!");
                 window.close();
                 window.location.href = "league.html";
