@@ -376,6 +376,40 @@ app.delete('/api/franchises/:id', async (req, res) => {
 });
 
 // ==========================================
+// UMPIRE & FIXTURE API ROUTES
+// ==========================================
+const FixtureSchema = new mongoose.Schema({}, { strict: false });
+const Fixture = mongoose.model('Fixture', FixtureSchema);
+
+// Save fixtures to MongoDB
+app.post('/api/fixtures', async (req, res) => {
+    try {
+        await Fixture.deleteMany({});
+        if (req.body && req.body.length > 0) {
+            await Fixture.insertMany(req.body);
+        }
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// Load fixtures from MongoDB
+app.get('/api/fixtures', async (req, res) => {
+    const fixtures = await Fixture.find();
+    res.json(fixtures);
+});
+
+// Load sold players and attach their Team Name for the scoreboard dropdowns
+app.get('/api/players/sold', async (req, res) => {
+    const players = await Player.find({ status: 'sold' }).lean();
+    const teams = await Franchise.find().lean();
+    
+    const enhancedPlayers = players.map(p => {
+        const team = teams.find(t => t._id.toString() === p.soldToTeamId);
+        return { ...p, teamName: team ? team.name : 'Unknown' };
+    });
+    res.json(enhancedPlayers);
+});
+// ==========================================
 // 7. START SERVER
 // ==========================================
 const PORT = process.env.PORT || 3000;
