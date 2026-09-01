@@ -156,11 +156,10 @@
             let manualFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
             let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
 
-            let tA = "Team A", tB = "Team B", activeCategory = "";
+            let tA = "Team A", tB = "Team B";
             
             if(match) {
-                activeCategory = match.category;
-                document.getElementById('matchCategory').innerText = activeCategory;
+                document.getElementById('matchCategory').innerText = match.category;
                 document.getElementById('dashTeamA').innerText = match.teamA;
                 document.getElementById('dashTeamB').innerText = match.teamB;
                 tA = match.teamA;
@@ -169,25 +168,26 @@
                 document.getElementById('matchCategory').innerText = "No Match Assigned";
             }
 
-            populateRosterDropdowns(tA, tB, activeCategory);
+            populateRosterDropdowns(tA, tB);
         };
 
-        function populateRosterDropdowns(teamA, teamB, category) {
+        function populateRosterDropdowns(teamA, teamB) {
             let allPlayers = JSON.parse(localStorage.getItem('auctionPlayers') || '[]');
             
-            // Strictly filters players by Sold Status + Team + Specific Match Category
-            let filterRoster = (teamName) => allPlayers.filter(p => 
+            // Only filters by sold status and team name (showing all categories)
+            let teamARoster = allPlayers.filter(p => 
                 p.status === 'sold' && 
-                String(p.teamName).toLowerCase() === String(teamName).toLowerCase() && 
-                String(p.category).trim().toLowerCase() === String(category).trim().toLowerCase()
+                String(p.teamName).toLowerCase() === String(teamA).toLowerCase()
             );
-
-            let teamARoster = filterRoster(teamA);
-            let teamBRoster = filterRoster(teamB);
+            
+            let teamBRoster = allPlayers.filter(p => 
+                p.status === 'sold' && 
+                String(p.teamName).toLowerCase() === String(teamB).toLowerCase()
+            );
 
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
-                roster.forEach(p => html += `<option value="${p.name}">${p.name}</option>`);
+                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category})</option>`);
                 return html;
             };
 
@@ -199,12 +199,14 @@
 
         function modScore(team, type, amt) {
             if (team === 'A') {
-                if (type === 'pts') matchState.scoreA = Math.max(0, matchState.scoreA + amt);
+                // Capped points at 30
+                if (type === 'pts') matchState.scoreA = Math.min(30, Math.max(0, matchState.scoreA + amt));
                 if (type === 'sets') matchState.setsA = Math.max(0, matchState.setsA + amt);
                 document.getElementById('scoreA').innerText = matchState.scoreA;
                 document.getElementById('setsA').innerText = matchState.setsA;
             } else {
-                if (type === 'pts') matchState.scoreB = Math.max(0, matchState.scoreB + amt);
+                // Capped points at 30
+                if (type === 'pts') matchState.scoreB = Math.min(30, Math.max(0, matchState.scoreB + amt));
                 if (type === 'sets') matchState.setsB = Math.max(0, matchState.setsB + amt);
                 document.getElementById('scoreB').innerText = matchState.scoreB;
                 document.getElementById('setsB').innerText = matchState.setsB;
