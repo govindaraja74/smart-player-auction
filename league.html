@@ -8,34 +8,44 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
         :root { --primary: #0284c7; --secondary: #fde047; --dark: #0f172a; --card-bg: #1e293b; }
-        body { background-color: var(--dark); color: white; display: flex; flex-direction: column; min-height: 100vh; }
+        body { background-color: var(--dark); color: white; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
         /* Navbar */
-        .navbar { padding: 20px 40px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .nav-brand { font-size: 22px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
-        .nav-brand img { height: 35px; }
+        .navbar { padding: 15px 30px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .nav-brand { font-size: 20px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
+        .nav-brand img { height: 30px; }
         .nav-brand span { color: var(--secondary); }
         
-        /* Main Layout */
-        .container { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
-        .header { text-align: center; margin-bottom: 40px; }
-        .header h1 { font-size: 42px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
-        .header p { color: #94a3b8; font-size: 16px; margin-top: 10px; }
+        /* Action Buttons */
+        .nav-actions { display: flex; gap: 15px; }
+        .points-btn { background: #f59e0b; color: #0f172a; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 900; font-size: 13px; display: inline-flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: none; cursor: pointer; text-transform: uppercase;}
+        .admin-btn { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
-        /* Grid & Cards */
-        .match-grid { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1200px; }
-        .match-card { background: var(--card-bg); border: 1px solid #334155; border-radius: 12px; padding: 25px; width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); position: relative; overflow: hidden;}
-        .court-badge { background: #0ea5e9; color: white; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;}
+        /* Split Screen Layout */
+        .container { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; height: calc(100vh - 65px); }
+        .split-grid { display: grid; gap: 20px; width: 100%; height: 100%; }
         
-        /* Status Indicators */
-        .status-badge { color: #10b981; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-        .status-queue { color: #94a3b8; font-size: 12px; font-weight: bold; }
-        .pulse { width: 8px; height: 8px; background: #10b981; border-radius: 50%; animation: blink 1.5s infinite; }
+        .court-panel { background: var(--card-bg); border: 2px solid #334155; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .court-header { background: #0ea5e9; color: white; padding: 10px; text-align: center; font-weight: 900; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; }
+        
+        .court-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
+        
+        .live-indicator { color: #10b981; font-weight: 900; font-size: 14px; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; animation: blink 1.5s infinite; }
+        .pulse { width: 10px; height: 10px; background: #10b981; border-radius: 50%; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        .match-cat { color: #fde047; font-size: 22px; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; text-align: center; }
         
-        /* Teams Layout */
-        .team-box { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #475569; margin-top: 20px; }
-        .team-name { font-weight: 900; font-size: 18px; width: 42%; text-align: center; word-wrap: break-word; text-transform: uppercase; }
+        .teams-split { display: flex; width: 100%; justify-content: space-between; align-items: center; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #475569; }
+        .team-name { font-weight: 900; font-size: 28px; width: 45%; text-align: center; word-wrap: break-word; text-transform: uppercase; }
+        .vs-badge { color: #94a3b8; font-size: 16px; font-weight: bold; background: #1e293b; padding: 5px 10px; border-radius: 4px; }
+        
+        .court-footer { background: #0f172a; padding: 12px 20px; border-top: 1px solid #334155; font-size: 14px; display: flex; align-items: center; gap: 10px;}
+        .queue-badge { background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+
+        /* Points Table Modal */
+        #pointsModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 12px; max-width: 800px; width: 90%; border: 1px solid #334155; max-height: 80vh; overflow-y: auto; }
     </style>
 </head>
 <body>
@@ -45,88 +55,136 @@
             <img src="/spa-logo.png.png" alt="Logo">
             Smart <span>Players</span> Auction
         </a>
-        </nav>
+        
+        <div class="nav-actions">
+            <!-- Points Table Button -->
+            <button onclick="togglePointsModal()" class="points-btn">🏆 Franchise Points Table</button>
+            <!-- Organizer Hub Button -->
+            <a href="league-admin.html" class="admin-btn">⚙️ Organizer Hub</a>
+        </div>
+    </nav>
     
     <div class="container">
-        <div class="header">
-            <h1>Live <span>Matches</span></h1>
-            <p>Public Match-Day Hub & Live Court Summaries</p>
+        <!-- Split Screen Grid -->
+        <div id="splitCourtsGrid" class="split-grid"></div>
+    </div>
+
+    <!-- Points Table Modal -->
+    <div id="pointsModal">
+        <div class="modal-content">
+            <h2 style="color: #fde047; text-align: center; margin-bottom: 20px; font-size: 28px; text-transform: uppercase; font-weight: 900;">Franchise Standings</h2>
+            <p style="text-align: center; color: #94a3b8; margin-bottom: 30px;">Points data will be mapped here from your Organizer Hub settings.</p>
+            
+            <!-- Placeholder Table until you set points in admin -->
+            <table style="width: 100%; border-collapse: collapse; text-align: left; background: #0f172a; border-radius: 8px; overflow: hidden;">
+                <tr style="background: #334155; color: white;">
+                    <th style="padding: 15px;">Rank</th>
+                    <th style="padding: 15px;">Franchise Name</th>
+                    <th style="padding: 15px; text-align: center;">Matches</th>
+                    <th style="padding: 15px; text-align: center;">Points</th>
+                </tr>
+                <tr style="border-bottom: 1px solid #334155;">
+                    <td style="padding: 15px; font-weight: bold; color: #fde047;">1</td>
+                    <td style="padding: 15px; font-weight: bold;">SMASHWIN</td>
+                    <td style="padding: 15px; text-align: center; color: #94a3b8;">0</td>
+                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">0</td>
+                </tr>
+                <tr>
+                    <td style="padding: 15px; font-weight: bold; color: #cbd5e1;">2</td>
+                    <td style="padding: 15px; font-weight: bold;">COSTAL</td>
+                    <td style="padding: 15px; text-align: center; color: #94a3b8;">0</td>
+                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">0</td>
+                </tr>
+            </table>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button onclick="togglePointsModal()" style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Close Table</button>
+            </div>
         </div>
-        
-        <!-- The cards will be generated inside this grid -->
-        <div id="publicMatchesGrid" class="match-grid"></div>
     </div>
 
     <script>
         window.onload = async function() {
             loadPublicMatches();
-            // Automatically silently refresh the page data every 10 seconds to catch new organizer assignments
-            setInterval(loadPublicMatches, 10000); 
+            setInterval(loadPublicMatches, 5000); // Polls silently every 5 seconds for real-time dashboard updates
         };
+
+        function togglePointsModal() {
+            const modal = document.getElementById('pointsModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        }
 
         async function loadPublicMatches() {
             let fixtures = [];
             
-            // 1. Fetch live queue from MongoDB
             try {
                 const res = await fetch('/api/fixtures');
                 if(res.ok) fixtures = await res.json();
-            } catch(err) {
-                console.warn("Could not fetch cloud fixtures");
-            }
+            } catch(err) {}
 
-            // 2. Hybrid Fallback (In case Cloud is unreachable)
             if(!Array.isArray(fixtures) || fixtures.length === 0) {
                 try {
                     fixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
                 } catch(e) {}
             }
 
-            const grid = document.getElementById('publicMatchesGrid');
+            // Get total active courts from local storage (set via league-admin.html)
+            let courtCount = parseInt(localStorage.getItem('leagueCourtCount')) || 6;
+            
+            const grid = document.getElementById('splitCourtsGrid');
+            
+            // Dynamic Grid Calculation to perfectly split the screen
+            if (courtCount === 1) grid.style.gridTemplateColumns = '1fr';
+            else if (courtCount === 2) grid.style.gridTemplateColumns = '1fr 1fr';
+            else if (courtCount === 3 || courtCount === 4) grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            else grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+
             grid.innerHTML = '';
 
-            // Empty State
-            if(fixtures.length === 0) {
-                grid.innerHTML = `
-                <div style="text-align: center; color: #94a3b8; width: 100%; padding: 50px; background: #1e293b; border-radius: 12px; border: 1px solid #334155; max-width: 600px;">
-                    <h2 style="color: white; margin-bottom: 10px;">No Matches Currently Assigned</h2>
-                    <p>Matches will appear here as soon as the tournament organizer queues them up.</p>
-                </div>`;
-                return;
+            for(let i = 1; i <= courtCount; i++) {
+                let cName = `COURT ${i}`;
+                let courtFixtures = fixtures.filter(f => f.court === cName);
+                let activeMatch = courtFixtures.length > 0 ? courtFixtures[0] : null;
+                let queue = courtFixtures.slice(1);
+
+                let panelHtml = `
+                <div class="court-panel">
+                    <div class="court-header">${cName}</div>
+                    <div class="court-body">`;
+
+                if(activeMatch) {
+                    panelHtml += `
+                        <div class="live-indicator"><div class="pulse"></div> LIVE NOW</div>
+                        <div class="match-cat">${activeMatch.category}</div>
+                        <div class="teams-split">
+                            <div class="team-name" style="color: #ef4444;">${activeMatch.teamA}</div>
+                            <div class="vs-badge">VS</div>
+                            <div class="team-name" style="color: #3b82f6;">${activeMatch.teamB}</div>
+                        </div>
+                    `;
+                } else {
+                    panelHtml += `<div style="color: #475569; font-weight: bold; font-size: 20px; text-transform: uppercase;">Awaiting Players</div>`;
+                }
+
+                panelHtml += `</div>`;
+
+                // Render the Up Next Queue at the bottom of the court panel
+                if(queue.length > 0) {
+                    let nextMatch = queue[0];
+                    panelHtml += `
+                    <div class="court-footer">
+                        <span class="queue-badge">UP NEXT</span>
+                        <strong style="color: #eab308; font-size: 12px;">${nextMatch.category}</strong>
+                        <span style="color: #cbd5e1; font-size: 12px;">(${nextMatch.teamA} vs ${nextMatch.teamB})</span>
+                        ${queue.length > 1 ? `<span style="color: #64748b; font-size: 11px; margin-left: auto;">+${queue.length - 1} more in queue</span>` : ''}
+                    </div>`;
+                } else {
+                    panelHtml += `<div class="court-footer" style="justify-content: center; color: #475569; font-size: 12px; font-weight: bold;">Queue is empty</div>`;
+                }
+
+                panelHtml += `</div>`;
+                grid.innerHTML += panelHtml;
             }
-
-            let courtTracker = {};
-
-            // Render Match Cards
-            fixtures.forEach((f, index) => {
-                if(!courtTracker[f.court]) courtTracker[f.court] = 0;
-                courtTracker[f.court]++;
-                
-                let isFirst = courtTracker[f.court] === 1;
-                
-                // Apply 'Live' styling to the 1st match on a court, and 'Queue' styling to the rest
-                let statusHtml = isFirst 
-                    ? `<div class="status-badge"><div class="pulse"></div> ON COURT</div>`
-                    : `<div class="status-queue">⏳ IN QUEUE (#${courtTracker[f.court]})</div>`;
-                    
-                let borderHighlight = isFirst ? 'border-top: 4px solid #10b981;' : 'border-top: 4px solid #475569; opacity: 0.8;';
-
-                grid.innerHTML += `
-                <div class="match-card" style="${borderHighlight}">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <span class="court-badge">${f.court}</span>
-                        ${statusHtml}
-                    </div>
-                    <h3 style="color: #fde047; font-size: 16px; text-transform: uppercase;">${f.category}</h3>
-                    
-                    <div class="team-box">
-                        <div class="team-name" style="color: #ef4444;">${f.teamA}</div>
-                        <div style="color: #94a3b8; font-size: 12px; font-weight: bold;">VS</div>
-                        <div class="team-name" style="color: #3b82f6;">${f.teamB}</div>
-                    </div>
-                </div>
-                `;
-            });
         }
     </script>
 </body>
