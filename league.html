@@ -84,25 +84,18 @@
             <p style="text-align: center; color: #94a3b8; margin-bottom: 30px;">Points data will be mapped here from your Organizer Hub settings.</p>
             
             <!-- Placeholder Table until you set points in admin -->
-            <table style="width: 100%; border-collapse: collapse; text-align: left; background: #0f172a; border-radius: 8px; overflow: hidden;">
-                <tr style="background: #334155; color: white;">
-                    <th style="padding: 15px;">Rank</th>
-                    <th style="padding: 15px;">Franchise Name</th>
-                    <th style="padding: 15px; text-align: center;">Matches</th>
-                    <th style="padding: 15px; text-align: center;">Points</th>
-                </tr>
-                <tr style="border-bottom: 1px solid #334155;">
-                    <td style="padding: 15px; font-weight: bold; color: #fde047;">1</td>
-                    <td style="padding: 15px; font-weight: bold;">SMASHWIN</td>
-                    <td style="padding: 15px; text-align: center; color: #94a3b8;">0</td>
-                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">0</td>
-                </tr>
-                <tr>
-                    <td style="padding: 15px; font-weight: bold; color: #cbd5e1;">2</td>
-                    <td style="padding: 15px; font-weight: bold;">COSTAL</td>
-                    <td style="padding: 15px; text-align: center; color: #94a3b8;">0</td>
-                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">0</td>
-                </tr>
+           <table style="width: 100%; border-collapse: collapse; text-align: left; background: #0f172a; border-radius: 8px; overflow: hidden;">
+                <thead style="background: #334155; color: white;">
+                    <tr>
+                        <th style="padding: 15px;">Rank</th>
+                        <th style="padding: 15px;">Franchise Name</th>
+                        <th style="padding: 15px; text-align: center;">Matches</th>
+                        <th style="padding: 15px; text-align: center;">Points</th>
+                    </tr>
+                </thead>
+                <tbody id="standingsTableBody">
+                    <!-- Teams will load here automatically -->
+                </tbody>
             </table>
 
             <div style="text-align: center; margin-top: 30px;">
@@ -117,12 +110,47 @@
             setInterval(loadPublicMatches, 5000); // Polls silently every 5 seconds for real-time dashboard updates
         };
 
-        function togglePointsModal() {
+      function togglePointsModal() {
             const modal = document.getElementById('pointsModal');
-            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                populateStandings();
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
         }
 
-     async function loadPublicMatches() {
+        function populateStandings() {
+            const tbody = document.getElementById('standingsTableBody');
+            if (!tbody) return;
+            
+            let teams = [];
+            try {
+                teams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            } catch(e) {}
+
+            if (teams.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center; color: #94a3b8;">No teams registered yet.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            teams.forEach((team, index) => {
+                let rankColor = index === 0 ? '#fde047' : (index === 1 ? '#cbd5e1' : '#b45309');
+                if(index > 2) rankColor = '#94a3b8';
+                
+                html += `
+                <tr style="border-bottom: 1px solid #334155;">
+                    <td style="padding: 15px; font-weight: bold; color: ${rankColor};">${index + 1}</td>
+                    <td style="padding: 15px; font-weight: bold;">${team.name.toUpperCase()}</td>
+                    <td style="padding: 15px; text-align: center; color: #94a3b8;">0</td>
+                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">0</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        async function loadPublicMatches() {
             let fixtures = [];
             
             try {
