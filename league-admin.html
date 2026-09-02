@@ -297,11 +297,12 @@
             }
         }
 
-        function resetCategorySelection() {
+      function resetCategorySelection() {
             let fCat = document.getElementById('fixCategory');
             if(fCat) {
-                fCat.value = ""; 
+                fCat.value = ""; // Clears the selection
             }
+            populateFixtureDropdowns(); // Refreshes the dropdown list styling immediately
         }
 
         function loadOrderOfPlayData() {
