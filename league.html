@@ -36,10 +36,18 @@
 
         .match-cat { color: #fde047; font-size: 22px; font-weight: 900; text-transform: uppercase; margin-bottom: 25px; text-align: center; }
         
-        .teams-split { display: flex; width: 100%; justify-content: space-between; align-items: center; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #475569; }
-        .team-name { font-weight: 900; font-size: 28px; width: 45%; text-align: center; word-wrap: break-word; text-transform: uppercase; }
-        .vs-badge { color: #94a3b8; font-size: 16px; font-weight: bold; background: #1e293b; padding: 5px 10px; border-radius: 4px; }
+      .teams-split { display: flex; width: 100%; justify-content: space-between; align-items: stretch; gap: 10px; }
         
+        .team-box { flex: 1; background: #0f172a; padding: 15px 10px; border-radius: 8px; border: 1px solid #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: inset 0 2px 15px rgba(0,0,0,0.3); }
+        .team-name { font-weight: 900; font-size: 18px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; line-height: 1.1; word-wrap: break-word; width: 100%;}
+        
+        .player-names { font-size: 10px; color: #94a3b8; font-weight: 700; line-height: 1.3; min-height: 26px; display: flex; align-items: center; justify-content: center; text-transform: capitalize; margin-bottom: 8px; }
+        
+        .score-display { font-size: 34px; font-weight: 900; color: white; display: flex; align-items: baseline; gap: 4px; line-height: 1; }
+        .score-label { font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase; }
+        
+        .vs-wrapper { display: flex; align-items: center; justify-content: center; }
+        .vs-badge { color: #94a3b8; font-size: 14px; font-weight: 900; background: #1e293b; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; }
         .court-footer { background: #0f172a; padding: 12px 20px; border-top: 1px solid #334155; font-size: 14px; display: flex; align-items: center; gap: 10px;}
         .queue-badge { background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
 
@@ -114,7 +122,7 @@
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
         }
 
-        async function loadPublicMatches() {
+     async function loadPublicMatches() {
             let fixtures = [];
             
             try {
@@ -128,12 +136,9 @@
                 } catch(e) {}
             }
 
-            // Get total active courts from local storage (set via league-admin.html)
             let courtCount = parseInt(localStorage.getItem('leagueCourtCount')) || 6;
-            
             const grid = document.getElementById('splitCourtsGrid');
             
-            // Dynamic Grid Calculation to perfectly split the screen
             if (courtCount === 1) grid.style.gridTemplateColumns = '1fr';
             else if (courtCount === 2) grid.style.gridTemplateColumns = '1fr 1fr';
             else if (courtCount === 3 || courtCount === 4) grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
@@ -153,13 +158,35 @@
                     <div class="court-body">`;
 
                 if(activeMatch) {
+                    // Extract player names (handling doubles) and default to 'TBA' if not selected yet
+                    let pA = activeMatch.playerA1 ? activeMatch.playerA1 : 'Players TBA';
+                    if(activeMatch.playerA2) pA += ` & ${activeMatch.playerA2}`;
+                    
+                    let pB = activeMatch.playerB1 ? activeMatch.playerB1 : 'Players TBA';
+                    if(activeMatch.playerB2) pB += ` & ${activeMatch.playerB2}`;
+                    
+                    // Extract live points
+                    let scoreA = activeMatch.scoreA !== undefined ? activeMatch.scoreA : '0';
+                    let scoreB = activeMatch.scoreB !== undefined ? activeMatch.scoreB : '0';
+
                     panelHtml += `
                         <div class="live-indicator"><div class="pulse"></div> LIVE NOW</div>
                         <div class="match-cat">${activeMatch.category}</div>
+                        
                         <div class="teams-split">
-                            <div class="team-name" style="color: #ef4444;">${activeMatch.teamA}</div>
-                            <div class="vs-badge">VS</div>
-                            <div class="team-name" style="color: #3b82f6;">${activeMatch.teamB}</div>
+                            <div class="team-box" style="border-bottom: 4px solid #ef4444;">
+                                <div class="team-name" style="color: #ef4444;">${activeMatch.teamA}</div>
+                                <div class="player-names">${pA}</div>
+                                <div class="score-display">${scoreA} <span class="score-label">PTS</span></div>
+                            </div>
+                            
+                            <div class="vs-wrapper"><div class="vs-badge">VS</div></div>
+                            
+                            <div class="team-box" style="border-bottom: 4px solid #3b82f6;">
+                                <div class="team-name" style="color: #3b82f6;">${activeMatch.teamB}</div>
+                                <div class="player-names">${pB}</div>
+                                <div class="score-display">${scoreB} <span class="score-label">PTS</span></div>
+                            </div>
                         </div>
                     `;
                 } else {
@@ -168,15 +195,14 @@
 
                 panelHtml += `</div>`;
 
-                // Render the Up Next Queue at the bottom of the court panel
                 if(queue.length > 0) {
                     let nextMatch = queue[0];
                     panelHtml += `
                     <div class="court-footer">
                         <span class="queue-badge">UP NEXT</span>
-                        <strong style="color: #eab308; font-size: 12px;">${nextMatch.category}</strong>
-                        <span style="color: #cbd5e1; font-size: 12px;">(${nextMatch.teamA} vs ${nextMatch.teamB})</span>
-                        ${queue.length > 1 ? `<span style="color: #64748b; font-size: 11px; margin-left: auto;">+${queue.length - 1} more in queue</span>` : ''}
+                        <strong style="color: #eab308; font-size: 12px; margin-left: 10px;">${nextMatch.category}</strong>
+                        <span style="color: #cbd5e1; font-size: 12px; margin-left: 6px;">(${nextMatch.teamA} vs ${nextMatch.teamB})</span>
+                        ${queue.length > 1 ? `<span style="color: #64748b; font-size: 11px; margin-left: auto;">+${queue.length - 1} more</span>` : ''}
                     </div>`;
                 } else {
                     panelHtml += `<div class="court-footer" style="justify-content: center; color: #475569; font-size: 12px; font-weight: bold;">Queue is empty</div>`;
