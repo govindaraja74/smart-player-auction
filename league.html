@@ -124,19 +124,10 @@
         <div id="fixtureManager" style="display: none; width: 100%; max-width: 900px; margin: 20px auto; background: #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: white;">
             <h2 style="text-align: center; color: #eab308; margin-top: 0; margin-bottom: 20px;">MANAGE TODAY'S FIXTURES</h2>
             
-            <!-- Court Count Selector -->
+            <!-- Dynamic Court Count Input -->
             <div style="display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155;">
                 <label style="font-size: 14px; font-weight: bold; color: #38bdf8;">Number of Active Courts:</label>
-                <select id="activeCourtsCount" onchange="updateCourtDropdowns()" style="padding: 8px 15px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 4px; font-weight: bold;">
-                    <option value="1">1 Court</option>
-                    <option value="2">2 Courts</option>
-                    <option value="3" selected>3 Courts</option>
-                    <option value="4">4 Courts</option>
-                    <option value="5">5 Courts</option>
-                    <option value="6">6 Courts</option>
-                    <option value="7">7 Courts</option>
-                    <option value="8">8 Courts</option>
-                </select>
+                <input type="number" id="activeCourtsCount" oninput="updateCourtDropdowns()" min="1" max="99" style="padding: 8px 15px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 4px; font-weight: bold; width: 100px; text-align: center; margin-bottom: 0;">
             </div>
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
@@ -186,13 +177,13 @@
 
         window.onload = function() {
             loadTeamsForFixtures();
-            loadOrderOfPlayData();
-            loadManualFixtures();
+            // Load fixtures FIRST so we know which categories are currently "On Court"
+            loadManualFixtures(); 
+            loadOrderOfPlayData(); 
             
-            // Restore the saved court count before generating the lists
-            let savedCount = localStorage.getItem('leagueCourtCount');
+            let savedCount = localStorage.getItem('leagueCourtCount') || 3;
             let courtSelect = document.getElementById('activeCourtsCount');
-            if (savedCount && courtSelect) {
+            if (courtSelect) {
                 courtSelect.value = savedCount;
             }
             
@@ -266,9 +257,9 @@
         }
 
         function updateCourtDropdowns() {
-            let activeSelect = document.getElementById('activeCourtsCount');
-            if(!activeSelect) return;
-            const count = parseInt(activeSelect.value) || 3;
+            let activeInput = document.getElementById('activeCourtsCount');
+            if(!activeInput) return;
+            const count = parseInt(activeInput.value) || 3;
             localStorage.setItem('leagueCourtCount', count);
             
             let usedCourts = manualFixtures.map(f => f.court);
@@ -376,10 +367,12 @@
             let cat = scheduledOrder.splice(catIndex, 1)[0];
             allCategories.push(cat); renderOrderManager();
         }
+        
         function renderOrderManager() {
             const availList = document.getElementById('availableCatsList');
             const orderList = document.getElementById('scheduledCatsList');
             if(!availList || !orderList) return;
+            
             availList.innerHTML = '';
             allCategories.forEach((cat, index) => {
                 availList.innerHTML += `<div onclick="addToOrder(${index})" style="background: #334155; padding: 12px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between; border-left: 4px solid #38bdf8;"><span>${cat}</span> <span>➕</span></div>`;
@@ -387,11 +380,27 @@
             if(allCategories.length === 0) availList.innerHTML = '<p style="color:#64748b; text-align:center;">No more categories available.</p>';
             
             orderList.innerHTML = '';
+            
+            // Check which categories are currently playing in the Fixtures list
+            let activeMatchCats = manualFixtures.map(f => f.category);
+
             scheduledOrder.forEach((cat, index) => {
-                orderList.innerHTML += `<div onclick="removeFromOrder(${index})" style="background: #10b981; color: #0f172a; font-weight: bold; padding: 12px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between;"><span>${index + 1}. ${cat}</span> <span>❌</span></div>`;
+                let isOnCourt = activeMatchCats.includes(cat);
+                
+                // Highlight yellow if on court, green if waiting
+                let bgColor = isOnCourt ? '#eab308' : '#10b981'; 
+                let textColor = '#0f172a';
+                let badge = isOnCourt ? `<span style="background: #0f172a; color: #eab308; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px;">ON COURT</span>` : '';
+
+                orderList.innerHTML += `<div style="background: ${bgColor}; color: ${textColor}; font-weight: bold; padding: 12px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
+                    <div style="display: flex; align-items: center;"><span>${index + 1}. ${cat}</span> ${badge}</div> 
+                    <span onclick="removeFromOrder(${index})" style="cursor: pointer; padding: 5px;">❌</span>
+                </div>`;
             });
+            
             if(scheduledOrder.length === 0) orderList.innerHTML = '<p style="color:#64748b; text-align:center;">Click a category on the left to add it.</p>';
         }
+
         function saveOrderOfPlay() {
             if(!confirm("Are you sure you want to save and publish this Order of Play chart?")) return;
             localStorage.setItem('leagueOrderOfPlay', JSON.stringify(scheduledOrder));
@@ -445,12 +454,14 @@
             manualFixtures.push({ category: cat, teamA: tA, teamB: tB, court: court });
             renderFixtureManagerList();
             updateCourtDropdowns(); 
+            renderOrderManager(); // Instantly highlight it in the Order of Play chart!
         }
 
         function removeManualFixture(index) {
             manualFixtures.splice(index, 1);
             renderFixtureManagerList();
             updateCourtDropdowns(); 
+            renderOrderManager(); // Instantly un-highlight it in the Order of Play chart!
         }
 
         function renderFixtureManagerList() {
