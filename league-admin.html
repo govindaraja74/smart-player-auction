@@ -273,7 +273,7 @@
             renderUmpireCourtPortals();
         }
 
-        function loadTeamsForFixtures() {
+     function loadTeamsForFixtures() {
             try {
                 let rawData = localStorage.getItem('auctionTeams');
                 if(rawData) auctionTeamsList = JSON.parse(rawData);
@@ -283,8 +283,25 @@
             auctionTeamsList.forEach(team => {
                 optionsHtml += `<option value="${team.name}">${team.name.toUpperCase()}</option>`;
             });
-            let fA = document.getElementById('fixTeamA'); let fB = document.getElementById('fixTeamB');
-            if(fA) fA.innerHTML = optionsHtml; if(fB) fB.innerHTML = optionsHtml;
+            
+            let fA = document.getElementById('fixTeamA'); 
+            let fB = document.getElementById('fixTeamB');
+            
+            if(fA) {
+                fA.innerHTML = optionsHtml;
+                fA.onchange = function() { resetCategorySelection(); };
+            }
+            if(fB) {
+                fB.innerHTML = optionsHtml;
+                fB.onchange = function() { resetCategorySelection(); };
+            }
+        }
+
+        function resetCategorySelection() {
+            let fCat = document.getElementById('fixCategory');
+            if(fCat) {
+                fCat.value = ""; 
+            }
         }
 
         function loadOrderOfPlayData() {
