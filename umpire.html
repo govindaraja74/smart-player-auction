@@ -175,60 +175,106 @@
         
     </div>
 
-    <script>
+  <script>
         let matchState = { scoreA: 0, scoreB: 0, setsA: 0, setsB: 0 };
 
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
             const courtName = urlParams.get('court') || 'COURT 1';
+            const umpireName = urlParams.get('umpire'); 
             
             document.getElementById('matchCourt').innerText = courtName;
             document.getElementById('boardSportTitle').innerText = `SPORTS OFFICIAL SCORING`;
 
-            try {
-                // Fetch Fixtures & Players directly from MongoDB
-                const fixtureRes = await fetch('/api/fixtures');
-                const manualFixtures = await fixtureRes.json();
-                
-                const playerRes = await fetch('/api/players/sold');
-                const allPlayers = await playerRes.json();
-
-                let match = manualFixtures.find(f => String(f.court).trim() === String(courtName).trim());
-                let tA = "Team A", tB = "Team B";
-                
-                if(match) {
-                    document.getElementById('matchCategory').innerText = match.category;
-                    document.getElementById('dashTeamA').innerText = match.teamA;
-                    document.getElementById('dashTeamB').innerText = match.teamB;
-                    tA = match.teamA;
-                    tB = match.teamB;
-                } else {
-                    document.getElementById('matchCategory').innerText = "No Match Assigned";
+            // Display Umpire Name if it was passed through the QR code URL
+            if (umpireName) {
+                const umpDisplay = document.getElementById('umpireNameDisplay');
+                if (umpDisplay) {
+                    umpDisplay.innerText = `Match Umpire: ${umpireName}`;
+                    umpDisplay.style.display = 'block';
                 }
-
-                populateRosterDropdowns(tA, tB, allPlayers);
-
-            } catch (err) {
-                console.error("Database connection failed", err);
-                document.getElementById('matchCategory').innerText = "CONNECTION ERROR";
-                alert("Could not connect to the database. Ensure the server is running.");
             }
+
+            let manualFixtures = [];
+            let allPlayers = [];
+
+            // 1. Safely Fetch Fixtures from MongoDB
+            try {
+                const fixtureRes = await fetch('/api/fixtures');
+                if (fixtureRes.ok) {
+                    const fData = await fixtureRes.json();
+                    if (Array.isArray(fData)) manualFixtures = fData;
+                }
+            } catch (err) { console.warn("Fixtures DB Error:", err); }
+
+            // 2. Safely Fetch Players from MongoDB
+            try {
+                const playerRes = await fetch('/api/players/sold');
+                if (playerRes.ok) {
+                    const pData = await playerRes.json();
+                    if (Array.isArray(pData)) allPlayers = pData;
+                }
+            } catch (err) { console.warn("Players DB Error:", err); }
+
+            // 3. Crash-Proof Hybrid Fallback (In case Cloud is unreachable)
+            if (!Array.isArray(manualFixtures) || manualFixtures.length === 0) {
+                try {
+                    let localF = JSON.parse(localStorage.getItem('leagueManualFixtures'));
+                    if (Array.isArray(localF)) manualFixtures = localF;
+                } catch(e) {}
+            }
+            if (!Array.isArray(allPlayers) || allPlayers.length === 0) {
+                try {
+                    let localP = JSON.parse(localStorage.getItem('auctionPlayers'));
+                    if (Array.isArray(localP)) allPlayers = localP;
+                } catch(e) {}
+            }
+
+            // Enforce Arrays to prevent crashes
+            manualFixtures = Array.isArray(manualFixtures) ? manualFixtures : [];
+            allPlayers = Array.isArray(allPlayers) ? allPlayers : [];
+
+            // Find the specific match for this court
+            let match = manualFixtures.find(f => f && f.court && String(f.court).trim() === String(courtName).trim());
+            let tA = "Team A", tB = "Team B";
+            
+            if(match) {
+                document.getElementById('matchCategory').innerText = match.category || "Match";
+                document.getElementById('dashTeamA').innerText = match.teamA || "TEAM A";
+                document.getElementById('dashTeamB').innerText = match.teamB || "TEAM B";
+                tA = match.teamA || "Team A";
+                tB = match.teamB || "Team B";
+            } else {
+                document.getElementById('matchCategory').innerText = "No Match Assigned";
+            }
+
+            populateRosterDropdowns(tA, tB, allPlayers);
         };
 
         function populateRosterDropdowns(teamA, teamB, allPlayers) {
-            let teamARoster = allPlayers.filter(p => String(p.teamName).toLowerCase() === String(teamA).toLowerCase());
-            let teamBRoster = allPlayers.filter(p => String(p.teamName).toLowerCase() === String(teamB).toLowerCase());
+            // Aggressively match the team name to ensure players are found
+            let teamARoster = allPlayers.filter(p => 
+                p && p.status === 'sold' && 
+                ((p.teamName && String(p.teamName).toLowerCase() === String(teamA).toLowerCase()) || 
+                 (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamA).toLowerCase()))
+            );
+            
+            let teamBRoster = allPlayers.filter(p => 
+                p && p.status === 'sold' && 
+                ((p.teamName && String(p.teamName).toLowerCase() === String(teamB).toLowerCase()) || 
+                 (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamB).toLowerCase()))
+            );
 
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
-                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category})</option>`);
+                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category || 'Player'})</option>`);
                 return html;
             };
 
-            document.getElementById('playerA1').innerHTML = buildOptions(teamARoster);
-            document.getElementById('playerA2').innerHTML = buildOptions(teamARoster);
-            document.getElementById('playerB1').innerHTML = buildOptions(teamBRoster);
-            document.getElementById('playerB2').innerHTML = buildOptions(teamBRoster);
+            const pA1 = document.getElementById('playerA1'); if(pA1) pA1.innerHTML = buildOptions(teamARoster);
+            const pA2 = document.getElementById('playerA2'); if(pA2) pA2.innerHTML = buildOptions(teamARoster);
+            const pB1 = document.getElementById('playerB1'); if(pB1) pB1.innerHTML = buildOptions(teamBRoster);
+            const pB2 = document.getElementById('playerB2'); if(pB2) pB2.innerHTML = buildOptions(teamBRoster);
         }
 
         function modScore(team, type, amt) {
@@ -245,9 +291,9 @@
             }
         }
 
-       function endMatch() { 
-            let pA1 = document.getElementById('playerA1').value;
-            let pB1 = document.getElementById('playerB1').value;
+        function endMatch() { 
+            let pA1 = document.getElementById('playerA1') ? document.getElementById('playerA1').value : '';
+            let pB1 = document.getElementById('playerB1') ? document.getElementById('playerB1').value : '';
 
             if(!pA1 || !pB1) {
                 if(!confirm("Warning: You haven't selected the playing players for both teams. Submit anyway?")) return;
