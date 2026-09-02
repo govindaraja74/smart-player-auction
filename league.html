@@ -438,19 +438,33 @@
             if(fA) fA.innerHTML = teamOptions; if(fB) fB.innerHTML = teamOptions;
         }
 
-        function addManualFixture() {
-            let cat = document.getElementById('fixCategory').value;
-            let tA = document.getElementById('fixTeamA').value;
-            let tB = document.getElementById('fixTeamB').value;
-            let court = document.getElementById('fixCourt').value;
+      function addManualFixture() {
+            let catSelect = document.getElementById('fixCategory');
+            let teamASelect = document.getElementById('fixTeamA');
+            let teamBSelect = document.getElementById('fixTeamB');
+            let courtSelect = document.getElementById('fixCourt');
+            
+            let cat = catSelect.value;
+            let tA = teamASelect.value;
+            let tB = teamBSelect.value;
+            let court = courtSelect.value;
             
             if(!cat || !tA || !tB || !court) return alert("Please select a Category, both Teams, and a Court.");
             if(tA === tB) return alert("Team A and Team B cannot be the same.");
 
+            // Add the match to the queue
             manualFixtures.push({ category: cat.replace('✅ ', '').replace(' (Scheduled)', ''), teamA: tA, teamB: tB, court: court });
+            
+            // Update the UI lists
             renderFixtureManagerList();
-            populateFixtureDropdowns(); // Re-render dropdowns to show highlights
+            populateFixtureDropdowns(); 
             renderOrderManager();
+
+            // FORCIBLY RESTORE THE EXACT SELECTIONS SO THEY DON'T CLEAR!
+            if(catSelect) catSelect.value = cat;
+            if(teamASelect) teamASelect.value = tA;
+            if(teamBSelect) teamBSelect.value = tB;
+            if(courtSelect) courtSelect.value = court;
         }
 
         function removeManualFixture(index) {
