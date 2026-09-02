@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -260,7 +260,6 @@
             const count = parseInt(activeInput.value) || 3;
             localStorage.setItem('leagueCourtCount', count);
             
-            // Allow all courts to be selected infinitely for queueing
             let courtOptions = '';
             for(let i = 1; i <= count; i++) {
                 let cName = `COURT ${i}`;
@@ -273,7 +272,7 @@
             renderUmpireCourtPortals();
         }
 
-     function loadTeamsForFixtures() {
+        function loadTeamsForFixtures() {
             try {
                 let rawData = localStorage.getItem('auctionTeams');
                 if(rawData) auctionTeamsList = JSON.parse(rawData);
@@ -297,12 +296,12 @@
             }
         }
 
-      function resetCategorySelection() {
+        function resetCategorySelection() {
             let fCat = document.getElementById('fixCategory');
             if(fCat) {
-                fCat.value = ""; // Clears the selection
+                fCat.value = ""; 
             }
-            populateFixtureDropdowns(); // Refreshes the dropdown list styling immediately
+            populateFixtureDropdowns(); 
         }
 
         function loadOrderOfPlayData() {
@@ -388,12 +387,10 @@
             
             orderList.innerHTML = '';
             
-            // Check which categories are currently scheduled in the Fixtures list
             let scheduledCats = manualFixtures.map(f => f.category);
 
             scheduledOrder.forEach((cat, index) => {
                 let isScheduled = scheduledCats.includes(cat);
-                
                 let bgColor = isScheduled ? '#eab308' : '#10b981'; 
                 let textColor = '#0f172a';
                 let badge = isScheduled ? `<span style="background: #0f172a; color: #eab308; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px;">SCHEDULED</span>` : '';
@@ -435,28 +432,37 @@
         }
 
         function populateFixtureDropdowns() {
+            let fCat = document.getElementById('fixCategory');
+            let fA = document.getElementById('fixTeamA');
+            let fB = document.getElementById('fixTeamB');
+
+            let currentCat = fCat ? fCat.value : "";
+            let teamA = fA ? fA.value : "";
+            let teamB = fB ? fB.value : "";
+
+            let scheduledCatsForMatch = manualFixtures
+                .filter(f => (f.teamA === teamA && f.teamB === teamB) || (f.teamA === teamB && f.teamB === teamA))
+                .map(f => f.category);
+
             let catOptions = '<option value="">Select Category...</option>';
             let activeCats = scheduledOrder.length > 0 ? scheduledOrder : [...allCategories, ...scheduledOrder];
-            
-            // Highlight categories that are already scheduled in the queue
-            let scheduledCats = manualFixtures.map(f => f.category);
 
             activeCats.forEach(cat => {
-                let isScheduled = scheduledCats.includes(cat);
+                let isScheduled = scheduledCatsForMatch.includes(cat);
                 let label = isScheduled ? `✅ ${cat} (Scheduled)` : cat;
                 let style = isScheduled ? `color: #eab308; font-weight: bold; background: #0f172a;` : ``;
                 catOptions += `<option value="${cat}" style="${style}">${label}</option>`;
             });
-            let fCat = document.getElementById('fixCategory');
-            if(fCat) fCat.innerHTML = catOptions;
-
-            let teamOptions = '<option value="">Select Team...</option>';
-            auctionTeamsList.forEach(t => teamOptions += `<option value="${t.name}">${t.name.toUpperCase()}</option>`);
-            let fA = document.getElementById('fixTeamA'); let fB = document.getElementById('fixTeamB');
-            if(fA) fA.innerHTML = teamOptions; if(fB) fB.innerHTML = teamOptions;
+            
+            if(fCat) {
+                fCat.innerHTML = catOptions;
+                if(currentCat && !scheduledCatsForMatch.includes(currentCat)) {
+                    fCat.value = currentCat; 
+                }
+            }
         }
 
-      function addManualFixture() {
+        function addManualFixture() {
             let catSelect = document.getElementById('fixCategory');
             let teamASelect = document.getElementById('fixTeamA');
             let teamBSelect = document.getElementById('fixTeamB');
@@ -470,15 +476,12 @@
             if(!cat || !tA || !tB || !court) return alert("Please select a Category, both Teams, and a Court.");
             if(tA === tB) return alert("Team A and Team B cannot be the same.");
 
-            // Add the match to the queue
             manualFixtures.push({ category: cat.replace('✅ ', '').replace(' (Scheduled)', ''), teamA: tA, teamB: tB, court: court });
             
-            // Update the UI lists
             renderFixtureManagerList();
             populateFixtureDropdowns(); 
             renderOrderManager();
 
-            // FORCIBLY RESTORE THE EXACT SELECTIONS SO THEY DON'T CLEAR!
             if(catSelect) catSelect.value = cat;
             if(teamASelect) teamASelect.value = tA;
             if(teamBSelect) teamBSelect.value = tB;
@@ -488,7 +491,7 @@
         function removeManualFixture(index) {
             manualFixtures.splice(index, 1);
             renderFixtureManagerList();
-            populateFixtureDropdowns(); // Re-render dropdowns to remove highlights
+            populateFixtureDropdowns(); 
             renderOrderManager(); 
         }
 
@@ -502,7 +505,7 @@
                 return;
             }
             
-            let courtTracker = {}; // Tracks how many matches are assigned per court
+            let courtTracker = {}; 
 
             manualFixtures.forEach((f, i) => {
                 if(!courtTracker[f.court]) courtTracker[f.court] = 0;
@@ -510,7 +513,6 @@
                 
                 let isFirst = courtTracker[f.court] === 1;
                 
-                // Show "ON COURT" for the first match, "IN QUEUE" for all subsequent matches
                 let badge = isFirst 
                     ? `<span style="background: #eab308; color: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: auto;">🔥 ON COURT</span>`
                     : `<span style="background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: auto;">⏳ IN QUEUE (#${courtTracker[f.court]})</span>`;
@@ -548,3 +550,4 @@
     </script>
 </body>
 </html>
+  
