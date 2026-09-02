@@ -131,9 +131,9 @@
             </div>
 
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
-                <div style="flex: 1; min-width: 150px;">
+                <div style="flex: 1; min-width: 200px;">
                     <label style="font-size: 12px; color: #94a3b8;">Category</label>
-                    <select id="fixCategory" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 4px;"></select>
+                    <select id="fixCategory" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 4px; font-weight: bold;"></select>
                 </div>
                 <div style="flex: 1; min-width: 130px;">
                     <label style="font-size: 12px; color: #94a3b8;">Team A</label>
@@ -144,15 +144,15 @@
                     <select id="fixTeamB" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #3b82f6; border-radius: 4px;"></select>
                 </div>
                 <div style="flex: 1; min-width: 100px;">
-                    <label style="font-size: 12px; color: #94a3b8;">Court</label>
+                    <label style="font-size: 12px; color: #94a3b8;">Court Assignment</label>
                     <select id="fixCourt" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #10b981; border-radius: 4px;"></select>
                 </div>
                 <div style="display: flex; align-items: flex-end;">
-                    <button onclick="addManualFixture()" style="background: #eab308; color: #0f172a; border: none; padding: 9px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Assign court</button>
+                    <button onclick="addManualFixture()" style="background: #eab308; color: #0f172a; border: none; padding: 9px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Assign to Queue</button>
                 </div>
             </div>
 
-            <div id="addedFixturesList" style="display: flex; flex-direction: column; gap: 10px; max-height: 250px; overflow-y: auto; margin-bottom: 20px;"></div>
+            <div id="addedFixturesList" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; margin-bottom: 20px;"></div>
             <button onclick="saveManualFixtures()" style="width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px;">💾 Save & Publish Fixtures</button>
             <div style="text-align: center; margin-top: 15px;">
                 <button onclick="toggleFixtureManager()" style="background: transparent; color: #94a3b8; border: 1px solid #94a3b8; padding: 6px 12px; border-radius: 5px; cursor: pointer;">Close</button>
@@ -173,11 +173,9 @@
     <script>
         let allCategories = []; let scheduledOrder = [];
         let manualFixtures = []; let auctionTeamsList = [];
-        let currentFilter = null;
 
         window.onload = function() {
             loadTeamsForFixtures();
-            // Load fixtures FIRST so we know which categories are currently "On Court"
             loadManualFixtures(); 
             loadOrderOfPlayData(); 
             
@@ -262,20 +260,11 @@
             const count = parseInt(activeInput.value) || 3;
             localStorage.setItem('leagueCourtCount', count);
             
-            let usedCourts = manualFixtures.map(f => f.court);
+            // Allow all courts to be selected infinitely for queueing
             let courtOptions = '';
-            let availableCount = 0;
-            
             for(let i = 1; i <= count; i++) {
                 let cName = `COURT ${i}`;
-                if (!usedCourts.includes(cName)) {
-                    courtOptions += `<option value="${cName}">Court ${i}</option>`;
-                    availableCount++;
-                }
-            }
-            
-            if (availableCount === 0) {
-                courtOptions = '<option value="">All Courts Full</option>';
+                courtOptions += `<option value="${cName}">Court ${i}</option>`;
             }
             
             let fixCourt = document.getElementById('fixCourt');
@@ -381,16 +370,15 @@
             
             orderList.innerHTML = '';
             
-            // Check which categories are currently playing in the Fixtures list
-            let activeMatchCats = manualFixtures.map(f => f.category);
+            // Check which categories are currently scheduled in the Fixtures list
+            let scheduledCats = manualFixtures.map(f => f.category);
 
             scheduledOrder.forEach((cat, index) => {
-                let isOnCourt = activeMatchCats.includes(cat);
+                let isScheduled = scheduledCats.includes(cat);
                 
-                // Highlight yellow if on court, green if waiting
-                let bgColor = isOnCourt ? '#eab308' : '#10b981'; 
+                let bgColor = isScheduled ? '#eab308' : '#10b981'; 
                 let textColor = '#0f172a';
-                let badge = isOnCourt ? `<span style="background: #0f172a; color: #eab308; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px;">ON COURT</span>` : '';
+                let badge = isScheduled ? `<span style="background: #0f172a; color: #eab308; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px;">SCHEDULED</span>` : '';
 
                 orderList.innerHTML += `<div style="background: ${bgColor}; color: ${textColor}; font-weight: bold; padding: 12px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
                     <div style="display: flex; align-items: center;"><span>${index + 1}. ${cat}</span> ${badge}</div> 
@@ -431,7 +419,16 @@
         function populateFixtureDropdowns() {
             let catOptions = '<option value="">Select Category...</option>';
             let activeCats = scheduledOrder.length > 0 ? scheduledOrder : [...allCategories, ...scheduledOrder];
-            activeCats.forEach(cat => catOptions += `<option value="${cat}">${cat}</option>`);
+            
+            // Highlight categories that are already scheduled in the queue
+            let scheduledCats = manualFixtures.map(f => f.category);
+
+            activeCats.forEach(cat => {
+                let isScheduled = scheduledCats.includes(cat);
+                let label = isScheduled ? `✅ ${cat} (Scheduled)` : cat;
+                let style = isScheduled ? `color: #eab308; font-weight: bold; background: #0f172a;` : ``;
+                catOptions += `<option value="${cat}" style="${style}">${label}</option>`;
+            });
             let fCat = document.getElementById('fixCategory');
             if(fCat) fCat.innerHTML = catOptions;
 
@@ -447,33 +444,54 @@
             let tB = document.getElementById('fixTeamB').value;
             let court = document.getElementById('fixCourt').value;
             
-            if(!cat || !tA || !tB) return alert("Please select a Category and both Teams.");
-            if(!court) return alert("No courts available! Please delete a match to free up a court.");
+            if(!cat || !tA || !tB || !court) return alert("Please select a Category, both Teams, and a Court.");
             if(tA === tB) return alert("Team A and Team B cannot be the same.");
 
-            manualFixtures.push({ category: cat, teamA: tA, teamB: tB, court: court });
+            manualFixtures.push({ category: cat.replace('✅ ', '').replace(' (Scheduled)', ''), teamA: tA, teamB: tB, court: court });
             renderFixtureManagerList();
-            updateCourtDropdowns(); 
-            renderOrderManager(); // Instantly highlight it in the Order of Play chart!
+            populateFixtureDropdowns(); // Re-render dropdowns to show highlights
+            renderOrderManager();
         }
 
         function removeManualFixture(index) {
             manualFixtures.splice(index, 1);
             renderFixtureManagerList();
-            updateCourtDropdowns(); 
-            renderOrderManager(); // Instantly un-highlight it in the Order of Play chart!
+            populateFixtureDropdowns(); // Re-render dropdowns to remove highlights
+            renderOrderManager(); 
         }
 
         function renderFixtureManagerList() {
             let listDiv = document.getElementById('addedFixturesList');
             if(!listDiv) return;
             listDiv.innerHTML = '';
-            if(manualFixtures.length === 0) listDiv.innerHTML = '<p style="color:#64748b; text-align:center;">No fixtures added yet.</p>';
+            
+            if(manualFixtures.length === 0) {
+                listDiv.innerHTML = '<p style="color:#64748b; text-align:center;">No fixtures added yet.</p>';
+                return;
+            }
+            
+            let courtTracker = {}; // Tracks how many matches are assigned per court
+
             manualFixtures.forEach((f, i) => {
+                if(!courtTracker[f.court]) courtTracker[f.court] = 0;
+                courtTracker[f.court]++;
+                
+                let isFirst = courtTracker[f.court] === 1;
+                
+                // Show "ON COURT" for the first match, "IN QUEUE" for all subsequent matches
+                let badge = isFirst 
+                    ? `<span style="background: #eab308; color: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: auto;">🔥 ON COURT</span>`
+                    : `<span style="background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: auto;">⏳ IN QUEUE (#${courtTracker[f.court]})</span>`;
+                    
+                let borderCol = isFirst ? '#eab308' : '#475569';
+
                 listDiv.innerHTML += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 5px; border-left: 4px solid #eab308;">
-                    <div style="font-size: 14px;"><strong>Match ${i+1}:</strong> ${f.category} | <span style="color:#ef4444">${f.teamA}</span> vs <span style="color:#3b82f6">${f.teamB}</span> | <span style="color:#10b981">${f.court}</span></div>
-                    <button onclick="removeManualFixture(${i})" style="background: #ef4444; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer;">X</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 5px; border-left: 4px solid ${borderCol}; margin-bottom: 8px;">
+                    <div style="font-size: 14px; display: flex; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
+                        <div><strong>Match ${i+1}:</strong> ${f.category} | <span style="color:#ef4444">${f.teamA}</span> vs <span style="color:#3b82f6">${f.teamB}</span> | <span style="color:#10b981">${f.court}</span></div>
+                        ${badge}
+                    </div>
+                    <button onclick="removeManualFixture(${i})" style="background: #ef4444; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; margin-left: 15px;">X</button>
                 </div>`;
             });
         }
