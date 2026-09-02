@@ -248,10 +248,18 @@
                 document.getElementById('matchCategory').innerText = "No Match Assigned";
             }
 
-            populateRosterDropdowns(tA, tB, allPlayers);
+            // Pass the current match category down to correctly highlight the players
+            populateRosterDropdowns(tA, tB, allPlayers, match ? match.category : null);
         };
 
-        function populateRosterDropdowns(teamA, teamB, allPlayers) {
+        function populateRosterDropdowns(teamA, teamB, allPlayers, currentCategory) {
+            // 1. Fetch the official Order of Play from storage
+            let orderOfPlay = [];
+            try {
+                let savedOrder = localStorage.getItem('leagueOrderOfPlay');
+                if (savedOrder) orderOfPlay = JSON.parse(savedOrder);
+            } catch(e) {}
+
             // Aggressively match the team name to ensure players are found
             let teamARoster = allPlayers.filter(p => 
                 p && p.status === 'sold' && 
@@ -265,9 +273,35 @@
                  (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamB).toLowerCase()))
             );
 
+            // 2. Sort the rosters based on the Order of Play
+            const sortRoster = (roster) => {
+                roster.sort((a, b) => {
+                    let indexA = orderOfPlay.indexOf(a.category);
+                    let indexB = orderOfPlay.indexOf(b.category);
+                    
+                    // If a category isn't in the order list, push it to the very bottom
+                    if (indexA === -1) indexA = 999;
+                    if (indexB === -1) indexB = 999;
+                    
+                    return indexA - indexB;
+                });
+            };
+
+            sortRoster(teamARoster);
+            sortRoster(teamBRoster);
+
+            // 3. Build the options and highlight players belonging to the current match category
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
-                roster.forEach(p => html += `<option value="${p.name}">${p.name} (${p.category || 'Player'})</option>`);
+                roster.forEach(p => {
+                    let isMatchCategory = p.category === currentCategory;
+                    
+                    // Apply highlight styling (Green background, yellow text, bold) to the correct players
+                    let highlightStyle = isMatchCategory ? 'background-color: #10b981; color: #fde047; font-weight: bold;' : 'background-color: #1e293b; color: white;';
+                    let icon = isMatchCategory ? ' ⭐' : '';
+                    
+                    html += `<option value="${p.name}" style="${highlightStyle}">${p.name} (${p.category || 'Player'})${icon}</option>`;
+                });
                 return html;
             };
 
