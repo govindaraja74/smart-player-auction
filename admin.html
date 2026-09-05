@@ -1211,9 +1211,14 @@
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
-     function checkPassword() {
+  function checkPassword() {
             const pwd = document.getElementById('adminPassword').value;
-            if (pwd === "MasterUnlock2026") {
+            // Checks for the typed password OR an auto-login trigger
+            if (pwd === "MasterUnlock2026" || pwd === "AUTO_LOGIN") {
+                
+                // 🔥 SAVES THE LOGIN STATE PERMANENTLY 🔥
+                localStorage.setItem('isAdmin', 'true');
+                
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 document.getElementById('errorMessage').style.display = 'none';
@@ -1240,9 +1245,13 @@
         }
 
         function safeInit() {
+            // Check if you are already logged in, and instantly bypass the login screen!
+            if (localStorage.getItem('isAdmin') === 'true') {
+                document.getElementById('adminPassword').value = "AUTO_LOGIN";
+                checkPassword();
+            }
             try { loadSavedMemory(); } catch(e) {}
         }
-
       function loadSavedMemory() {
             const activeSetup = safeGetStorage('auctionSetup', {});
 
