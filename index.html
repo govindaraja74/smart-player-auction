@@ -252,6 +252,16 @@
             </div>
         </div>
     </section>
-
+<script>
+        window.onload = function() {
+            // If the organizer is already logged in, skip the home page and go to the dashboard
+            if (localStorage.getItem('isAdmin') === 'true') {
+                window.location.href = "admin.html"; 
+            }
+        };
+    </script>
+    
+</body>
+</html>
 </body>
 </html>
