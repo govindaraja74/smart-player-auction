@@ -66,8 +66,9 @@
         
         <!-- Organizer Menu Buttons -->
         <div style="display: flex; gap: 15px; z-index: 101;">
-            <button onclick="toggleOrderOfPlay()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 14px; transition: 0.2s;">⚙️ Manage Order of Play</button>
-            <button onclick="toggleFixtureManager()" style="background: #eab308; color: #0f172a; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-size: 14px; transition: 0.2s;">📅 Assign Court</button>
+            <button style="background: #f59e0b; color: #0f172a; padding: 10px 20px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px;" onclick="openPointsModal()">🏆 Points System</button>
+            <button onclick="toggleOrderOfPlay()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px;">⚙️ Manage Order of Play</button>
+            <button onclick="toggleFixtureManager()" style="background: #eab308; color: #0f172a; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px;">📅 Assign Court</button>
         </div>
     </nav>
     
@@ -172,7 +173,52 @@
             <button onclick="toggleQRModal()" style="background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Close</button>
         </div>
     </div>
+<!-- Points Configuration Modal -->
+    <div id="pointsConfigModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: #1e293b; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; border: 1px solid #475569; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
+            <button onclick="closePointsModal()" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
+            
+            <h2 style="margin-top: 0; color: #fde047; border-bottom: 1px solid #334155; padding-bottom: 10px; font-size: 22px; text-transform: uppercase;">🏆 League Points System</h2>
+            
+            <label style="font-size: 14px; font-weight: bold; color: #cbd5e1; display: block; margin-bottom: 8px; margin-top: 20px;">Select Scoring Pattern</label>
+            <select id="scoringPattern" style="width: 100%; padding: 12px; border-radius: 6px; margin-bottom: 20px; background: #0f172a; color: white; border: 1px solid #475569; font-size: 14px; outline: none; cursor: pointer;" onchange="togglePointsView()">
+                <option value="overall_tie">Pattern A: Overall Tie Winner (Win majority of categories)</option>
+                <option value="per_game">Pattern B: Per Game Winner (Points per individual category)</option>
+            </select>
 
+            <!-- Pattern A: Overall Tie Configuration -->
+            <div id="overallTieConfig" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 25px;">
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 0; margin-bottom: 15px; line-height: 1.4;">A team gets these points if they win the overall matchup (e.g., winning 5 out of 9 categories against the opponent).</p>
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; font-weight: bold; color: #10b981;">Points for Winning Tie</label>
+                        <input type="number" id="ptsTieWin" value="2" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #cbd5e1; color: black; margin-top: 5px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; font-weight: bold; color: #ef4444;">Points for Losing Tie</label>
+                        <input type="number" id="ptsTieLoss" value="0" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #cbd5e1; color: black; margin-top: 5px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pattern B: Per Game Configuration -->
+            <div id="perGameConfig" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 25px; display: none;">
+                <p style="font-size: 12px; color: #94a3b8; margin-top: 0; margin-bottom: 15px; line-height: 1.4;">A team gets these points for EVERY individual category match they win or draw within the tie.</p>
+                <div style="display: flex; gap: 15px;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; font-weight: bold; color: #10b981;">Points per Category Win</label>
+                        <input type="number" id="ptsGameWin" value="1" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #cbd5e1; color: black; margin-top: 5px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-size: 12px; font-weight: bold; color: #f59e0b;">Points per Category Tie</label>
+                        <input type="number" id="ptsGameDraw" value="0" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #cbd5e1; color: black; margin-top: 5px; font-weight: bold; text-align: center; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+
+            <button style="background: #10b981; color: white; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer;" onclick="savePointsConfig()">Save Configuration</button>
+        </div>
+    </div>
     <script>
         let allCategories = []; let scheduledOrder = [];
         let manualFixtures = []; let auctionTeamsList = [];
@@ -550,6 +596,60 @@
 
             toggleFixtureManager();
         }
+        // --- LEAGUE POINTS CONFIGURATION LOGIC ---
+        function openPointsModal() {
+            const config = JSON.parse(localStorage.getItem('leaguePointsConfig')) || {
+                pattern: 'overall_tie',
+                tieWin: 2,
+                tieLoss: 0,
+                gameWin: 1,
+                gameDraw: 0
+            };
+            
+            document.getElementById('scoringPattern').value = config.pattern;
+            document.getElementById('ptsTieWin').value = config.tieWin;
+            document.getElementById('ptsTieLoss').value = config.tieLoss;
+            document.getElementById('ptsGameWin').value = config.gameWin;
+            document.getElementById('ptsGameDraw').value = config.gameDraw;
+            
+            togglePointsView();
+            document.getElementById('pointsConfigModal').style.display = 'flex';
+        }
+
+        function closePointsModal() {
+            document.getElementById('pointsConfigModal').style.display = 'none';
+        }
+
+        function togglePointsView() {
+            const pattern = document.getElementById('scoringPattern').value;
+            if (pattern === 'overall_tie') {
+                document.getElementById('overallTieConfig').style.display = 'block';
+                document.getElementById('perGameConfig').style.display = 'none';
+            } else {
+                document.getElementById('overallTieConfig').style.display = 'none';
+                document.getElementById('perGameConfig').style.display = 'block';
+            }
+        }
+
+        function savePointsConfig() {
+            const config = {
+                pattern: document.getElementById('scoringPattern').value,
+                tieWin: parseInt(document.getElementById('ptsTieWin').value) || 0,
+                tieLoss: parseInt(document.getElementById('ptsTieLoss').value) || 0,
+                gameWin: parseInt(document.getElementById('ptsGameWin').value) || 0,
+                gameDraw: parseInt(document.getElementById('ptsGameDraw').value) || 0
+            };
+            
+            localStorage.setItem('leaguePointsConfig', JSON.stringify(config));
+            closePointsModal();
+            alert("🏆 League Points Configuration Saved Successfully!");
+        }
+        
+        // Ensure modal is hidden on load
+        document.addEventListener("DOMContentLoaded", () => {
+            const modal = document.getElementById('pointsConfigModal');
+            if (modal) modal.style.display = 'none';
+        });
     </script>
 </body>
 </html>
