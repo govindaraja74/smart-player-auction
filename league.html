@@ -68,7 +68,7 @@
             <!-- Points Table Button -->
             <button onclick="togglePointsModal()" class="points-btn">🏆 Franchise Points Table</button>
             <!-- Organizer Hub Button -->
-            <a href="league-admin.html" class="admin-btn">⚙️ Organizer Hub</a>
+          <a href="league-admin.html" class="admin-btn" id="organizerBtn" style="display: none;">⚙️ Organizer Hub</a>
         </div>
     </nav>
     
@@ -105,11 +105,16 @@
     </div>
 
     <script>
-        window.onload = async function() {
+      window.onload = async function() {
+            // Reveal Organizer button ONLY if the user is logged in
+            if (localStorage.getItem('isAdmin') === 'true') {
+                const orgBtn = document.getElementById('organizerBtn');
+                if (orgBtn) orgBtn.style.display = 'inline-flex';
+            }
+
             loadPublicMatches();
             setInterval(loadPublicMatches, 5000); // Polls silently every 5 seconds for real-time dashboard updates
         };
-
       function togglePointsModal() {
             const modal = document.getElementById('pointsModal');
             if (modal.style.display === 'none' || modal.style.display === '') {
