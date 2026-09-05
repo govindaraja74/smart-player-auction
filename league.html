@@ -125,13 +125,20 @@
             }
         }
 
-        function populateStandings() {
+       function populateStandings() {
             const tbody = document.getElementById('standingsTableBody');
             if (!tbody) return;
             
             let teams = [];
-            try {
-                teams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            let fixtures = [];
+            // Default configuration if the organizer hasn't saved one yet
+            let config = { pattern: 'overall_tie', tieWin: 2, tieLoss: 0, gameWin: 1, gameDraw: 0 };
+
+            try { teams = JSON.parse(localStorage.getItem('auctionTeams') || '[]'); } catch(e) {}
+            try { fixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]'); } catch(e) {}
+            try { 
+                let savedConfig = JSON.parse(localStorage.getItem('leaguePointsConfig'));
+                if (savedConfig) config = savedConfig;
             } catch(e) {}
 
             if (teams.length === 0) {
@@ -139,17 +146,95 @@
                 return;
             }
 
+            // 1. Setup base stats for all teams
+            let stats = {};
+            teams.forEach(t => {
+                let name = t.name.toUpperCase();
+                stats[name] = { matches: 0, points: 0 };
+            });
+
+            // 2. CALCULATE POINTS BASED ON ORGANIZER'S CHOSEN PATTERN
+            if (config.pattern === 'per_game') {
+                fixtures.forEach(f => {
+                    let tA = (f.teamA || '').toUpperCase();
+                    let tB = (f.teamB || '').toUpperCase();
+                    let setsA = parseInt(f.setsA) || 0;
+                    let setsB = parseInt(f.setsB) || 0;
+
+                    if (setsA > 0 || setsB > 0) { // Only count if the match has started/finished
+                        if (stats[tA]) stats[tA].matches++;
+                        if (stats[tB]) stats[tB].matches++;
+
+                        if (setsA > setsB) {
+                            if (stats[tA]) stats[tA].points += config.gameWin;
+                        } else if (setsB > setsA) {
+                            if (stats[tB]) stats[tB].points += config.gameWin;
+                        } else if (setsA === setsB) {
+                            if (stats[tA]) stats[tA].points += config.gameDraw;
+                            if (stats[tB]) stats[tB].points += config.gameDraw;
+                        }
+                    }
+                });
+            } else {
+                // Pattern A: Overall Tie Logic
+                let matchups = {};
+                fixtures.forEach(f => {
+                    let tA = (f.teamA || '').toUpperCase();
+                    let tB = (f.teamB || '').toUpperCase();
+                    if (!tA || !tB || tA === 'TBA' || tB === 'TBA') return;
+
+                    // Group all category matches into one overall tie between the two teams
+                    let key = [tA, tB].sort().join('_VS_');
+                    if (!matchups[key]) matchups[key] = { team1: tA, team2: tB, t1Wins: 0, t2Wins: 0, played: false };
+
+                    let setsA = parseInt(f.setsA) || 0;
+                    let setsB = parseInt(f.setsB) || 0;
+
+                    if (setsA > setsB) {
+                        if (matchups[key].team1 === tA) matchups[key].t1Wins++; else matchups[key].t2Wins++;
+                        matchups[key].played = true;
+                    } else if (setsB > setsA) {
+                        if (matchups[key].team1 === tB) matchups[key].t1Wins++; else matchups[key].t2Wins++;
+                        matchups[key].played = true;
+                    }
+                });
+
+                for (let key in matchups) {
+                    let m = matchups[key];
+                    if (m.played) {
+                        if (stats[m.team1]) stats[m.team1].matches++;
+                        if (stats[m.team2]) stats[m.team2].matches++;
+
+                        // Award points to the franchise who won the majority of the categories
+                        if (m.t1Wins > m.t2Wins) {
+                            if (stats[m.team1]) stats[m.team1].points += config.tieWin;
+                            if (stats[m.team2]) stats[m.team2].points += config.tieLoss;
+                        } else if (m.t2Wins > m.t1Wins) {
+                            if (stats[m.team2]) stats[m.team2].points += config.tieWin;
+                            if (stats[m.team1]) stats[m.team1].points += config.tieLoss;
+                        }
+                    }
+                }
+            }
+
+            // 3. Sort the final table by points
+            let sortedTeams = teams.map(t => {
+                let name = t.name.toUpperCase();
+                return { name: name, matches: stats[name].matches, points: stats[name].points };
+            }).sort((a, b) => b.points - a.points);
+
+            // 4. Output the table
             let html = '';
-            teams.forEach((team, index) => {
+            sortedTeams.forEach((team, index) => {
                 let rankColor = index === 0 ? '#fde047' : (index === 1 ? '#cbd5e1' : '#b45309');
                 if(index > 2) rankColor = '#94a3b8';
                 
                 html += `
                 <tr style="border-bottom: 1px solid #334155;">
                     <td style="padding: 15px; font-weight: bold; color: ${rankColor};">${index + 1}</td>
-                    <td style="padding: 15px; font-weight: bold;">${team.name.toUpperCase()}</td>
-                    <td style="padding: 15px; text-align: center; color: #94a3b8;">0</td>
-                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">0</td>
+                    <td style="padding: 15px; font-weight: bold;">${team.name}</td>
+                    <td style="padding: 15px; text-align: center; color: #94a3b8;">${team.matches}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">${team.points}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
