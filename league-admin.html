@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -215,6 +215,10 @@
                     </div>
                 </div>
             </div>
+            
+            <button style="background: #10b981; color: white; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer;" onclick="savePointsConfig()">Save Configuration</button>
+        </div>
+    </div>
     <script>
         let allCategories = []; let scheduledOrder = [];
         let manualFixtures = []; let auctionTeamsList = [];
@@ -521,7 +525,20 @@
             if(!cat || !tA || !tB || !court) return alert("Please select a Category, both Teams, and a Court.");
             if(tA === tB) return alert("Team A and Team B cannot be the same.");
 
-            manualFixtures.push({ category: cat.replace('✅ ', '').replace(' (Scheduled)', ''), teamA: tA, teamB: tB, court: court });
+            let cleanCat = cat.replace('✅ ', '').replace(' (Scheduled)', '');
+
+            // Check if this exact match combination already exists in the queue
+            const isDuplicate = manualFixtures.some(f => 
+                f.category === cleanCat && 
+                ((f.teamA === tA && f.teamB === tB) || (f.teamA === tB && f.teamB === tA))
+            );
+
+            if (isDuplicate) {
+                alert(`⚠️ WARNING: The match ${tA} vs ${tB} for ${cleanCat} is already in the queue!`);
+                return; 
+            }
+
+            manualFixtures.push({ category: cleanCat, teamA: tA, teamB: tB, court: court });
             
             renderFixtureManagerList();
             populateFixtureDropdowns(); 
@@ -649,4 +666,3 @@
     </script>
 </body>
 </html>
-  
