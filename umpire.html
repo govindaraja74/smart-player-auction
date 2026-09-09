@@ -178,18 +178,18 @@
         
     </div>
 
-  <script>
+<script>
         let matchState = { scoreA: 0, scoreB: 0, setsA: 0, setsB: 0 };
+        let currentCourtName = 'COURT 1'; // Global tracker for the active court
 
         window.onload = async function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const courtName = urlParams.get('court') || 'COURT 1';
+            currentCourtName = urlParams.get('court') || 'COURT 1';
             const umpireName = urlParams.get('umpire'); 
             
-            document.getElementById('matchCourt').innerText = courtName;
+            document.getElementById('matchCourt').innerText = currentCourtName;
             document.getElementById('boardSportTitle').innerText = `SPORTS OFFICIAL SCORING`;
 
-            // Display Umpire Name if it was passed through the QR code URL
             if (umpireName) {
                 const umpDisplay = document.getElementById('umpireNameDisplay');
                 if (umpDisplay) {
@@ -201,25 +201,25 @@
             let manualFixtures = [];
             let allPlayers = [];
 
-            // 1. Safely Fetch Fixtures from MongoDB
+            // 1. Fetch Fixtures
             try {
                 const fixtureRes = await fetch('/api/fixtures');
                 if (fixtureRes.ok) {
                     const fData = await fixtureRes.json();
                     if (Array.isArray(fData)) manualFixtures = fData;
                 }
-            } catch (err) { console.warn("Fixtures DB Error:", err); }
+            } catch (err) {}
 
-            // 2. Safely Fetch Players from MongoDB
+            // 2. Fetch Players
             try {
                 const playerRes = await fetch('/api/players/sold');
                 if (playerRes.ok) {
                     const pData = await playerRes.json();
                     if (Array.isArray(pData)) allPlayers = pData;
                 }
-            } catch (err) { console.warn("Players DB Error:", err); }
+            } catch (err) {}
 
-            // 3. Crash-Proof Hybrid Fallback (In case Cloud is unreachable)
+            // 3. Fallbacks
             if (!Array.isArray(manualFixtures) || manualFixtures.length === 0) {
                 try {
                     let localF = JSON.parse(localStorage.getItem('leagueManualFixtures'));
@@ -233,12 +233,10 @@
                 } catch(e) {}
             }
 
-            // Enforce Arrays to prevent crashes
             manualFixtures = Array.isArray(manualFixtures) ? manualFixtures : [];
             allPlayers = Array.isArray(allPlayers) ? allPlayers : [];
 
-            // Find the specific match for this court
-            let match = manualFixtures.find(f => f && f.court && String(f.court).trim() === String(courtName).trim());
+            let match = manualFixtures.find(f => f && f.court && String(f.court).trim() === String(currentCourtName).trim());
             let tA = "Team A", tB = "Team B";
             
             if(match) {
@@ -251,41 +249,34 @@
                 document.getElementById('matchCategory').innerText = "No Match Assigned";
             }
 
-            // Pass the current match category down to correctly highlight the players
             populateRosterDropdowns(tA, tB, allPlayers, match ? match.category : null);
+
+            // Add auto-save listeners to dropdowns
+            ['playerA1', 'playerA2', 'playerB1', 'playerB2'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', autoSaveMatchState);
+            });
+
+            // 4. LOAD AUTO-SAVED STATE (Crash Recovery)
+            setTimeout(loadAutoSavedState, 300); // Slight delay to ensure dropdowns are populated first
         };
 
         function populateRosterDropdowns(teamA, teamB, allPlayers, currentCategory) {
-            // 1. Fetch the official Order of Play from storage
             let orderOfPlay = [];
             try {
                 let savedOrder = localStorage.getItem('leagueOrderOfPlay');
                 if (savedOrder) orderOfPlay = JSON.parse(savedOrder);
             } catch(e) {}
 
-            // Aggressively match the team name to ensure players are found
-            let teamARoster = allPlayers.filter(p => 
-                p && p.status === 'sold' && 
-                ((p.teamName && String(p.teamName).toLowerCase() === String(teamA).toLowerCase()) || 
-                 (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamA).toLowerCase()))
-            );
-            
-            let teamBRoster = allPlayers.filter(p => 
-                p && p.status === 'sold' && 
-                ((p.teamName && String(p.teamName).toLowerCase() === String(teamB).toLowerCase()) || 
-                 (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamB).toLowerCase()))
-            );
+            let teamARoster = allPlayers.filter(p => p && p.status === 'sold' && ((p.teamName && String(p.teamName).toLowerCase() === String(teamA).toLowerCase()) || (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamA).toLowerCase())));
+            let teamBRoster = allPlayers.filter(p => p && p.status === 'sold' && ((p.teamName && String(p.teamName).toLowerCase() === String(teamB).toLowerCase()) || (p.soldToTeamId && String(p.soldToTeamId).toLowerCase() === String(teamB).toLowerCase())));
 
-            // 2. Sort the rosters based on the Order of Play
             const sortRoster = (roster) => {
                 roster.sort((a, b) => {
                     let indexA = orderOfPlay.indexOf(a.category);
                     let indexB = orderOfPlay.indexOf(b.category);
-                    
-                    // If a category isn't in the order list, push it to the very bottom
                     if (indexA === -1) indexA = 999;
                     if (indexB === -1) indexB = 999;
-                    
                     return indexA - indexB;
                 });
             };
@@ -293,16 +284,12 @@
             sortRoster(teamARoster);
             sortRoster(teamBRoster);
 
-            // 3. Build the options and highlight players belonging to the current match category
             let buildOptions = (roster) => {
                 let html = `<option value="">Select Player...</option>`;
                 roster.forEach(p => {
                     let isMatchCategory = p.category === currentCategory;
-                    
-                    // Apply highlight styling (Green background, yellow text, bold) to the correct players
                     let highlightStyle = isMatchCategory ? 'background-color: #10b981; color: #fde047; font-weight: bold;' : 'background-color: #1e293b; color: white;';
                     let icon = isMatchCategory ? ' ⭐' : '';
-                    
                     html += `<option value="${p.name}" style="${highlightStyle}">${p.name} (${p.category || 'Player'})${icon}</option>`;
                 });
                 return html;
@@ -312,6 +299,41 @@
             const pA2 = document.getElementById('playerA2'); if(pA2) pA2.innerHTML = buildOptions(teamARoster);
             const pB1 = document.getElementById('playerB1'); if(pB1) pB1.innerHTML = buildOptions(teamBRoster);
             const pB2 = document.getElementById('playerB2'); if(pB2) pB2.innerHTML = buildOptions(teamBRoster);
+        }
+
+        // --- NEW AUTO-SAVE FUNCTIONS ---
+        function autoSaveMatchState() {
+            const stateToSave = {
+                ...matchState,
+                pA1: document.getElementById('playerA1') ? document.getElementById('playerA1').value : '',
+                pA2: document.getElementById('playerA2') ? document.getElementById('playerA2').value : '',
+                pB1: document.getElementById('playerB1') ? document.getElementById('playerB1').value : '',
+                pB2: document.getElementById('playerB2') ? document.getElementById('playerB2').value : ''
+            };
+            localStorage.setItem(`umpireAutoSave_${currentCourtName}`, JSON.stringify(stateToSave));
+        }
+
+        function loadAutoSavedState() {
+            try {
+                const saved = localStorage.getItem(`umpireAutoSave_${currentCourtName}`);
+                if (saved) {
+                    const s = JSON.parse(saved);
+                    matchState.scoreA = s.scoreA || 0;
+                    matchState.scoreB = s.scoreB || 0;
+                    matchState.setsA = s.setsA || 0;
+                    matchState.setsB = s.setsB || 0;
+
+                    document.getElementById('scoreA').innerText = matchState.scoreA;
+                    document.getElementById('scoreB').innerText = matchState.scoreB;
+                    document.getElementById('setsA').innerText = matchState.setsA;
+                    document.getElementById('setsB').innerText = matchState.setsB;
+
+                    if (s.pA1 && document.getElementById('playerA1')) document.getElementById('playerA1').value = s.pA1;
+                    if (s.pA2 && document.getElementById('playerA2')) document.getElementById('playerA2').value = s.pA2;
+                    if (s.pB1 && document.getElementById('playerB1')) document.getElementById('playerB1').value = s.pB1;
+                    if (s.pB2 && document.getElementById('playerB2')) document.getElementById('playerB2').value = s.pB2;
+                }
+            } catch(e) { console.warn("Could not load auto-save", e); }
         }
 
         function modScore(team, type, amt) {
@@ -326,20 +348,56 @@
                 document.getElementById('scoreB').innerText = matchState.scoreB;
                 document.getElementById('setsB').innerText = matchState.setsB;
             }
+            autoSaveMatchState(); // Trigger save on every click
         }
 
-        function endMatch() { 
+        async function endMatch() { 
             let pA1 = document.getElementById('playerA1') ? document.getElementById('playerA1').value : '';
+            let pA2 = document.getElementById('playerA2') ? document.getElementById('playerA2').value : '';
             let pB1 = document.getElementById('playerB1') ? document.getElementById('playerB1').value : '';
+            let pB2 = document.getElementById('playerB2') ? document.getElementById('playerB2').value : '';
 
             if(!pA1 || !pB1) {
                 if(!confirm("Warning: You haven't selected the playing players for both teams. Submit anyway?")) return;
             }
 
             if(confirm(`Are you sure you want to end this match?\n\nTeam A: ${matchState.setsA} Games (${matchState.scoreA} Pts)\nTeam B: ${matchState.setsB} Games (${matchState.scoreB} Pts)`)) {
-                alert("Match results securely synced!");
                 
-                // Go back to the previous page instead of closing the window
+                // 1. Fetch fresh DB array to avoid overwriting other courts
+                let fixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
+                
+                // 2. Find the match for this court and update it with the final data
+                let matchIndex = fixtures.findIndex(f => f.court === currentCourtName);
+                if (matchIndex > -1) {
+                    fixtures[matchIndex].scoreA = matchState.scoreA;
+                    fixtures[matchIndex].scoreB = matchState.scoreB;
+                    fixtures[matchIndex].setsA = matchState.setsA;
+                    fixtures[matchIndex].setsB = matchState.setsB;
+                    fixtures[matchIndex].playerA1 = pA1;
+                    fixtures[matchIndex].playerA2 = pA2;
+                    fixtures[matchIndex].playerB1 = pB1;
+                    fixtures[matchIndex].playerB2 = pB2;
+
+                    // 3. Save it to Local Storage for instant frontend updates
+                    localStorage.setItem('leagueManualFixtures', JSON.stringify(fixtures));
+
+                    // 4. Push it to MongoDB via your API
+                    try {
+                        await fetch('/api/fixtures', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(fixtures)
+                        });
+                    } catch (error) {
+                        console.error("Cloud Sync Failed", error);
+                    }
+                }
+
+                // 5. Delete the temporary auto-save so the next match starts fresh!
+                localStorage.removeItem(`umpireAutoSave_${currentCourtName}`);
+
+                alert("Match results securely synced to the Database!");
+                
                 if (window.history.length > 1) {
                     window.history.back();
                 } else {
