@@ -353,21 +353,28 @@
             populateFixtureDropdowns(); 
         }
 
-        function loadOrderOfPlayData() {
+      function loadOrderOfPlayData() {
             allCategories = [];
             try {
-                let rawCats = localStorage.getItem('auctionCategories') || localStorage.getItem('categories');
+                // 🔥 FIX: Now looks for 'auctionCats' to perfectly match the Admin Dashboard
+                let rawCats = localStorage.getItem('auctionCats') || localStorage.getItem('auctionCategories') || localStorage.getItem('categories');
                 if(rawCats) {
                     let parsedCats = JSON.parse(rawCats);
-                    if(Array.isArray(parsedCats)) allCategories = parsedCats.map(c => c.name || c.category || c); 
+                    if(Array.isArray(parsedCats)) {
+                        allCategories = parsedCats.map(c => typeof c === 'object' ? (c.name || c.category) : c); 
+                    }
                 }
+                
                 if(allCategories.length === 0) {
                     let setupData = localStorage.getItem('auctionSetup');
                     if(setupData) {
                         let parsed = JSON.parse(setupData);
-                        if(parsed.categories && Array.isArray(parsed.categories)) allCategories = parsed.categories.map(c => c.name || c.category || c);
+                        if(parsed.categories && Array.isArray(parsed.categories)) {
+                            allCategories = parsed.categories.map(c => typeof c === 'object' ? (c.name || c.category) : c);
+                        }
                     }
                 }
+                
                 if(allCategories.length === 0) {
                     let playersData = localStorage.getItem('auctionPlayers') || localStorage.getItem('players') || localStorage.getItem('allPlayers');
                     if(playersData) {
@@ -383,11 +390,18 @@
                 if(savedOrder) scheduledOrder = JSON.parse(savedOrder);
             } catch(e) {}
 
-            allCategories = [...new Set(allCategories)];
-            allCategories = allCategories.filter(cat => cat && String(cat).trim() !== '' && !scheduledOrder.includes(cat));
+            // Preserve the exact original order while removing duplicates and already scheduled items
+            let uniqueOrderedCats = [];
+            allCategories.forEach(cat => {
+                let cleanCat = String(cat).trim();
+                if (cleanCat !== '' && !uniqueOrderedCats.includes(cleanCat)) {
+                    uniqueOrderedCats.push(cleanCat);
+                }
+            });
+
+            allCategories = uniqueOrderedCats.filter(cat => !scheduledOrder.includes(cat));
             renderOrderManager(); 
         }
-
         function loadManualFixtures() {
             try {
                 let rawFix = localStorage.getItem('leagueManualFixtures');
