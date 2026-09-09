@@ -355,51 +355,49 @@
 
       function loadOrderOfPlayData() {
             allCategories = [];
+            let officialCatsUpper = [];
+            
             try {
-                // 🔥 FIX: Now looks for 'auctionCats' to perfectly match the Admin Dashboard
-                let rawCats = localStorage.getItem('auctionCats') || localStorage.getItem('auctionCategories') || localStorage.getItem('categories');
+                // STRICT MODE: Only fetch from the official 'My Auction' Categories list
+                let rawCats = localStorage.getItem('auctionCats');
                 if(rawCats) {
                     let parsedCats = JSON.parse(rawCats);
                     if(Array.isArray(parsedCats)) {
-                        allCategories = parsedCats.map(c => typeof c === 'object' ? (c.name || c.category) : c); 
+                        parsedCats.forEach(c => {
+                            let catName = String(typeof c === 'object' ? (c.name || c.category) : c).trim();
+                            if (catName !== '') {
+                                officialCatsUpper.push(catName.toUpperCase());
+                            }
+                        });
                     }
                 }
                 
-                if(allCategories.length === 0) {
-                    let setupData = localStorage.getItem('auctionSetup');
-                    if(setupData) {
-                        let parsed = JSON.parse(setupData);
-                        if(parsed.categories && Array.isArray(parsed.categories)) {
-                            allCategories = parsed.categories.map(c => typeof c === 'object' ? (c.name || c.category) : c);
-                        }
-                    }
-                }
-                
-                if(allCategories.length === 0) {
-                    let playersData = localStorage.getItem('auctionPlayers') || localStorage.getItem('players') || localStorage.getItem('allPlayers');
-                    if(playersData) {
-                        let parsedPlayers = JSON.parse(playersData);
-                        if(Array.isArray(parsedPlayers)) {
-                            let uniqueCats = new Set();
-                            parsedPlayers.forEach(p => { if(p.category) uniqueCats.add(p.category.trim()); });
-                            allCategories = Array.from(uniqueCats);
-                        }
-                    }
-                }
                 let savedOrder = localStorage.getItem('leagueOrderOfPlay');
                 if(savedOrder) scheduledOrder = JSON.parse(savedOrder);
             } catch(e) {}
 
-            // Preserve the exact original order while removing duplicates and already scheduled items
-            let uniqueOrderedCats = [];
-            allCategories.forEach(cat => {
-                let cleanCat = String(cat).trim();
-                if (cleanCat !== '' && !uniqueOrderedCats.includes(cleanCat)) {
-                    uniqueOrderedCats.push(cleanCat);
+            // AUTOMATIC PURGE: Remove old ghost categories from the right-hand chart
+            let validScheduled = [];
+            scheduledOrder.forEach(scheduledCat => {
+                if (officialCatsUpper.includes(String(scheduledCat).trim().toUpperCase())) {
+                    validScheduled.push(String(scheduledCat).trim().toUpperCase());
                 }
             });
+            
+            // Remove any random duplicates caught in the saved order
+            scheduledOrder = [...new Set(validScheduled)];
+            localStorage.setItem('leagueOrderOfPlay', JSON.stringify(scheduledOrder));
 
-            allCategories = uniqueOrderedCats.filter(cat => !scheduledOrder.includes(cat));
+            // Populate the left-hand list ONLY with official categories that aren't scheduled yet
+            officialCatsUpper.forEach(cat => {
+                if (!scheduledOrder.includes(cat)) {
+                    allCategories.push(cat);
+                }
+            });
+            
+            // Final duplicate wipe on the left side
+            allCategories = [...new Set(allCategories)];
+            
             renderOrderManager(); 
         }
         function loadManualFixtures() {
@@ -433,8 +431,16 @@
             scheduledOrder.push(cat); renderOrderManager();
         }
         function removeFromOrder(catIndex) {
-            let cat = scheduledOrder.splice(catIndex, 1)[0];
-            allCategories.push(cat); renderOrderManager();
+            let cat = scheduledOrder.splice(catIndex, 1)[0].toUpperCase();
+            
+            // Only push back to the left side if it is still an official category in your dashboard
+            let rawCats = JSON.parse(localStorage.getItem('auctionCats') || '[]');
+            let officialUpper = rawCats.map(c => String(typeof c === 'object' ? (c.name || c.category) : c).trim().toUpperCase());
+            
+            if (officialUpper.includes(cat) && !allCategories.includes(cat)) {
+                allCategories.push(cat); 
+            }
+            renderOrderManager();
         }
         
         function renderOrderManager() {
