@@ -236,7 +236,8 @@
             manualFixtures = Array.isArray(manualFixtures) ? manualFixtures : [];
             allPlayers = Array.isArray(allPlayers) ? allPlayers : [];
 
-            let match = manualFixtures.find(f => f && f.court && String(f.court).trim() === String(currentCourtName).trim());
+            // 🔥 NEW: Find the NEXT uncompleted match in the queue for this court 🔥
+            let match = manualFixtures.find(f => f && f.court && String(f.court).trim() === String(currentCourtName).trim() && f.isCompleted !== true);
             let tA = "Team A", tB = "Team B";
             
             if(match) {
@@ -246,7 +247,10 @@
                 tA = match.teamA || "Team A";
                 tB = match.teamB || "Team B";
             } else {
+                // Display empty state if the queue is finished
                 document.getElementById('matchCategory').innerText = "No Match Assigned";
+                document.getElementById('dashTeamA').innerText = "WAITING";
+                document.getElementById('dashTeamB').innerText = "WAITING";
             }
 
             populateRosterDropdowns(tA, tB, allPlayers, match ? match.category : null);
@@ -258,7 +262,7 @@
             });
 
             // 4. LOAD AUTO-SAVED STATE (Crash Recovery)
-            setTimeout(loadAutoSavedState, 300); // Slight delay to ensure dropdowns are populated first
+            setTimeout(loadAutoSavedState, 300); 
         };
 
         function populateRosterDropdowns(teamA, teamB, allPlayers, currentCategory) {
@@ -337,6 +341,11 @@
         }
 
         function modScore(team, type, amt) {
+            // Prevent scoring if there is no match assigned to this court
+            if (document.getElementById('matchCategory').innerText === "No Match Assigned") {
+                return alert("No match is currently active in the queue for this court.");
+            }
+
             if (team === 'A') {
                 if (type === 'pts') matchState.scoreA = Math.min(30, Math.max(0, matchState.scoreA + amt));
                 if (type === 'sets') matchState.setsA = Math.max(0, matchState.setsA + amt);
@@ -348,10 +357,13 @@
                 document.getElementById('scoreB').innerText = matchState.scoreB;
                 document.getElementById('setsB').innerText = matchState.setsB;
             }
-            autoSaveMatchState(); // Trigger save on every click
+            autoSaveMatchState(); 
         }
 
         async function endMatch() { 
+            // Prevent submission if no match is assigned
+            if (document.getElementById('matchCategory').innerText === "No Match Assigned") return;
+
             let pA1 = document.getElementById('playerA1') ? document.getElementById('playerA1').value : '';
             let pA2 = document.getElementById('playerA2') ? document.getElementById('playerA2').value : '';
             let pB1 = document.getElementById('playerB1') ? document.getElementById('playerB1').value : '';
@@ -363,11 +375,10 @@
 
             if(confirm(`Are you sure you want to end this match?\n\nTeam A: ${matchState.setsA} Games (${matchState.scoreA} Pts)\nTeam B: ${matchState.setsB} Games (${matchState.scoreB} Pts)`)) {
                 
-                // 1. Fetch fresh DB array to avoid overwriting other courts
                 let fixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
                 
-                // 2. Find the match for this court and update it with the final data
-                let matchIndex = fixtures.findIndex(f => f.court === currentCourtName);
+                // 🔥 NEW: Find the current active match and mark it as COMPLETED 🔥
+                let matchIndex = fixtures.findIndex(f => f.court === currentCourtName && f.isCompleted !== true);
                 if (matchIndex > -1) {
                     fixtures[matchIndex].scoreA = matchState.scoreA;
                     fixtures[matchIndex].scoreB = matchState.scoreB;
@@ -377,11 +388,12 @@
                     fixtures[matchIndex].playerA2 = pA2;
                     fixtures[matchIndex].playerB1 = pB1;
                     fixtures[matchIndex].playerB2 = pB2;
+                    
+                    // Mark as complete so the next match drops into place
+                    fixtures[matchIndex].isCompleted = true; 
 
-                    // 3. Save it to Local Storage for instant frontend updates
                     localStorage.setItem('leagueManualFixtures', JSON.stringify(fixtures));
 
-                    // 4. Push it to MongoDB via your API
                     try {
                         await fetch('/api/fixtures', {
                             method: 'POST',
@@ -393,16 +405,11 @@
                     }
                 }
 
-                // 5. Delete the temporary auto-save so the next match starts fresh!
+                // Delete the temporary auto-save memory for this court
                 localStorage.removeItem(`umpireAutoSave_${currentCourtName}`);
-
-                alert("Match results securely synced to the Database!");
                 
-                if (window.history.length > 1) {
-                    window.history.back();
-                } else {
-                    window.location.href = "/league.html";
-                }
+                // Instantly refresh the page to load the next queued match!
+                window.location.reload(); 
             }
         }
     </script>
