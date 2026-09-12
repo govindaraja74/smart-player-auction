@@ -66,9 +66,11 @@
         
         <!-- Organizer Menu Buttons -->
         <div style="display: flex; gap: 15px; z-index: 101;">
-            <button style="background: #f59e0b; color: #0f172a; padding: 10px 20px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px;" onclick="openPointsModal()">🏆 Points System</button>
-            <button onclick="toggleOrderOfPlay()" style="background: #3b82f6; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px;">⚙️ Manage Order of Play</button>
-            <button onclick="toggleFixtureManager()" style="background: #eab308; color: #0f172a; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px;">📅 Assign Court</button>
+           <a href="?view=points" onclick="event.preventDefault(); openPointsModal();" style="background: #f59e0b; color: #0f172a; padding: 10px 20px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;">🏆 Points System</a>
+            
+            <a href="?view=order" onclick="event.preventDefault(); toggleOrderOfPlay();" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;">⚙️ Manage Order of Play</a>
+            
+            <a href="?view=court" onclick="event.preventDefault(); toggleFixtureManager();" style="background: #eab308; color: #0f172a; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;">📅 Assign Court</a>
         </div>
     </nav>
     
@@ -236,6 +238,12 @@
             
             updateCourtDropdowns();
             renderUmpireCourtPortals();
+            // Auto-open specific views if opened in a new tab/window
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view');
+            if (view === 'points') setTimeout(openPointsModal, 300);
+            if (view === 'order') setTimeout(toggleOrderOfPlay, 300);
+            if (view === 'court') setTimeout(toggleFixtureManager, 300);
         };
 
         function renderUmpireCourtPortals() {
