@@ -511,20 +511,34 @@
                     panelHtml += `
                         <div class="match-cat" title="${activeMatch.category}">${activeMatch.category}</div>
                         
-                        <div class="teams-split">
-                            <div class="team-box" style="border-bottom: 4px solid #ef4444;">
-                                <div class="team-name" style="color: #ef4444;">${activeMatch.teamA}</div>
-                                <div class="player-names">${pA}</div>
-                                <div class="score-display">${scoreA} <span class="score-label">PTS</span></div>
+                       <!-- NEW STACKED VERTICAL LAYOUT -->
+                        <div style="display: flex; flex-direction: column; width: 100%; gap: 10px; position: relative;">
+                            
+                            <!-- TEAM A ROW -->
+                            <div style="background: #0f172a; padding: 12px 15px; border-radius: 8px; border: 1px solid #334155; border-left: 5px solid #ef4444; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
+                                <div style="text-align: left; overflow: hidden; padding-right: 10px; width: 75%;">
+                                    <div style="font-weight: 900; font-size: 16px; text-transform: uppercase; color: #ef4444; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${activeMatch.teamA}</div>
+                                    <div style="font-size: 12px; color: #94a3b8; font-weight: 700; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pA}</div>
+                                </div>
+                                <div style="font-size: 28px; font-weight: 900; color: white; display: flex; align-items: baseline; gap: 4px;">
+                                    ${scoreA} <span style="font-size: 10px; color: #64748b; text-transform: uppercase;">PTS</span>
+                                </div>
                             </div>
                             
-                            <div class="vs-wrapper"><div class="vs-badge">VS</div></div>
-                            
-                            <div class="team-box" style="border-bottom: 4px solid #3b82f6;">
-                                <div class="team-name" style="color: #3b82f6;">${activeMatch.teamB}</div>
-                                <div class="player-names">${pB}</div>
-                                <div class="score-display">${scoreB} <span class="score-label">PTS</span></div>
+                            <!-- VS BADGE CENTERED -->
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; color: #94a3b8; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 900; border: 1px solid #334155; z-index: 2;">VS</div>
+
+                            <!-- TEAM B ROW -->
+                            <div style="background: #0f172a; padding: 12px 15px; border-radius: 8px; border: 1px solid #334155; border-left: 5px solid #3b82f6; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
+                                <div style="text-align: left; overflow: hidden; padding-right: 10px; width: 75%;">
+                                    <div style="font-weight: 900; font-size: 16px; text-transform: uppercase; color: #3b82f6; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${activeMatch.teamB}</div>
+                                    <div style="font-size: 12px; color: #94a3b8; font-weight: 700; text-transform: capitalize; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pB}</div>
+                                </div>
+                                <div style="font-size: 28px; font-weight: 900; color: white; display: flex; align-items: baseline; gap: 4px;">
+                                    ${scoreB} <span style="font-size: 10px; color: #64748b; text-transform: uppercase;">PTS</span>
+                                </div>
                             </div>
+
                         </div>
                     `;
                 } else {
