@@ -92,7 +92,7 @@
 
         /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: #1e293b; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; border: 1px solid #475569; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height: 80vh; overflow-y: auto;}
+        .modal-content { background: #1e293b; padding: 30px; border-radius: 12px; width: 90%; max-width: 800px; position: relative; border: 1px solid #475569; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height: 80vh; overflow-y: auto;}
     </style>
 </head>
 <body>
@@ -107,7 +107,7 @@
         </a>
         
         <div class="nav-actions">
-            <button onclick="togglePointsModal()" class="points-btn">🏆 Franchise Points Table</button>
+            <a href="?view=points" onclick="event.preventDefault(); togglePointsModal();" class="points-btn">🏆 Franchise Points Table</a>
             <a href="league-admin.html" class="admin-btn" id="organizerBtn" style="display: none;">⚙️ Organizer Hub</a>
         </div>
     </nav>
@@ -143,7 +143,7 @@
 
     <!-- Standings Modal -->
     <div id="pointsModal" class="modal-overlay hidden" style="display: none;">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content">
             <button onclick="togglePointsModal()" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
             <h2 style="color: #fde047; text-align: center; margin-bottom: 20px; font-size: 28px; text-transform: uppercase; font-weight: 900;">Franchise Standings</h2>
             
@@ -152,8 +152,10 @@
                     <tr>
                         <th style="padding: 15px;">Rank</th>
                         <th style="padding: 15px;">Franchise Name</th>
-                        <th style="padding: 15px; text-align: center;">Matches</th>
-                        <th style="padding: 15px; text-align: center;">Points</th>
+                        <th style="padding: 15px; text-align: center;" title="Matches Played">Played</th>
+                        <th style="padding: 15px; text-align: center; color: #34d399;" title="Matches Won">Won</th>
+                        <th style="padding: 15px; text-align: center; color: #f87171;" title="Matches Lost">Lost</th>
+                        <th style="padding: 15px; text-align: center; color: #fde047;">Points</th>
                     </tr>
                 </thead>
                 <tbody id="standingsTableBody"></tbody>
@@ -197,6 +199,11 @@
             // Check if there are active matches, otherwise show portals
             loadPublicMatches();
             setInterval(loadPublicMatches, 5000);
+
+            // Auto-open logic for right-click "Open in new tab"
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view');
+            if (view === 'points') setTimeout(togglePointsModal, 300);
         };
 
         function renderUmpireCourtPortals() {
@@ -315,7 +322,7 @@
             }
         }
 
-     async function populateStandings() {
+        async function populateStandings() {
             const tbody = document.getElementById('standingsTableBody');
             if (!tbody) return;
             
@@ -327,7 +334,6 @@
             try { 
                 let savedConfig = JSON.parse(localStorage.getItem('leaguePointsConfig'));
                 if (savedConfig) {
-                    // CRITICAL FIX: Force settings into pure Math Numbers to prevent addition bugs
                     config.pattern = savedConfig.pattern || 'overall_tie';
                     config.tieWin = Number(savedConfig.tieWin) || 0;
                     config.tieLoss = Number(savedConfig.tieLoss) || 0;
@@ -346,18 +352,16 @@
             }
 
             if (teams.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="padding: 15px; text-align: center; color: #94a3b8;">No teams registered yet.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 15px; text-align: center; color: #94a3b8;">No teams registered yet.</td></tr>';
                 return;
             }
 
             let stats = {};
             teams.forEach(t => {
-                // Trim spaces to prevent name mismatch bugs
                 let name = String(t.name).trim().toUpperCase();
-                stats[name] = { matches: 0, points: 0 };
+                stats[name] = { played: 0, won: 0, lost: 0, points: 0 };
             });
 
-            // CRITICAL FIX: Only calculate points for matches that the Umpire has OFFICIALLY COMPLETED
             let completedFixtures = fixtures.filter(f => f.isCompleted === true);
 
             if (config.pattern === 'per_game') {
@@ -365,8 +369,8 @@
                     let tA = String(f.teamA || '').trim().toUpperCase();
                     let tB = String(f.teamB || '').trim().toUpperCase();
                     
-                    if (stats[tA]) stats[tA].matches++;
-                    if (stats[tB]) stats[tB].matches++;
+                    if (stats[tA]) stats[tA].played++;
+                    if (stats[tB]) stats[tB].played++;
 
                     let setsA = Number(f.setsA) || 0;
                     let setsB = Number(f.setsB) || 0;
@@ -380,16 +384,17 @@
                     else if (scoreB > scoreA) winner = 'B';
 
                     if (winner === 'A') {
-                        if (stats[tA]) stats[tA].points += config.gameWin;
+                        if (stats[tA]) { stats[tA].points += config.gameWin; stats[tA].won++; }
+                        if (stats[tB]) { stats[tB].lost++; }
                     } else if (winner === 'B') {
-                        if (stats[tB]) stats[tB].points += config.gameWin;
+                        if (stats[tB]) { stats[tB].points += config.gameWin; stats[tB].won++; }
+                        if (stats[tA]) { stats[tA].lost++; }
                     } else {
                         if (stats[tA]) stats[tA].points += config.gameDraw;
                         if (stats[tB]) stats[tB].points += config.gameDraw;
                     }
                 });
             } else {
-                // Pattern A: Overall Tie Logic
                 let matchups = {};
                 
                 completedFixtures.forEach(f => {
@@ -423,25 +428,30 @@
                 for (let key in matchups) {
                     let m = matchups[key];
                     if (m.matchesPlayed > 0) {
-                        if (stats[m.team1]) stats[m.team1].matches++;
-                        if (stats[m.team2]) stats[m.team2].matches++;
+                        if (stats[m.team1]) stats[m.team1].played++;
+                        if (stats[m.team2]) stats[m.team2].played++;
 
                         if (m.t1Wins > m.t2Wins) {
-                            if (stats[m.team1]) stats[m.team1].points += config.tieWin;
-                            if (stats[m.team2]) stats[m.team2].points += config.tieLoss;
+                            if (stats[m.team1]) { stats[m.team1].points += config.tieWin; stats[m.team1].won++; }
+                            if (stats[m.team2]) { stats[m.team2].points += config.tieLoss; stats[m.team2].lost++; }
                         } else if (m.t2Wins > m.t1Wins) {
-                            if (stats[m.team2]) stats[m.team2].points += config.tieWin;
-                            if (stats[m.team1]) stats[m.team1].points += config.tieLoss;
+                            if (stats[m.team2]) { stats[m.team2].points += config.tieWin; stats[m.team2].won++; }
+                            if (stats[m.team1]) { stats[m.team1].points += config.tieLoss; stats[m.team1].lost++; }
                         }
                     }
                 }
             }
 
-            // Sort leaderboard by highest points
             let sortedTeams = teams.map(t => {
                 let name = String(t.name).trim().toUpperCase();
-                return { name: name, matches: stats[name].matches, points: stats[name].points };
-            }).sort((a, b) => b.points - a.points);
+                return { 
+                    name: name, 
+                    played: stats[name].played, 
+                    won: stats[name].won, 
+                    lost: stats[name].lost, 
+                    points: stats[name].points 
+                };
+            }).sort((a, b) => (b.points - a.points) || (b.won - a.won));
 
             let html = '';
             sortedTeams.forEach((team, index) => {
@@ -452,28 +462,10 @@
                 <tr style="border-bottom: 1px solid #334155;">
                     <td style="padding: 15px; font-weight: bold; color: ${rankColor};">${index + 1}</td>
                     <td style="padding: 15px; font-weight: bold;">${team.name}</td>
-                    <td style="padding: 15px; text-align: center; color: #94a3b8;">${team.matches}</td>
-                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">${team.points}</td>
-                </tr>`;
-            });
-            tbody.innerHTML = html;
-        }
-            let sortedTeams = teams.map(t => {
-                let name = t.name.toUpperCase();
-                return { name: name, matches: stats[name].matches, points: stats[name].points };
-            }).sort((a, b) => b.points - a.points);
-
-            let html = '';
-            sortedTeams.forEach((team, index) => {
-                let rankColor = index === 0 ? '#fde047' : (index === 1 ? '#cbd5e1' : '#b45309');
-                if(index > 2) rankColor = '#94a3b8';
-                
-                html += `
-                <tr style="border-bottom: 1px solid #334155;">
-                    <td style="padding: 15px; font-weight: bold; color: ${rankColor};">${index + 1}</td>
-                    <td style="padding: 15px; font-weight: bold;">${team.name}</td>
-                    <td style="padding: 15px; text-align: center; color: #94a3b8;">${team.matches}</td>
-                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #10b981;">${team.points}</td>
+                    <td style="padding: 15px; text-align: center; color: #94a3b8;">${team.played}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #34d399;">${team.won}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: bold; color: #f87171;">${team.lost}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 900; color: #fde047; font-size: 16px;">${team.points}</td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -499,7 +491,6 @@
             
             if(!grid) return;
 
-            // If no fixtures are found, show portals, hide grid
             if (fixtures.length === 0) {
                 grid.style.display = 'none';
                 if(portals) portals.style.display = 'flex';
@@ -542,10 +533,9 @@
                     panelHtml += `
                         <div class="match-cat" title="${activeMatch.category}">${activeMatch.category}</div>
                         
-                       <!-- NEW STACKED VERTICAL LAYOUT -->
+                        <!-- STACKED VERTICAL LAYOUT -->
                         <div style="display: flex; flex-direction: column; width: 100%; gap: 10px; position: relative;">
                             
-                            <!-- TEAM A ROW -->
                             <div style="background: #0f172a; padding: 12px 15px; border-radius: 8px; border: 1px solid #334155; border-left: 5px solid #ef4444; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
                                 <div style="text-align: left; overflow: hidden; padding-right: 10px; width: 75%;">
                                     <div style="font-weight: 900; font-size: 16px; text-transform: uppercase; color: #ef4444; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${activeMatch.teamA}</div>
@@ -556,10 +546,8 @@
                                 </div>
                             </div>
                             
-                            <!-- VS BADGE CENTERED -->
                             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e293b; color: #94a3b8; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 900; border: 1px solid #334155; z-index: 2;">VS</div>
 
-                            <!-- TEAM B ROW -->
                             <div style="background: #0f172a; padding: 12px 15px; border-radius: 8px; border: 1px solid #334155; border-left: 5px solid #3b82f6; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);">
                                 <div style="text-align: left; overflow: hidden; padding-right: 10px; width: 75%;">
                                     <div style="font-weight: 900; font-size: 16px; text-transform: uppercase; color: #3b82f6; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${activeMatch.teamB}</div>
