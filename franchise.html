@@ -3,215 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Franchise Portal | Playing Order</title>
+    <title>Franchise Portal | Smart Players Auction</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
-    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
-        :root { --primary: #0284c7; --secondary: #fde047; --dark: #0f172a; --card-bg: #1e293b; --success: #10b981; }
+        :root { --primary: #0284c7; --secondary: #fde047; --dark: #0f172a; --card-bg: #1e293b; }
         body { background-color: var(--dark); color: white; display: flex; flex-direction: column; min-height: 100vh; }
-
-        .navbar { padding: 20px 40px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
-        .nav-brand { font-size: 22px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
-        .nav-brand img { height: 35px; }
+        
+        .navbar { padding: 15px 30px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+        .nav-brand { font-size: 20px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
+        .nav-brand img { height: 30px; }
         .nav-brand span { color: var(--secondary); }
-        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; display: none; font-weight: bold;}
 
-        .container { flex-grow: 1; padding: 40px 20px; max-width: 900px; margin: 0 auto; width: 100%; }
+        .container { flex-grow: 1; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
         
-        /* LOGIN SECTION */
-        #login-section { text-align: center; margin-top: 50px; background: var(--card-bg); padding: 40px; border-radius: 12px; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        #login-section h1 { margin-bottom: 20px; }
-        select, input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; outline: none; font-size: 16px; }
-        button.btn-primary { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        button.btn-primary:hover { background: #0369a1; }
+        /* Login Card */
+        .login-card { background: var(--card-bg); border: 1px solid #334155; border-radius: 12px; padding: 40px; width: 100%; max-width: 500px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .login-card h2 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .login-card p { color: #94a3b8; margin-bottom: 30px; font-size: 14px; }
+        .login-input { width: 100%; padding: 12px 15px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; outline: none; font-size: 16px; }
+        .login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .login-btn:hover { background: #0369a1; }
 
-        /* DASHBOARD SECTION */
-        #dashboard-section { display: none; }
-        .dash-header { margin-bottom: 30px; border-bottom: 1px solid #334155; padding-bottom: 20px; }
-        .dash-header h1 { font-size: 32px; color: var(--secondary); margin-bottom: 5px; }
+        /* Dashboard */
+        #dashboardView { width: 100%; max-width: 1200px; display: none; flex-direction: column; gap: 30px; }
+        .dash-header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #334155; padding-bottom: 20px; }
+        .team-title { font-size: 32px; font-weight: 900; text-transform: uppercase; color: var(--secondary); margin-bottom: 5px; }
+        .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; }
+
+        /* Roster Layout */
+        .grid-layout { display: grid; grid-template-columns: 250px 1fr; gap: 30px; align-items: start; }
+        @media (max-width: 768px) { .grid-layout { grid-template-columns: 1fr; } }
+
+        .roster-panel { background: #1e293b; border-radius: 12px; border: 1px solid #334155; padding: 20px; }
+        .roster-panel h3 { color: #38bdf8; font-size: 16px; margin-bottom: 15px; text-transform: uppercase; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .player-item { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; border-left: 3px solid #10b981; }
+        .player-cat { color: #94a3b8; font-size: 11px; font-weight: normal; }
+
+        /* Matchup Tie Cards */
+        .tie-card { background: #1e293b; border-radius: 12px; border: 1px solid #334155; overflow: hidden; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .tie-header { background: #0ea5e9; color: white; padding: 15px 20px; font-size: 20px; font-weight: 900; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+        .tie-status { background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px; font-size: 12px; }
         
-        .roster-card { background: var(--card-bg); border-radius: 8px; padding: 15px 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #334155; }
-        .player-info { display: flex; align-items: center; gap: 15px; }
-        .player-info img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #cbd5e1; }
-        .player-name { font-weight: bold; font-size: 18px; }
-        .player-cat { font-size: 12px; color: #94a3b8; background: #0f172a; padding: 3px 8px; border-radius: 4px; }
+        .match-row { padding: 20px; border-bottom: 1px solid #334155; display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; background: #0f172a; }
+        .match-row:last-child { border-bottom: none; }
+        .cat-title { grid-column: 1 / -1; font-size: 14px; font-weight: 900; color: #fde047; text-transform: uppercase; text-align: center; margin-bottom: 10px; }
         
-        .order-select { width: 150px; margin-bottom: 0; }
+        .team-col { display: flex; flex-direction: column; gap: 8px; }
+        .team-label { font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase; }
+        .my-team-label { color: #10b981; }
         
-        .submit-panel { margin-top: 30px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); padding: 20px; border-radius: 8px; text-align: center; }
-        .submit-btn { background: var(--success); color: white; border: none; padding: 15px 40px; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; }
+        select.lineup-select { background: #1e293b; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; font-size: 13px; outline: none; width: 100%; font-weight: bold; appearance: none;}
+        select.lineup-select:disabled { background: #0f172a; color: #cbd5e1; cursor: not-allowed; border-color: #334155; }
+        
+        .vs-badge { background: #1e293b; color: #94a3b8; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; border: 1px solid #334155; text-align: center; }
+
+        .hidden-player { background: #1e293b; color: #64748b; padding: 10px; border-radius: 6px; font-size: 13px; text-align: center; font-style: italic; border: 1px dashed #475569; }
+        .revealed-player { background: #0f172a; color: white; padding: 10px; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #475569; border-left: 4px solid #ef4444; }
+
+        .submit-panel { padding: 20px; background: #1e293b; text-align: right; }
+        .submit-btn { background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: 900; font-size: 14px; cursor: pointer; text-transform: uppercase; transition: 0.2s; }
         .submit-btn:hover { background: #059669; }
+        .locked-msg { color: #10b981; font-weight: bold; font-size: 14px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px; }
-        .status-draft { background: #f59e0b; color: black; }
-        .status-submitted { background: var(--primary); color: white; }
-        .status-published { background: var(--success); color: white; }
     </style>
 </head>
 <body>
-
     <nav class="navbar">
-        <a href="/index.html" class="nav-brand"><img src="/spa-logo.png.png" alt="Logo"> Smart <span>Players</span> Auction</a>
-        <button id="logoutBtn" class="logout-btn" onclick="logout()">Logout</button>
+        <a href="/index.html" class="nav-brand">
+            <img src="/spa-logo.png.png" alt="Logo">
+            Smart <span>Players</span> Auction
+        </a>
     </nav>
-
+    
     <div class="container">
-        
-        <!-- LOGIN PORTAL -->
-        <div id="login-section">
-            <h1>Franchise Login</h1>
-            <p style="color: #94a3b8; margin-bottom: 25px;">Select your franchise to build your playing order.</p>
+        <!-- LOGIN VIEW -->
+        <div class="login-card" id="loginView">
+            <h2>Franchise Login</h2>
+            <p>Select your franchise to build your playing order.</p>
             
-            <select id="teamSelect">
-                <option value="">-- Loading Franchises --</option>
+            <select class="login-input" id="franchiseSelect">
+                <option value="">Loading franchises...</option>
             </select>
             
-            <input type="password" id="teamPassword" placeholder="Enter Franchise PIN (Default: 1234)">
-            <button class="btn-primary" onclick="loginFranchise()">Access Roster</button>
+            <input type="password" class="login-input" id="pinInput" placeholder="Enter Franchise PIN (Default: 1234)">
+            
+            <button class="login-btn" onclick="attemptLogin()">Access Roster</button>
         </div>
 
-        <!-- LINEUP BUILDER DASHBOARD -->
-        <div id="dashboard-section">
+        <!-- DASHBOARD VIEW -->
+        <div id="dashboardView">
             <div class="dash-header">
-                <h1 id="dashTeamName">TEAM NAME</h1>
-                <p>Assign your official match-day playing order below.</p>
-                <div id="lineupStatus" class="status-badge status-draft">Status: DRAFTING</div>
+                <div>
+                    <div class="team-title" id="dashTeamName">TEAM NAME</div>
+                    <p style="color: #94a3b8; font-size: 14px;">Official Match-Day Playing Order Submission</p>
+                </div>
+                <button class="logout-btn" onclick="logout()">Log Out</button>
             </div>
 
-            <div id="rosterContainer">
-                <!-- Roster populates here dynamically -->
-            </div>
+            <div class="grid-layout">
+                <!-- Left Panel: My Roster -->
+                <div class="roster-panel">
+                    <h3>🏆 Your Official Roster</h3>
+                    <div id="rosterList"></div>
+                </div>
 
-            <div class="submit-panel">
-                <p style="margin-bottom: 15px; color: #cbd5e1;">Once submitted, the Organizer will review and publish this lineup to the public.</p>
-                <button class="submit-btn" onclick="submitLineup()">Submit Order to Organizer</button>
+                <!-- Right Panel: Matchups -->
+                <div id="matchupsContainer">
+                    <!-- Matchup Ties will be injected here -->
+                </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        let currentTeam = null;
-        let teamRoster = [];
+        let myTeam = "";
+        let allFixtures = [];
+        let allPlayers = [];
+        let orderOfPlay = [];
 
-        // Load teams from the Auction Setup when page loads
-        window.onload = () => {
-            const setup = JSON.parse(localStorage.getItem('auctionSetup')) || {};
-            const teams = setup.teams || [];
-            const select = document.getElementById('teamSelect');
-            
+        window.onload = function() {
+            // Check if already logged in this session
+            const savedTeam = sessionStorage.getItem('loggedFranchise');
+            if(savedTeam) {
+                myTeam = savedTeam;
+                showDashboard();
+            } else {
+                loadFranchisesForLogin();
+            }
+        };
+
+        function loadFranchisesForLogin() {
+            let teams = [];
+            try {
+                teams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+            } catch(e) {}
+
+            const select = document.getElementById('franchiseSelect');
             if(teams.length === 0) {
                 select.innerHTML = '<option value="">No franchises found. Create them in Admin first.</option>';
                 return;
             }
 
-            select.innerHTML = '<option value="">-- Select Your Franchise --</option>';
+            let html = '<option value="">-- Select Your Franchise --</option>';
             teams.forEach(t => {
-                let opt = document.createElement('option');
-                opt.value = t.id || t._id;
-                opt.innerText = t.name;
-                select.appendChild(opt);
+                html += `<option value="${t.name}">${t.name.toUpperCase()}</option>`;
             });
-        };
-
-        function loginFranchise() {
-            const select = document.getElementById('teamSelect');
-            const teamId = select.value;
-            const pin = document.getElementById('teamPassword').value;
-
-            if(!teamId) return alert("Please select a franchise.");
-            if(pin !== "1234") return alert("Incorrect PIN."); // Basic security for now
-
-            const setup = JSON.parse(localStorage.getItem('auctionSetup')) || {};
-            currentTeam = (setup.teams || []).find(t => (t.id || t._id) === teamId);
-
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('dashboard-section').style.display = 'block';
-            document.getElementById('logoutBtn').style.display = 'block';
-            document.getElementById('dashTeamName').innerText = currentTeam.name.toUpperCase();
-
-            loadTeamRoster(teamId);
+            select.innerHTML = html;
         }
 
-        function loadTeamRoster(teamId) {
-            const allPlayers = JSON.parse(localStorage.getItem('localPlayers')) || [];
-            
-            // Extract ONLY players sold to this specific franchise
-            teamRoster = allPlayers.filter(p => p.status === 'sold' && (p.teamId === teamId || p.soldTo === teamId));
-            
-            const container = document.getElementById('rosterContainer');
-            container.innerHTML = '';
+        function attemptLogin() {
+            const team = document.getElementById('franchiseSelect').value;
+            const pin = document.getElementById('pinInput').value;
 
-            if(teamRoster.length === 0) {
-                container.innerHTML = '<p style="color: #fca5a5;">Your roster is empty. You must buy players in the auction first.</p>';
-                return;
-            }
+            if(!team) return alert("Please select your franchise.");
+            if(pin !== '1234') return alert("Incorrect PIN. Please try again.");
 
-            // Check if a lineup was already submitted
-            let submittedData = JSON.parse(localStorage.getItem('submittedLineups')) || {};
-            let myLineup = submittedData[teamId] || {};
-
-            teamRoster.forEach(player => {
-                let savedOrder = myLineup[player.id || player._id] || "";
-                
-                let card = document.createElement('div');
-                card.className = 'roster-card';
-                card.innerHTML = `
-                    <div class="player-info">
-                        <img src="${player.photo || '/spa-logo.png.png'}" alt="Player">
-                        <div>
-                            <div class="player-name">${player.name}</div>
-                            <span class="player-cat">${player.category || 'N/A'}</span>
-                        </div>
-                    </div>
-                    <select class="order-select" id="order_${player.id || player._id}">
-                        <option value="">Not Playing</option>
-                        <option value="Match 1" ${savedOrder === 'Match 1' ? 'selected' : ''}>Match 1</option>
-                        <option value="Match 2" ${savedOrder === 'Match 2' ? 'selected' : ''}>Match 2</option>
-                        <option value="Match 3" ${savedOrder === 'Match 3' ? 'selected' : ''}>Match 3</option>
-                        <option value="Match 4" ${savedOrder === 'Match 4' ? 'selected' : ''}>Match 4</option>
-                        <option value="Match 5" ${savedOrder === 'Match 5' ? 'selected' : ''}>Match 5</option>
-                        <option value="Substitute" ${savedOrder === 'Substitute' ? 'selected' : ''}>Substitute</option>
-                    </select>
-                `;
-                container.appendChild(card);
-            });
-
-            if(Object.keys(myLineup).length > 0) {
-                document.getElementById('lineupStatus').className = 'status-badge status-submitted';
-                document.getElementById('lineupStatus').innerText = 'Status: SUBMITTED TO ORGANIZER';
-            }
-        }
-
-        function submitLineup() {
-            if(!currentTeam) return;
-            
-            let myLineup = {};
-            teamRoster.forEach(player => {
-                let selectVal = document.getElementById('order_' + (player.id || player._id)).value;
-                if(selectVal) {
-                    myLineup[player.id || player._id] = selectVal;
-                }
-            });
-
-            // Save to database
-            let allLineups = JSON.parse(localStorage.getItem('submittedLineups')) || {};
-            allLineups[currentTeam.id || currentTeam._id] = myLineup;
-            localStorage.setItem('submittedLineups', JSON.stringify(allLineups));
-
-            document.getElementById('lineupStatus').className = 'status-badge status-submitted';
-            document.getElementById('lineupStatus').innerText = 'Status: SUBMITTED TO ORGANIZER';
-            
-            alert("✅ Playing Order Submitted Successfully!\n\nThe Organizer will review and publish this to the live portal.");
+            myTeam = team;
+            sessionStorage.setItem('loggedFranchise', myTeam);
+            showDashboard();
         }
 
         function logout() {
-            currentTeam = null;
-            document.getElementById('login-section').style.display = 'block';
-            document.getElementById('dashboard-section').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'none';
-            document.getElementById('teamPassword').value = '';
+            sessionStorage.removeItem('loggedFranchise');
+            myTeam = "";
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'block';
+            loadFranchisesForLogin();
+        }
+
+        async function showDashboard() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'flex';
+            document.getElementById('dashTeamName').innerText = myTeam.toUpperCase();
+
+            // Load Global Data
+            try {
+                let orderData = localStorage.getItem('leagueOrderOfPlay');
+                if(orderData) orderOfPlay = JSON.parse(orderData);
+            } catch(e) {}
+
+            try {
+                let pData = localStorage.getItem('auctionPlayers');
+                if(pData) allPlayers = JSON.parse(pData);
+            } catch(e) {}
+
+            // Try Cloud first, fallback to local for Fixtures
+            try {
+                const res = await fetch('/api/fixtures');
+                if(res.ok) allFixtures = await res.json();
+            } catch(err) {}
+
+            if(!Array.isArray(allFixtures) || allFixtures.length === 0) {
+                try {
+                    allFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
+                } catch(e) {}
+            }
+
+            renderRoster();
+            renderMatchups();
+        }
+
+        function renderRoster() {
+            const list = document.getElementById('rosterList');
+            let myPlayers = allPlayers.filter(p => p.status === 'sold' && ((p.teamName && p.teamName.toLowerCase() === myTeam.toLowerCase()) || (p.soldToTeamId && p.soldToTeamId.toLowerCase() === myTeam.toLowerCase())));
+
+            if(myPlayers.length === 0) {
+                list.innerHTML = `<p style="color: #64748b; font-size: 13px;">No players found for your franchise.</p>`;
+                return;
+            }
+
+            let html = '';
+            myPlayers.forEach(p => {
+                html += `
+                <div class="player-item">
+                    <span>${p.name}</span>
+                    <span class="player-cat">${p.category}</span>
+                </div>`;
+            });
+            list.innerHTML = html;
+        }
+
+        function renderMatchups() {
+            const container = document.getElementById('matchupsContainer');
+            container.innerHTML = '';
+
+            // 1. Find all fixtures where My Team is playing
+            let myFixtures = allFixtures.filter(f => 
+                (f.teamA && f.teamA.toLowerCase() === myTeam.toLowerCase()) || 
+                (f.teamB && f.teamB.toLowerCase() === myTeam.toLowerCase())
+            );
+
+            if(myFixtures.length === 0) {
+                container.innerHTML = `<div class="tie-card" style="padding: 40px; text-align: center; color: #94a3b8;">No matchups scheduled for your franchise yet.</div>`;
+                return;
+            }
+
+            // 2. Group fixtures by Opponent (The "Tie")
+            let ties = {};
+            myFixtures.forEach(f => {
+                let isTeamA = f.teamA.toLowerCase() === myTeam.toLowerCase();
+                let opponent = isTeamA ? f.teamB : f.teamA;
+                
+                if(!ties[opponent]) ties[opponent] = [];
+                ties[opponent].push(f);
+            });
+
+            // 3. Render each Tie
+            for (const [opponent, fixtures] of Object.entries(ties)) {
+                
+                // Sort fixtures according to Order of Play
+                fixtures.sort((a, b) => {
+                    let idxA = orderOfPlay.indexOf(a.category);
+                    let idxB = orderOfPlay.indexOf(b.category);
+                    if(idxA === -1) idxA = 999;
+                    if(idxB === -1) idxB = 999;
+                    return idxA - idxB;
+                });
+
+                // Check overall submission status for this Tie
+                let iAmTeamAForFirstMatch = fixtures[0].teamA.toLowerCase() === myTeam.toLowerCase();
+                let haveISubmitted = fixtures.every(f => {
+                    let isA = f.teamA.toLowerCase() === myTeam.toLowerCase();
+                    return isA ? f.submittedA === true : f.submittedB === true;
+                });
+                
+                let hasOpponentSubmitted = fixtures.every(f => {
+                    let isA = f.teamA.toLowerCase() === myTeam.toLowerCase();
+                    return isA ? f.submittedB === true : f.submittedA === true;
+                });
+
+                let statusBadge = haveISubmitted ? 
+                    `<span class="tie-status" style="background: #10b981;">✅ Your Lineup Locked</span>` : 
+                    `<span class="tie-status" style="background: #eab308; color: black;">⚠️ Pending Submission</span>`;
+
+                let html = `
+                <div class="tie-card">
+                    <div class="tie-header">
+                        <span>VS ${opponent.toUpperCase()}</span>
+                        ${statusBadge}
+                    </div>
+                `;
+
+                fixtures.forEach(f => {
+                    let isTeamA = f.teamA.toLowerCase() === myTeam.toLowerCase();
+                    
+                    // Filter roster just for this specific category to prevent selecting wrong players
+                    let availablePlayers = allPlayers.filter(p => 
+                        p.status === 'sold' && 
+                        p.category === f.category && 
+                        ((p.teamName && p.teamName.toLowerCase() === myTeam.toLowerCase()) || (p.soldToTeamId && p.soldToTeamId.toLowerCase() === myTeam.toLowerCase()))
+                    );
+
+                    let optionsHtml = `<option value="">Select Player...</option>`;
+                    availablePlayers.forEach(p => {
+                        optionsHtml += `<option value="${p.name}">${p.name}</option>`;
+                    });
+
+                    // Set default selections if already saved in DB
+                    let myP1 = isTeamA ? (f.playerA1 || '') : (f.playerB1 || '');
+                    let myP2 = isTeamA ? (f.playerA2 || '') : (f.playerB2 || '');
+                    let oppP1 = isTeamA ? (f.playerB1 || '') : (f.playerA1 || '');
+                    let oppP2 = isTeamA ? (f.playerB2 || '') : (f.playerA2 || '');
+
+                    // Opponent Reveal Logic
+                    let oppHTML = '';
+                    if (haveISubmitted && hasOpponentSubmitted) {
+                        // BOTH submitted -> Reveal!
+                        oppHTML = `
+                            <div class="revealed-player">${oppP1 || 'No Player'}</div>
+                            ${oppP2 ? `<div class="revealed-player">${oppP2}</div>` : ''}
+                        `;
+                    } else if (hasOpponentSubmitted) {
+                        oppHTML = `<div class="hidden-player">🔒 Lineup Locked (Submit yours to reveal)</div>`;
+                    } else {
+                        oppHTML = `<div class="hidden-player">⏳ Awaiting Opponent...</div>`;
+                    }
+
+                    // My Dropdowns
+                    let myHTML = `
+                        <select class="lineup-select p1-select" data-fixid="${f.id || f.category}" ${haveISubmitted ? 'disabled' : ''}>
+                            ${optionsHtml.replace(`value="${myP1}"`, `value="${myP1}" selected`)}
+                        </select>
+                        <select class="lineup-select p2-select" data-fixid="${f.id || f.category}" ${haveISubmitted ? 'disabled' : ''} style="margin-top: 8px;">
+                            <option value="">Select Player 2 (If Doubles)...</option>
+                            ${availablePlayers.map(p => `<option value="${p.name}" ${myP2 === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
+                        </select>
+                    `;
+
+                    html += `
+                    <div class="match-row" data-fixture="${f.category}">
+                        <div class="cat-title">${f.category}</div>
+                        
+                        <div class="team-col">
+                            <span class="team-label my-team-label">Your Lineup</span>
+                            ${myHTML}
+                        </div>
+                        
+                        <div class="vs-badge">VS</div>
+                        
+                        <div class="team-col">
+                            <span class="team-label">${opponent} Lineup</span>
+                            ${oppHTML}
+                        </div>
+                    </div>`;
+                });
+
+                if (!haveISubmitted) {
+                    html += `
+                    <div class="submit-panel">
+                        <button class="submit-btn" onclick="submitTieLineup('${opponent}')">🔒 Lock & Submit Lineup</button>
+                    </div>`;
+                } else {
+                    html += `
+                    <div class="submit-panel">
+                        <span class="locked-msg">🔒 Lineup officially submitted. Edits locked.</span>
+                    </div>`;
+                }
+
+                html += `</div>`;
+                container.innerHTML += html;
+            }
+        }
+
+        async function submitTieLineup(opponentName) {
+            if(!confirm("Warning: Once submitted, your lineup is LOCKED and cannot be changed. Proceed?")) return;
+
+            // 1. Gather all selections for this opponent
+            let myFixtures = allFixtures.filter(f => 
+                (f.teamA && f.teamA.toLowerCase() === myTeam.toLowerCase() && f.teamB.toLowerCase() === opponentName.toLowerCase()) || 
+                (f.teamB && f.teamB.toLowerCase() === myTeam.toLowerCase() && f.teamA.toLowerCase() === opponentName.toLowerCase())
+            );
+
+            // 2. Loop through the UI rows and update the array objects
+            myFixtures.forEach(f => {
+                let isTeamA = f.teamA.toLowerCase() === myTeam.toLowerCase();
+                
+                // Find the dropdowns in the DOM for this specific fixture row
+                let row = document.querySelector(`.match-row[data-fixture="${f.category}"]`);
+                if(row) {
+                    let p1 = row.querySelector('.p1-select').value;
+                    let p2 = row.querySelector('.p2-select').value;
+
+                    if (isTeamA) {
+                        f.playerA1 = p1;
+                        f.playerA2 = p2;
+                        f.submittedA = true;
+                    } else {
+                        f.playerB1 = p1;
+                        f.playerB2 = p2;
+                        f.submittedB = true;
+                    }
+                }
+            });
+
+            // 3. Save to Database
+            localStorage.setItem('leagueManualFixtures', JSON.stringify(allFixtures));
+            
+            try {
+                await fetch('/api/fixtures', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(allFixtures)
+                });
+            } catch (error) {
+                console.error("Cloud Sync Failed", error);
+            }
+
+            // 4. Refresh UI
+            alert("Lineup successfully locked and submitted!");
+            renderMatchups();
         }
     </script>
 </body>
