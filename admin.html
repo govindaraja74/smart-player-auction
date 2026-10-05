@@ -2137,24 +2137,43 @@ function showFranchiseRoster(teamId) {
             }
         }
 
-        function editCategory(oldName) {
-            const newName = prompt("Enter new category name:", oldName);
-            if(!newName || newName.trim() === "" || newName === oldName) return;
-
+     function editCategory(oldName) {
             let cats = safeGetStorage('auctionCats', []);
             let index = cats.findIndex(c => (c.name || c) === oldName);
 
-            if(index > -1) {
-                if(typeof cats[index] === 'object') cats[index].name = newName;
-                else cats[index] = newName;
-                safeSetStorage('auctionCats', cats);
+            if(index === -1) return;
 
-                // Cascade the name change to any players already in this category
+            // Get the current max players limit (if it exists)
+            let currentCat = cats[index];
+            let currentMax = typeof currentCat === 'object' ? (currentCat.maxPlayers || '') : '';
+
+            // Prompt 1: Edit Name
+            const newName = prompt("Enter new category name:", oldName);
+            if(newName === null) return; // User clicked Cancel
+            
+            // Prompt 2: Edit Max Players
+            const newMax = prompt(`Enter max players limit for "${newName}" (leave blank for no limit):`, currentMax);
+            if(newMax === null) return; // User clicked Cancel
+
+            let finalName = newName.trim() === "" ? oldName : newName.trim();
+
+            // Update the category object
+            if(typeof cats[index] === 'object') {
+                cats[index].name = finalName;
+                cats[index].maxPlayers = newMax.trim();
+            } else {
+                cats[index] = { name: finalName, maxPlayers: newMax.trim() };
+            }
+            
+            safeSetStorage('auctionCats', cats);
+
+            // Cascade the name change to any players already in this category
+            if (finalName !== oldName) {
                 let players = safeGetStorage('auctionPlayers', []);
                 let playersUpdated = false;
                 players.forEach(p => {
                     if (p.category === oldName) {
-                        p.category = newName;
+                        p.category = finalName;
                         playersUpdated = true;
                     }
                 });
@@ -2163,12 +2182,11 @@ function showFranchiseRoster(teamId) {
                     safeSetStorage('auctionPlayers', players);
                     window.allPlayers = players;
                 }
-
-                updateManualCategoryDropdowns();
-                renderAuctionDetailLists();
             }
-        }
 
+            updateManualCategoryDropdowns();
+            renderAuctionDetailLists();
+        }
         function deleteCategory(name) {
             if(!confirm(`Are you sure you want to delete the category '${name}'?`)) return;
 
