@@ -224,6 +224,31 @@
             list.innerHTML = html;
         }
 
+        // NEW: Anti-Duplicate Selection Validation
+        function validatePlayerSelection(selectElement) {
+            let selectedValue = selectElement.value;
+            if (!selectedValue) return; // Empty selections are fine
+
+            // Scope the check to the current matchup block (tie-card)
+            let tieCard = selectElement.closest('.tie-card');
+            if (!tieCard) return;
+
+            let allDropdowns = tieCard.querySelectorAll('.lineup-select');
+            let matchCount = 0;
+
+            allDropdowns.forEach(dropdown => {
+                if (dropdown.value === selectedValue) {
+                    matchCount++;
+                }
+            });
+
+            // If the player appears more than once, throw an error and reset the dropdown
+            if (matchCount > 1) {
+                alert(`⚠️ ERROR: "${selectedValue}" is already playing in this tie!\n\nA player cannot be selected twice against the same opponent.`);
+                selectElement.value = ""; // Clear the invalid selection immediately
+            }
+        }
+
         function renderMatchups() {
             const container = document.getElementById('matchupsContainer');
             container.innerHTML = '';
@@ -320,12 +345,12 @@
                         oppHTML = `<div class="hidden-player">⏳ Awaiting Opponent...</div>`;
                     }
 
-                    // My Dropdowns
+                    // My Dropdowns (UPDATED with onchange="validatePlayerSelection(this)")
                     let myHTML = `
-                        <select class="lineup-select p1-select" data-fixid="${f.id || f.category}" ${haveISubmitted ? 'disabled' : ''}>
+                        <select class="lineup-select p1-select" data-fixid="${f.id || f.category}" ${haveISubmitted ? 'disabled' : ''} onchange="validatePlayerSelection(this)">
                             ${optionsHtml.replace(`value="${myP1}"`, `value="${myP1}" selected`)}
                         </select>
-                        <select class="lineup-select p2-select" data-fixid="${f.id || f.category}" ${haveISubmitted ? 'disabled' : ''} style="margin-top: 8px;">
+                        <select class="lineup-select p2-select" data-fixid="${f.id || f.category}" ${haveISubmitted ? 'disabled' : ''} style="margin-top: 8px;" onchange="validatePlayerSelection(this)">
                             <option value="">Select Player 2 (If Doubles)...</option>
                             ${availablePlayers.map(p => `<option value="${p.name}" ${myP2 === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
                         </select>
