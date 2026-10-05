@@ -182,7 +182,7 @@
         let matchState = { scoreA: 0, scoreB: 0, setsA: 0, setsB: 0 };
         let currentCourtName = 'COURT 1'; // Global tracker for the active court
 
-        window.onload = async function() {
+        window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
             currentCourtName = urlParams.get('court') || 'COURT 1';
             const umpireName = urlParams.get('umpire'); 
@@ -198,46 +198,40 @@
                 }
             }
 
+            // 🔥 FAST LOAD: Instantly grab local data so the UI NEVER freezes
             let manualFixtures = [];
             let allPlayers = [];
 
-            // 1. Fetch Fixtures from Cloud
-            try {
-                const fixtureRes = await fetch('/api/fixtures');
-                if (fixtureRes.ok) {
-                    const fData = await fixtureRes.json();
-                    if (Array.isArray(fData)) manualFixtures = fData;
-                }
-            } catch (err) {}
-
-            // 2. Fetch Players from Cloud
-            try {
-                const playerRes = await fetch('/api/players/sold');
-                if (playerRes.ok) {
-                    const pData = await playerRes.json();
-                    if (Array.isArray(pData)) allPlayers = pData;
-                }
-            } catch (err) {}
-
-            // 3. Fallback & Anti-Lag Override: Prioritize Local Storage if Cloud is lagging
             try {
                 let localF = JSON.parse(localStorage.getItem('leagueManualFixtures'));
-                if (Array.isArray(localF) && localF.length >= manualFixtures.length) {
-                    manualFixtures = localF; 
-                }
+                if (Array.isArray(localF)) manualFixtures = localF;
             } catch(e) {}
 
-            if (!Array.isArray(allPlayers) || allPlayers.length === 0) {
-                try {
-                    let localP = JSON.parse(localStorage.getItem('auctionPlayers'));
-                    if (Array.isArray(localP)) allPlayers = localP;
-                } catch(e) {}
-            }
+            try {
+                let localP = JSON.parse(localStorage.getItem('auctionPlayers'));
+                if (Array.isArray(localP)) allPlayers = localP;
+            } catch(e) {}
 
-            manualFixtures = Array.isArray(manualFixtures) ? manualFixtures : [];
-            allPlayers = Array.isArray(allPlayers) ? allPlayers : [];
+            // Draw the screen immediately!
+            updateUmpireUI(manualFixtures, allPlayers);
 
-            // 🔥 FIX: Strict Uppercase Matching to prevent "Court 1" vs "COURT 1" bugs 🔥
+            // 🔥 BACKGROUND SYNC: Fetch from cloud silently and update if needed
+            fetch('/api/fixtures').then(res => res.json()).then(fData => {
+                if (Array.isArray(fData) && fData.length > 0) {
+                    manualFixtures = fData;
+                    updateUmpireUI(manualFixtures, allPlayers);
+                }
+            }).catch(err => console.log("Cloud fixtures syncing in background."));
+
+            fetch('/api/players/sold').then(res => res.json()).then(pData => {
+                if (Array.isArray(pData) && pData.length > 0) {
+                    allPlayers = pData;
+                    updateUmpireUI(manualFixtures, allPlayers);
+                }
+            }).catch(err => console.log("Cloud players syncing in background."));
+        };
+
+        function updateUmpireUI(manualFixtures, allPlayers) {
             let match = manualFixtures.find(f => 
                 f && f.court && 
                 String(f.court).trim().toUpperCase() === String(currentCourtName).trim().toUpperCase() && 
@@ -262,11 +256,14 @@
 
             ['playerA1', 'playerA2', 'playerB1', 'playerB2'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('change', autoSaveMatchState);
+                if (el) {
+                    el.removeEventListener('change', autoSaveMatchState); // Prevent duplicate listeners
+                    el.addEventListener('change', autoSaveMatchState);
+                }
             });
 
-            setTimeout(loadAutoSavedState, 300); 
-        };
+            setTimeout(loadAutoSavedState, 100); 
+        }
 
         function populateRosterDropdowns(teamA, teamB, allPlayers, currentCategory) {
             let orderOfPlay = [];
@@ -343,7 +340,7 @@
         }
 
         function modScore(team, type, amt) {
-            if (document.getElementById('matchCategory').innerText === "No Match Assigned") {
+            if (document.getElementById('matchCategory').innerText === "No Match Assigned" || document.getElementById('matchCategory').innerText === "Loading Data...") {
                 return alert("No match is currently active in the queue for this court.");
             }
 
@@ -362,7 +359,7 @@
         }
 
         async function endMatch() { 
-            if (document.getElementById('matchCategory').innerText === "No Match Assigned") return;
+            if (document.getElementById('matchCategory').innerText === "No Match Assigned" || document.getElementById('matchCategory').innerText === "Loading Data...") return;
 
             let pA1 = document.getElementById('playerA1') ? document.getElementById('playerA1').value : '';
             let pA2 = document.getElementById('playerA2') ? document.getElementById('playerA2').value : '';
@@ -377,7 +374,6 @@
                 
                 let fixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
                 
-                // 🔥 FIX: Strict Uppercase Matching Here Too 🔥
                 let matchIndex = fixtures.findIndex(f => 
                     f && f.court && 
                     String(f.court).trim().toUpperCase() === String(currentCourtName).trim().toUpperCase() && 
