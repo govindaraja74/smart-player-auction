@@ -145,12 +145,14 @@
         function showSignup() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('recoverySection').classList.add('hidden');
+            document.getElementById('ownerLoginSection').classList.add('hidden');
             document.getElementById('signupSection').classList.remove('hidden');
         }
 
         function showLogin() {
             document.getElementById('signupSection').classList.add('hidden');
             document.getElementById('recoverySection').classList.add('hidden');
+            document.getElementById('ownerLoginSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('signupMessage').style.display = 'none';
         }
@@ -158,11 +160,19 @@
         function showRecovery() {
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('ownerLoginSection').classList.add('hidden');
             document.getElementById('recoverySection').classList.remove('hidden');
             document.getElementById('recoveryQuestionBox').classList.add('hidden');
             document.getElementById('recoveredPwdDisplay').style.display = 'none';
             document.getElementById('recoverError').style.display = 'none';
             document.getElementById('recoverUserId').value = '';
+        }
+
+        function showOwnerLogin() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('recoverySection').classList.add('hidden');
+            document.getElementById('ownerLoginSection').classList.remove('hidden');
         }
 
         function toggleCustomSecurityQuestion() {
@@ -294,7 +304,7 @@
     <!-- Organizer Login Screen -->
     <div class="box" id="loginSection">
         <h2 style="text-align: center; color: #38bdf8; margin-bottom: 20px; font-weight: 900; text-transform: uppercase;">Organizer Login</h2>
-        <input type="text" id="adminUserId" placeholder="User ID (or 'owner')" style="margin-bottom: 15px; color: black;">
+        <input type="text" id="adminUserId" placeholder="User ID" style="margin-bottom: 15px; color: black;">
         <input type="password" id="adminPassword" placeholder="Password" style="margin-bottom: 10px; color: black;" onkeyup="if(event.key==='Enter') checkPassword()">
         
         <div style="text-align: right; margin-bottom: 15px;">
@@ -306,10 +316,27 @@
         
         <hr style="border: 1px solid #334155; margin: 25px 0;">
         
-        <div style="text-align: center;">
+        <div style="text-align: center; margin-bottom: 15px;">
             <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Don't have an Organizer account?</p>
             <button class="btn-success" style="width:100%; background: #10b981; padding: 10px; font-size: 14px;" onclick="showSignup()">Sign Up / Request Access</button>
         </div>
+
+        <div style="text-align: center; margin-top: 25px;">
+            <a href="#" onclick="showOwnerLogin()" style="color: #fde047; font-size: 13px; font-weight: bold; text-decoration: none; cursor: pointer;">👑 Website Owner Login</a>
+        </div>
+    </div>
+
+    <!-- Owner Login Screen -->
+    <div class="box hidden" id="ownerLoginSection" style="max-width: 400px;">
+        <h2 style="text-align: center; color: #fde047; margin-bottom: 10px; font-weight: 900; text-transform: uppercase;">👑 Owner Portal</h2>
+        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-bottom: 25px;">Master access for platform administration.</p>
+        
+        <input type="password" id="ownerPasswordInput" placeholder="Master Password" style="margin-bottom: 15px; color: black;" onkeyup="if(event.key==='Enter') checkOwnerPassword()">
+        
+        <button class="btn-primary" style="background: #f59e0b; width:100%; padding: 12px; font-size: 15px; margin-bottom: 15px;" onclick="checkOwnerPassword()">Unlock Hub</button>
+        <button class="btn-danger" style="width:100%; background: transparent; border: 1px solid #94a3b8; color: #94a3b8; padding: 12px; font-size: 14px;" onclick="showLogin()">← Back to Organizer Login</button>
+        
+        <p id="ownerErrorMessage" style="color: #ff4d4d; display: none; text-align: center; margin-top: 15px;">Incorrect Master Password.</p>
     </div>
 
     <!-- Organizer Signup Screen -->
