@@ -1007,6 +1007,44 @@
         }
     }
 
+    function checkOwnerPassword() {
+        const pwd = document.getElementById('ownerPasswordInput').value;
+        
+        if (pwd === "MasterUnlock2026") {
+            // Save login state permanently as OWNER
+            localStorage.setItem('isAdmin', 'owner');
+            document.getElementById('nav-owner').style.display = 'block'; // Show Owner Hub
+            
+            // Hide login, show main UI
+            document.getElementById('ownerLoginSection').classList.add('hidden');
+            document.getElementById('appMainUI').classList.remove('hidden'); 
+            document.getElementById('ownerErrorMessage').style.display = 'none';
+
+            // Fetch permanently saved data from the server
+            if (typeof socket !== 'undefined' && socket.connected) {
+                socket.emit('request_saved_auctions');
+                socket.on('load_saved_auctions', (serverHistory) => {
+                    if (serverHistory && serverHistory.length > 0) {
+                        safeSetStorage('auctionHistory', serverHistory);
+                        if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
+                    }
+                });
+            }
+
+            // Load all dashboard components
+            try { populateAuctionDetails(); } catch(e){}
+            try { updateDashboardHistoryCard(); } catch(e){}
+            try { updateManualCategoryDropdowns(); } catch(e){}
+            try { renderFranchiseStandings(); } catch(e){}
+            try { renderPlayersDatabase('all'); } catch(e){}
+            try { renderOwnerHub(); } catch(e){}
+
+        } else {
+            // Show error message
+            document.getElementById('ownerErrorMessage').style.display = 'block';
+        }
+    }
+
     function checkPassword() {
             const uid = document.getElementById('adminUserId').value.trim();
             const pwd = document.getElementById('adminPassword').value;
@@ -1078,6 +1116,7 @@
             const adminStatus = localStorage.getItem('isAdmin');
             if (adminStatus === 'owner') {
                 document.getElementById('adminPassword').value = "AUTO_LOGIN_OWNER";
+                document.getElementById('adminUserId').value = "owner";
                 checkPassword();
             } else if (adminStatus === 'organizer') {
                 document.getElementById('adminPassword').value = "AUTO_LOGIN_ORG";
