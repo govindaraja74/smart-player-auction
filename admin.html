@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Smart Players Auction</title>
+    <!-- XLSX Library required for Excel upload processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -164,6 +165,17 @@
             document.getElementById('recoverUserId').value = '';
         }
 
+        function toggleCustomSecurityQuestion() {
+            const secQ = document.getElementById('signupSecQ').value;
+            const customInput = document.getElementById('signupCustomSecQ');
+            if (secQ === 'custom') {
+                customInput.style.display = 'block';
+            } else {
+                customInput.style.display = 'none';
+                customInput.value = '';
+            }
+        }
+
         function checkUserId() {
             const uid = document.getElementById('signupUserId').value.trim();
             const statusLabel = document.getElementById('userIdStatus');
@@ -202,8 +214,13 @@
             const phone = document.getElementById('signupPhone').value.trim();
             const userId = document.getElementById('signupUserId').value.trim();
             const pwd = document.getElementById('signupPwd').value;
-            const secQ = document.getElementById('signupSecQ').value;
+            let secQ = document.getElementById('signupSecQ').value;
             const secA = document.getElementById('signupSecA').value.trim().toLowerCase();
+            
+            if (secQ === 'custom') {
+                secQ = document.getElementById('signupCustomSecQ').value.trim();
+                if (!secQ) return alert("Please type your custom security question.");
+            }
             
             if(!name || !email || !org || !userId || !pwd || !secQ || !secA) {
                 return alert("Please fill in all required fields (*).");
@@ -228,6 +245,8 @@
                 document.getElementById('signupUserId').value = '';
                 document.getElementById('signupPwd').value = '';
                 document.getElementById('signupSecQ').value = '';
+                document.getElementById('signupCustomSecQ').value = '';
+                document.getElementById('signupCustomSecQ').style.display = 'none';
                 document.getElementById('signupSecA').value = '';
                 document.getElementById('userIdStatus').innerText = '';
             }, 3000);
@@ -241,7 +260,7 @@
             
             if (account && account.secQ) {
                 currentRecoveryAccount = account;
-                let qText = "";
+                let qText = account.secQ; // Defaults to the custom text if stored directly
                 if(account.secQ === "pet") qText = "What is the name of your first pet?";
                 if(account.secQ === "school") qText = "What city were you born in?";
                 if(account.secQ === "mother") qText = "What is your mother's maiden name?";
@@ -311,12 +330,14 @@
         </div>
         <input type="password" id="signupPwd" placeholder="Choose a Password *" style="margin-bottom: 15px; color: black;" required>
         
-        <select id="signupSecQ" style="margin-bottom: 15px; color: black;" required>
+        <select id="signupSecQ" style="margin-bottom: 15px; color: black;" onchange="toggleCustomSecurityQuestion()" required>
             <option value="">Select Security Question (For Recovery) *</option>
             <option value="pet">What is the name of your first pet?</option>
             <option value="school">What city were you born in?</option>
             <option value="mother">What is your mother's maiden name?</option>
+            <option value="custom">Write my own custom question...</option>
         </select>
+        <input type="text" id="signupCustomSecQ" placeholder="Type your custom security question *" style="margin-bottom: 15px; color: black; display: none;">
         <input type="text" id="signupSecA" placeholder="Security Answer *" style="margin-bottom: 15px; color: black;" required>
         
         <button class="btn-success" id="submitSignupBtn" style="width:100%; margin-bottom: 10px; padding: 12px; font-size: 14px;" onclick="submitSignup()" disabled>Submit Request</button>
