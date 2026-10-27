@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Smart Players Auction</title>
-    <!-- XLSX Library required for Excel upload processing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
@@ -55,8 +54,6 @@
         .modal-content { background: #0f172a; padding: 30px; border-radius: 12px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: white; position: relative; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .close-btn { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #94a3b8; cursor: pointer; background: none; border: none; font-weight: bold; line-height: 1; }
         .close-btn:hover { color: white; }
-
-        /* Utility */
         .edit-del-btn { background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; font-size: 12px; padding: 6px 10px; transition: 0.2s; }
         .edit-del-btn:hover { background: #e2e8f0; }
 
@@ -82,7 +79,6 @@
         .sold-stamp-overlay { position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg) scale(0.1); font-size: 110px; color: white; border: 12px solid white; padding: 15px 50px; border-radius: 20px; background: rgba(0,0,0,0.7); letter-spacing: 12px; opacity: 0; pointer-events: none; transition: all 0.3s ease-out; z-index: 50; box-shadow: 0 15px 40px rgba(0,0,0,0.8); }
         .sold-stamp-overlay.active { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
 
-        /* LIVE AUCTION ROOM UI ENHANCEMENTS */
         #view-live-room { position: fixed !important; top: 0; left: 0; width: 100vw !important; height: 100vh !important; background-color: #0d1b2a !important; overflow: hidden !important; display: flex; flex-direction: column; align-items: center !important; justify-content: center !important; z-index: 500; padding: 20px; box-sizing: border-box; }
         #view-live-room > div { width: 100% !important; max-width: 98% !important; zoom: 0.85; display: flex; flex-direction: column; align-items: center; }
         #la-franchise-strip { display: flex !important; flex-wrap: nowrap !important; justify-content: center; align-items: center; width: 100% !important; max-width: 1200px !important; gap: 8px; padding: 15px 5px; min-height: 80px; margin-top: 25px !important;  background: rgba(0,0,0,0.2); border-radius: 10px; }
@@ -147,26 +143,77 @@
         // Form toggle and signup functions
         function showSignup() {
             document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('recoverySection').classList.add('hidden');
             document.getElementById('signupSection').classList.remove('hidden');
         }
 
         function showLogin() {
             document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('recoverySection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             document.getElementById('signupMessage').style.display = 'none';
         }
 
-        function submitSignup() {
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const org = document.getElementById('signupOrg').value;
-            const phone = document.getElementById('signupPhone').value;
+        function showRecovery() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('recoverySection').classList.remove('hidden');
+            document.getElementById('recoveryQuestionBox').classList.add('hidden');
+            document.getElementById('recoveredPwdDisplay').style.display = 'none';
+            document.getElementById('recoverError').style.display = 'none';
+            document.getElementById('recoverUserId').value = '';
+        }
+
+        function checkUserId() {
+            const uid = document.getElementById('signupUserId').value.trim();
+            const statusLabel = document.getElementById('userIdStatus');
+            const submitBtn = document.getElementById('submitSignupBtn');
+
+            if (!uid) {
+                statusLabel.innerText = "";
+                submitBtn.disabled = true;
+                return;
+            }
+
+            const pending = JSON.parse(localStorage.getItem('pendingOrganizers') || '[]');
+            const approved = JSON.parse(localStorage.getItem('approvedOrganizers') || '[]');
             
-            if(!name || !email || !org) return alert("Please fill in all required fields (*).");
+            const isTaken = pending.some(o => o.userId.toLowerCase() === uid.toLowerCase()) || 
+                            approved.some(o => o.userId.toLowerCase() === uid.toLowerCase()) || 
+                            uid.toLowerCase() === "owner";
+
+            if (isTaken) {
+                statusLabel.innerText = "❌ User ID is already taken";
+                statusLabel.style.color = "#ef4444";
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
+            } else {
+                statusLabel.innerText = "✅ User ID is available";
+                statusLabel.style.color = "#10b981";
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
+        }
+
+        function submitSignup() {
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const org = document.getElementById('signupOrg').value.trim();
+            const phone = document.getElementById('signupPhone').value.trim();
+            const userId = document.getElementById('signupUserId').value.trim();
+            const pwd = document.getElementById('signupPwd').value;
+            const secQ = document.getElementById('signupSecQ').value;
+            const secA = document.getElementById('signupSecA').value.trim().toLowerCase();
+            
+            if(!name || !email || !org || !userId || !pwd || !secQ || !secA) {
+                return alert("Please fill in all required fields (*).");
+            }
             
             // Save request to localStorage
             let pending = JSON.parse(localStorage.getItem('pendingOrganizers') || '[]');
-            pending.push({ name, email, org, phone, date: new Date().toLocaleDateString() });
+            pending.push({ 
+                name, email, org, phone, userId, password: pwd, secQ, secA, date: new Date().toLocaleDateString() 
+            });
             localStorage.setItem('pendingOrganizers', JSON.stringify(pending));
             
             // Show success message
@@ -178,17 +225,65 @@
                 document.getElementById('signupEmail').value = '';
                 document.getElementById('signupOrg').value = '';
                 document.getElementById('signupPhone').value = '';
+                document.getElementById('signupUserId').value = '';
+                document.getElementById('signupPwd').value = '';
+                document.getElementById('signupSecQ').value = '';
+                document.getElementById('signupSecA').value = '';
+                document.getElementById('userIdStatus').innerText = '';
             }, 3000);
+        }
+
+        let currentRecoveryAccount = null;
+        function findRecoveryAccount() {
+            const uid = document.getElementById('recoverUserId').value.trim();
+            const approved = JSON.parse(localStorage.getItem('approvedOrganizers') || '[]');
+            const account = approved.find(o => o.userId.toLowerCase() === uid.toLowerCase());
+            
+            if (account && account.secQ) {
+                currentRecoveryAccount = account;
+                let qText = "";
+                if(account.secQ === "pet") qText = "What is the name of your first pet?";
+                if(account.secQ === "school") qText = "What city were you born in?";
+                if(account.secQ === "mother") qText = "What is your mother's maiden name?";
+                
+                document.getElementById('recoverQText').innerText = qText;
+                document.getElementById('recoveryQuestionBox').classList.remove('hidden');
+                document.getElementById('recoverError').style.display = 'none';
+            } else {
+                document.getElementById('recoverError').innerText = "User ID not found or account is still pending approval.";
+                document.getElementById('recoverError').style.display = 'block';
+                document.getElementById('recoveryQuestionBox').classList.add('hidden');
+            }
+        }
+
+        function verifyRecovery() {
+            const ans = document.getElementById('recoverAnswer').value.trim().toLowerCase();
+            if (currentRecoveryAccount && currentRecoveryAccount.secA === ans) {
+                document.getElementById('recoveredPwdDisplay').innerText = `Your Password is: ${currentRecoveryAccount.password}`;
+                document.getElementById('recoveredPwdDisplay').style.display = 'block';
+                document.getElementById('recoverError').style.display = 'none';
+            } else {
+                document.getElementById('recoverError').innerText = "Incorrect security answer.";
+                document.getElementById('recoverError').style.display = 'block';
+                document.getElementById('recoveredPwdDisplay').style.display = 'none';
+            }
         }
     </script>
 </head>
 <body onload="setTimeout(safeInit, 300)">
+    
     <!-- Organizer Login Screen -->
     <div class="box" id="loginSection">
         <h2 style="text-align: center; color: #38bdf8; margin-bottom: 20px; font-weight: 900; text-transform: uppercase;">Organizer Login</h2>
-        <input type="password" id="adminPassword" placeholder="Enter Password" style="margin-bottom: 15px; color: black;" onkeyup="if(event.key==='Enter') checkPassword()">
+        <input type="text" id="adminUserId" placeholder="User ID (or 'owner')" style="margin-bottom: 15px; color: black;">
+        <input type="password" id="adminPassword" placeholder="Password" style="margin-bottom: 10px; color: black;" onkeyup="if(event.key==='Enter') checkPassword()">
+        
+        <div style="text-align: right; margin-bottom: 15px;">
+            <a href="#" onclick="showRecovery()" style="color: #38bdf8; font-size: 12px; text-decoration: underline; cursor: pointer;">Forgot Password?</a>
+        </div>
+
         <button class="btn-primary" style="width:100%; padding: 12px; font-size: 15px;" onclick="checkPassword()">Secure Login 🔒</button>
-        <p id="errorMessage" style="color: #ff4d4d; display: none; text-align: center; margin-top: 10px;">Incorrect password.</p>
+        <p id="errorMessage" style="color: #ff4d4d; display: none; text-align: center; margin-top: 10px;">Incorrect User ID or Password, or account pending.</p>
         
         <hr style="border: 1px solid #334155; margin: 25px 0;">
         
@@ -199,7 +294,7 @@
     </div>
 
     <!-- Organizer Signup Screen -->
-    <div class="box hidden" id="signupSection">
+    <div class="box hidden" id="signupSection" style="max-width: 450px;">
         <h2 style="text-align: center; color: #10b981; margin-top: 0; font-weight: 900; text-transform: uppercase;">Organizer Sign Up</h2>
         <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-bottom: 20px;">New accounts must be approved by the website owner before you can login.</p>
         
@@ -208,10 +303,46 @@
         <input type="text" id="signupOrg" placeholder="Club / Organization Name *" style="margin-bottom: 15px; color: black;" required>
         <input type="text" id="signupPhone" placeholder="Phone Number" style="margin-bottom: 15px; color: black;">
         
-        <button class="btn-success" style="width:100%; margin-bottom: 10px; padding: 12px; font-size: 14px;" onclick="submitSignup()">Submit Request</button>
+        <hr style="border: 1px solid #334155; margin: 15px 0;">
+        
+        <div style="position: relative;">
+            <input type="text" id="signupUserId" placeholder="Choose a User ID *" style="margin-bottom: 5px; color: black;" onkeyup="checkUserId()" required>
+            <small id="userIdStatus" style="display: block; margin-bottom: 10px; font-weight: bold; font-size: 12px; min-height: 14px;"></small>
+        </div>
+        <input type="password" id="signupPwd" placeholder="Choose a Password *" style="margin-bottom: 15px; color: black;" required>
+        
+        <select id="signupSecQ" style="margin-bottom: 15px; color: black;" required>
+            <option value="">Select Security Question (For Recovery) *</option>
+            <option value="pet">What is the name of your first pet?</option>
+            <option value="school">What city were you born in?</option>
+            <option value="mother">What is your mother's maiden name?</option>
+        </select>
+        <input type="text" id="signupSecA" placeholder="Security Answer *" style="margin-bottom: 15px; color: black;" required>
+        
+        <button class="btn-success" id="submitSignupBtn" style="width:100%; margin-bottom: 10px; padding: 12px; font-size: 14px;" onclick="submitSignup()" disabled>Submit Request</button>
         <button class="btn-danger" style="width:100%; background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 12px; font-size: 14px;" onclick="showLogin()">Cancel & Go Back</button>
         
         <p id="signupMessage" style="color: #10b981; display: none; text-align: center; font-size: 14px; margin-top: 15px; font-weight: bold;">✅ Request sent! The site owner will review your application.</p>
+    </div>
+
+    <!-- Password Recovery Screen -->
+    <div class="box hidden" id="recoverySection">
+        <h2 style="text-align: center; color: #f59e0b; margin-top: 0; font-weight: 900; text-transform: uppercase;">Recover Password</h2>
+        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-bottom: 20px;">Enter your User ID to retrieve your security question.</p>
+        
+        <input type="text" id="recoverUserId" placeholder="Enter User ID" style="margin-bottom: 15px; color: black;">
+        <button class="btn-primary" style="width:100%; margin-bottom: 15px;" onclick="findRecoveryAccount()">Find Account</button>
+        
+        <div id="recoveryQuestionBox" class="hidden">
+            <p id="recoverQText" style="color: #fde047; font-size: 13px; font-weight: bold; margin-bottom: 10px; text-align: center;"></p>
+            <input type="text" id="recoverAnswer" placeholder="Your Answer" style="margin-bottom: 15px; color: black;">
+            <button class="btn-success" style="width:100%; margin-bottom: 15px;" onclick="verifyRecovery()">Show Password</button>
+        </div>
+        
+        <p id="recoveredPwdDisplay" style="color: #10b981; display: none; text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 15px; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px solid #10b981;"></p>
+        <p id="recoverError" style="color: #ff4d4d; display: none; text-align: center; font-size: 13px; margin-bottom: 15px; font-weight: bold;"></p>
+
+        <button class="btn-danger" style="width:100%; background: transparent; border: 1px solid #ef4444; color: #ef4444;" onclick="showLogin()">Back to Login</button>
     </div>
 
     <!-- UNIVERSAL APP LAYOUT -->
@@ -249,7 +380,7 @@
             <div id="view-owner-hub" class="hidden">
                 <div style="font-size: 14px; color: #64748b; margin-bottom: 10px;">HOME &nbsp;>&nbsp; OWNER HUB</div>
                 <h1 class="dash-title" style="color: #fde047;">👑 WEBSITE OWNER HUB</h1>
-                <p style="color: #64748b; margin-bottom: 30px;">Review signup requests, assign passwords, and manage organizer access.</p>
+                <p style="color: #64748b; margin-bottom: 30px;">Review signup requests, manage organizers, and secure your platform.</p>
 
                 <div class="ad-card">
                     <h2 style="color: #1e73be; border-bottom: 2px solid #1e73be; padding-bottom: 10px; margin-top: 0;">Pending Organizer Requests</h2>
@@ -829,12 +960,14 @@
     }
 
     function checkPassword() {
+            const uid = document.getElementById('adminUserId').value.trim();
             const pwd = document.getElementById('adminPassword').value;
             let approvedOrganizers = JSON.parse(localStorage.getItem('approvedOrganizers') || '[]');
-            let isApprovedOrganizer = approvedOrganizers.find(o => o.password === pwd);
+            
+            let isApprovedOrganizer = approvedOrganizers.find(o => o.userId.toLowerCase() === uid.toLowerCase() && o.password === pwd);
 
             // Checks for the typed password OR an auto-login trigger
-            if (pwd === "MasterUnlock2026" || pwd === "AUTO_LOGIN_OWNER") {
+            if ((uid.toLowerCase() === "owner" && pwd === "MasterUnlock2026") || pwd === "AUTO_LOGIN_OWNER") {
                 
                 // 🔥 SAVES THE LOGIN STATE PERMANENTLY AS OWNER 🔥
                 localStorage.setItem('isAdmin', 'owner');
@@ -924,11 +1057,10 @@
                     <div style="background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                         <div>
                             <strong style="color: white; font-size: 16px;">${req.name}</strong> <span style="color: #94a3b8; font-size: 13px;">(${req.date})</span>
-                            <div style="color: #38bdf8; font-size: 14px; margin-top: 4px;">${req.org}</div>
+                            <div style="color: #38bdf8; font-size: 14px; margin-top: 4px;">User ID: <span style="color:white;">${req.userId}</span> | Org: ${req.org}</div>
                             <div style="color: #cbd5e1; font-size: 12px; margin-top: 4px;">Email: ${req.email} | Phone: ${req.phone || 'N/A'}</div>
                         </div>
                         <div style="display: flex; gap: 10px; align-items: center;">
-                            <input type="text" id="assignPwd_${index}" placeholder="Assign Password" style="padding: 8px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: white;">
                             <button onclick="approveOrganizer(${index})" style="background: #10b981; color: white; padding: 8px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Approve</button>
                             <button onclick="rejectOrganizer(${index})" style="background: #ef4444; color: white; padding: 8px 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer;">Reject</button>
                         </div>
@@ -944,8 +1076,7 @@
                     <div style="background: #1e293b; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <strong style="color: white; font-size: 16px;">${org.name}</strong>
-                            <div style="color: #38bdf8; font-size: 14px; margin-top: 4px;">${org.org}</div>
-                            <div style="color: #cbd5e1; font-size: 12px; margin-top: 4px;">Assigned Password: <strong style="color: #fde047;">${org.password}</strong></div>
+                            <div style="color: #38bdf8; font-size: 14px; margin-top: 4px;">User ID: <span style="color:white;">${org.userId}</span> | Org: ${org.org}</div>
                         </div>
                         <button onclick="revokeOrganizer(${index})" style="background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">Revoke Access</button>
                     </div>`;
@@ -956,19 +1087,15 @@
         function approveOrganizer(index) {
             let pending = JSON.parse(localStorage.getItem('pendingOrganizers') || '[]');
             let approved = JSON.parse(localStorage.getItem('approvedOrganizers') || '[]');
-            let assignedPwd = document.getElementById(`assignPwd_${index}`).value;
-
-            if (!assignedPwd) return alert("Please type a password to assign to this organizer.");
 
             let org = pending[index];
-            org.password = assignedPwd;
             approved.push(org);
             pending.splice(index, 1);
 
             localStorage.setItem('pendingOrganizers', JSON.stringify(pending));
             localStorage.setItem('approvedOrganizers', JSON.stringify(approved));
             renderOwnerHub();
-            alert(`Organizer approved! Give them the password: ${assignedPwd}`);
+            alert(`Account for ${org.name} (User ID: ${org.userId}) has been approved! They can now log in.`);
         }
 
         function rejectOrganizer(index) {
