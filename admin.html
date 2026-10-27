@@ -622,14 +622,70 @@
        </style>
 <!-- Fireworks Engine -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        // Form toggle and signup functions
+        function showSignup() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('signupSection').classList.remove('hidden');
+        }
+
+        function showLogin() {
+            document.getElementById('signupSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('signupMessage').style.display = 'none';
+        }
+
+        function submitSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const org = document.getElementById('signupOrg').value;
+            
+            if(!name || !email || !org) return alert("Please fill in all required fields (*).");
+            
+            // Show success message
+            document.getElementById('signupMessage').style.display = 'block';
+            
+            // Automatically switch back to login after 3 seconds
+            setTimeout(() => {
+                showLogin();
+                document.getElementById('signupName').value = '';
+                document.getElementById('signupEmail').value = '';
+                document.getElementById('signupOrg').value = '';
+                document.getElementById('signupPhone').value = '';
+            }, 3000);
+        }
+    </script>
 </head>
 <body onload="setTimeout(safeInit, 300)">
-    <!-- Login Screen -->
+    <!-- Organizer Login Screen -->
     <div class="box" id="loginSection">
-        <h2 style="text-align: center;">Admin Portal</h2>
-        <input type="password" id="adminPassword" placeholder="Enter Password" style="margin-bottom: 15px;" onkeyup="if(event.key==='Enter') checkPassword()">
-        <button class="btn-primary" style="width:100%" onclick="checkPassword()">Login</button>
-        <p id="errorMessage" style="color: #ff4d4d; display: none; text-align: center;">Incorrect password.</p>
+        <h2 style="text-align: center; color: #38bdf8; margin-bottom: 20px; font-weight: 900; text-transform: uppercase;">Organizer Login</h2>
+        <input type="password" id="adminPassword" placeholder="Enter Password" style="margin-bottom: 15px; color: black;" onkeyup="if(event.key==='Enter') checkPassword()">
+        <button class="btn-primary" style="width:100%; padding: 12px; font-size: 15px;" onclick="checkPassword()">Secure Login 🔒</button>
+        <p id="errorMessage" style="color: #ff4d4d; display: none; text-align: center; margin-top: 10px;">Incorrect password.</p>
+        
+        <hr style="border: 1px solid #334155; margin: 25px 0;">
+        
+        <div style="text-align: center;">
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Don't have an Organizer account?</p>
+            <button class="btn-success" style="width:100%; background: #10b981; padding: 10px; font-size: 14px;" onclick="showSignup()">Sign Up / Request Access</button>
+        </div>
+    </div>
+
+    <!-- Organizer Signup Screen -->
+    <div class="box hidden" id="signupSection">
+        <h2 style="text-align: center; color: #10b981; margin-top: 0; font-weight: 900; text-transform: uppercase;">Organizer Sign Up</h2>
+        <p style="color: #94a3b8; font-size: 12px; text-align: center; margin-bottom: 20px;">New accounts must be approved by the website owner before you can login.</p>
+        
+        <input type="text" id="signupName" placeholder="Full Name *" style="margin-bottom: 15px; color: black;" required>
+        <input type="email" id="signupEmail" placeholder="Email Address *" style="margin-bottom: 15px; color: black;" required>
+        <input type="text" id="signupOrg" placeholder="Club / Organization Name *" style="margin-bottom: 15px; color: black;" required>
+        <input type="text" id="signupPhone" placeholder="Phone Number" style="margin-bottom: 15px; color: black;">
+        
+        <button class="btn-success" style="width:100%; margin-bottom: 10px; padding: 12px; font-size: 14px;" onclick="submitSignup()">Submit Request</button>
+        <button class="btn-danger" style="width:100%; background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 12px; font-size: 14px;" onclick="showLogin()">Cancel & Go Back</button>
+        
+        <p id="signupMessage" style="color: #10b981; display: none; text-align: center; font-size: 14px; margin-top: 15px; font-weight: bold;">✅ Request sent! The site owner will review your application.</p>
     </div>
 
     <!-- UNIVERSAL APP LAYOUT -->
@@ -1477,7 +1533,7 @@
                 const logoInput = document.getElementById('setupLogo');
                 if (logoInput && logoInput.files && logoInput.files.length > 0) {
                     try {
-                       auctionLogoUrl = await uploadImageToCloudinary(logoInput.files[0]);
+                        auctionLogoUrl = await uploadImageToCloudinary(logoInput.files[0]);
                     } catch (imgErr) {}
                 }
 
