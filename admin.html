@@ -1111,8 +1111,18 @@
             }
         }
 
-        function safeInit() {
-            // Check if you are already logged in, and instantly bypass the login screen!
+     function safeInit() {
+            // Check if the URL explicitly asks to force the login screen
+            const urlParams = new URLSearchParams(window.location.search);
+            const forceLogin = urlParams.get('forceLogin');
+
+            if (forceLogin === 'true') {
+                // If the user came from the homepage login button, DON'T auto-login.
+                // Just stay on the login screen.
+                return;
+            }
+
+            // Otherwise, check if you are already logged in, and instantly bypass the login screen!
             const adminStatus = localStorage.getItem('isAdmin');
             if (adminStatus === 'owner') {
                 document.getElementById('adminPassword').value = "AUTO_LOGIN_OWNER";
@@ -1124,7 +1134,6 @@
             }
             try { loadSavedMemory(); } catch(e) {}
         }
-
         // --- NEW: OWNER HUB FUNCTIONS ---
         function renderOwnerHub() {
             let pending = JSON.parse(localStorage.getItem('pendingOrganizers') || '[]');
