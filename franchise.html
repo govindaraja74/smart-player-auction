@@ -225,17 +225,8 @@
                 allPlayers = safeGetStorage('auctionPlayers', []);
             } catch(e) {}
 
-            // Try Cloud first, fallback to local for Fixtures
-            try {
-                const res = await fetch('/api/fixtures');
-                if(res.ok) allFixtures = await res.json();
-            } catch(err) {}
-
-            if(!Array.isArray(allFixtures) || allFixtures.length === 0) {
-                try {
-                    allFixtures = safeGetStorage('leagueManualFixtures', []);
-                } catch(e) {}
-            }
+            // Strict Local Scoped Fetch (No Backend Call)
+            allFixtures = safeGetStorage('leagueManualFixtures', []);
 
             renderRoster();
             renderMatchups();
@@ -459,19 +450,9 @@
                 }
             });
 
-            // 3. Save to Database
+            // 3. Save to Scoped Database
             safeSetStorage('leagueManualFixtures', allFixtures);
             
-            try {
-                await fetch('/api/fixtures', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(allFixtures)
-                });
-            } catch (error) {
-                console.error("Cloud Sync Failed", error);
-            }
-
             // 4. Refresh UI
             alert("Lineup successfully locked and submitted!");
             renderMatchups();
