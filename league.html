@@ -16,30 +16,23 @@
         }
         body { background-color: var(--dark); color: white; display: flex; flex-direction: column; min-height: 100vh; }
 
-        /* Simple Navbar */
         .navbar { padding: 20px 40px; background: rgba(15, 23, 42, 0.95); border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; position: relative; z-index: 100; }
         .nav-brand { font-size: 22px; font-weight: 900; text-transform: uppercase; color: white; text-decoration: none; display: flex; align-items: center; gap: 10px;}
         .nav-brand img { height: 35px; }
         .nav-brand span { color: var(--secondary); }
 
-        /* Action Buttons */
         .nav-actions { display: flex; gap: 15px; }
         .points-btn { background: #f59e0b; color: #0f172a; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 900; font-size: 13px; display: inline-flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border: none; cursor: pointer; text-transform: uppercase;}
         .admin-btn { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
 
-        /* Main Content */
         .container { flex-grow: 1; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; position: relative; z-index: 10; }
         .header { text-align: center; margin-bottom: 50px; }
         .header h1 { font-size: 48px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; }
         .header p { color: #94a3b8; font-size: 18px; margin-top: 10px; }
 
-        /* Split Screen Grid */
         .split-grid { display: grid; gap: 20px; width: 100%; max-width: 1400px; }
-        
         .court-panel { background: var(--card-bg); border: 2px solid #334155; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        
         .court-header { background: #0ea5e9; color: white; padding: 10px 15px; text-align: left; font-weight: 900; font-size: 18px; letter-spacing: 2px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
-        
         .court-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative; }
         
         .live-indicator { color: white; font-weight: 900; font-size: 12px; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; animation: blink 1.5s infinite; background: rgba(0,0,0,0.25); padding: 4px 8px; border-radius: 4px; }
@@ -47,80 +40,45 @@
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         .match-cat { font-family: Arial, sans-serif; color: #fde047; font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; text-align: center; line-height: 1.3; max-height: 42px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; padding: 0 10px; }
-        
-        .teams-split { display: flex; width: 100%; justify-content: space-between; align-items: stretch; gap: 10px; }
-        
-        .team-box { flex: 1; background: #0f172a; padding: 15px 10px; border-radius: 8px; border: 1px solid #334155; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; box-shadow: inset 0 2px 15px rgba(0,0,0,0.3); }
-        .team-name { font-weight: 900; font-size: 18px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 1px; line-height: 1.1; word-wrap: break-word; width: 100%;}
-        
-        .player-names { font-size: 10px; color: #94a3b8; font-weight: 700; line-height: 1.3; min-height: 26px; display: flex; align-items: center; justify-content: center; text-transform: capitalize; margin-bottom: 8px; }
-        
-        .score-display { font-size: 34px; font-weight: 900; color: white; display: flex; align-items: baseline; gap: 4px; line-height: 1; }
-        .score-label { font-size: 11px; color: #64748b; font-weight: 800; text-transform: uppercase; }
-        
-        .vs-wrapper { display: flex; align-items: center; justify-content: center; }
-        .vs-badge { color: #94a3b8; font-size: 14px; font-weight: 900; background: #1e293b; padding: 6px 10px; border-radius: 6px; border: 1px solid #334155; }
-        .court-footer { background: #0f172a; padding: 12px 20px; border-top: 1px solid #334155; font-size: 14px; display: flex; align-items: center; gap: 10px;}
         .queue-badge { background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .court-footer { background: #0f172a; padding: 12px 20px; border-top: 1px solid #334155; font-size: 14px; display: flex; align-items: center; gap: 10px;}
 
-        /* Login Portals Grid */
         .portal-grid { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1000px; margin-top: 40px; }
-        
-        .portal-card {
-            background: var(--card-bg); border: 1px solid #334155; border-radius: 12px;
-            padding: 40px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
+        .portal-card { background: var(--card-bg); border: 1px solid #334155; border-radius: 12px; padding: 40px; width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .portal-icon { font-size: 50px; margin-bottom: 20px; }
         .portal-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
         .portal-card p { font-size: 14px; color: #94a3b8; margin-bottom: 30px; line-height: 1.5; }
         
-        input {
-            width: 100%; padding: 12px 15px; margin-bottom: 15px; border-radius: 6px;
-            border: 1px solid #475569; background: #0f172a; color: white; outline: none;
-        }
+        input { width: 100%; padding: 12px 15px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: white; outline: none; }
         input:focus { border-color: var(--primary); }
 
-        .login-btn {
-            width: 100%; background: var(--primary); color: white; border: none;
-            padding: 15px; border-radius: 6px; font-weight: 800; font-size: 16px;
-            cursor: pointer; transition: 0.3s; text-transform: uppercase;
-        }
+        .login-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 6px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .login-btn:hover { background: #0369a1; transform: translateY(-2px); }
 
-        /* Modals */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
         .modal-content { background: #1e293b; padding: 30px; border-radius: 12px; width: 90%; max-width: 800px; position: relative; border: 1px solid #475569; box-shadow: 0 10px 30px rgba(0,0,0,0.6); max-height: 80vh; overflow-y: auto;}
     </style>
 </head>
 <body>
-<!-- Global Live Matches Button -->
     <a href="#" onclick="event.preventDefault(); loadPublicMatches();" style="position: fixed; bottom: 25px; right: 25px; background: #ef4444; color: white; padding: 12px 24px; border-radius: 50px; text-decoration: none; font-weight: 900; font-size: 14px; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.6); z-index: 9999; display: flex; align-items: center; gap: 8px; border: 2px solid white;">
         <div style="width: 10px; height: 10px; background: white; border-radius: 50%; animation: blink 1.5s infinite;"></div> LIVE MATCHES
     </a>
+    
     <nav class="navbar">
         <a href="/index.html" class="nav-brand">
             <img src="/spa-logo.png.png" alt="Logo">
             Smart <span>Players</span> Auction
         </a>
-        
-        <!-- Organizer Menu Buttons -->
-        <div style="display: flex; gap: 15px; z-index: 101;">
-           <a href="#" onclick="event.preventDefault(); openPointsModal();" style="background: #f59e0b; color: #0f172a; padding: 10px 20px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;">🏆 Points System</a>
-           
-           <a href="#" onclick="event.preventDefault(); toggleCategoriesModal();" style="background: #8b5cf6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;" id="organizerCatBtn">🏷️ Categories</a>
-           
-            <a href="#" onclick="event.preventDefault(); toggleOrderOfPlay();" style="background: #3b82f6; color: white; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;">⚙️ Manage Order of Play</a>
-            
-            <a href="#" onclick="event.preventDefault(); toggleFixtureManager();" style="background: #eab308; color: #0f172a; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 15px; text-decoration: none; display: inline-block;">📅 Assign Court</a>
+        <div class="nav-actions">
+            <a href="#" onclick="event.preventDefault(); togglePointsModal();" class="points-btn">🏆 Franchise Points Table</a>
+            <a href="league-admin.html" class="admin-btn" id="organizerBtn" style="display: none;">⚙️ Organizer Hub</a>
         </div>
     </nav>
     
     <div class="container" id="mainContainer">
-        <!-- Live Matches Grid -->
-        <div id="splitCourtsGrid" class="split-grid"></div>
+        <div id="splitCourtsGrid" class="split-grid" style="display:none;"></div>
 
-        <!-- Portals Grid (Hidden when Live matches are active, visible otherwise) -->
-        <div class="portal-grid" id="mainPortals" style="display: none;">
+        <div class="portal-grid" id="mainPortals">
             <div class="portal-card">
                 <div class="portal-icon">👔</div>
                 <h2>Franchise Portal</h2>
@@ -134,103 +92,11 @@
                 <div class="portal-icon">⚖️</div>
                 <h2>Umpire Portals</h2>
                 <p>Select your court or scan your court's QR code to access your live match score sheet.</p>
-                
                 <div id="umpireCourtLinks" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;"></div>
-
                 <div style="text-align: center; border-top: 1px solid #334155; padding-top: 15px;">
                     <button onclick="toggleQRModal()" style="background: transparent; color: #38bdf8; border: 1px solid #38bdf8; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px; font-weight: bold;">📱 Generate Umpire QR Codes</button>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Match Categories Modal -->
-    <div id="manageCategoriesModal" class="modal-overlay hidden" style="display: none;">
-        <div class="modal-content" style="max-width: 500px;">
-            <button onclick="toggleCategoriesModal()" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
-            <h2 style="color: #fde047; margin-bottom: 20px; font-size: 22px; text-transform: uppercase; font-weight: 900;">Manage Match Categories</h2>
-            
-            <div style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 20px;">
-                <label style="font-size: 13px; font-weight: bold; color: #94a3b8; margin-bottom: 5px; display: block;">Format / Type</label>
-                <select id="newCatType" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #475569; background: #1e293b; color: white; margin-bottom: 15px; font-weight: bold; outline: none;">
-                    <option value="">Select Format Type...</option>
-                    <option value="MS">Men's Singles (MS)</option>
-                    <option value="MD">Men's Doubles (MD)</option>
-                    <option value="WS">Women's Singles (WS)</option>
-                    <option value="WD">Women's Doubles (WD)</option>
-                    <option value="XD">Mixed Doubles (XD)</option>
-                    <option value="Jumbled">Jumbled</option>
-                    <option value="Custom">Other / Custom Format</option>
-                </select>
-
-                <label style="font-size: 13px; font-weight: bold; color: #94a3b8; margin-bottom: 5px; display: block;">Custom Category Name</label>
-                <input type="text" id="newCatName" placeholder="e.g., Jhon's Academy Mixed, Open Jumbled" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #475569; background: #1e293b; color: white; margin-bottom: 15px; outline: none;">
-                
-                <button onclick="addMatchDayCategory()" style="background: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase;">➕ Add Category</button>
-            </div>
-
-            <h3 style="color: #cbd5e1; font-size: 14px; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 10px;">Active Categories</h3>
-            <div id="activeCategoriesList" style="max-height: 200px; overflow-y: auto;">
-                <!-- Existing categories will load here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- 1. Order of Play Manager (Hidden) -->
-    <div id="orderOfPlayManager" style="display: none; width: 100%; max-width: 900px; margin: 20px auto; background: #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: white; position: relative; z-index: 105;">
-        <h2 style="text-align: center; color: #fde047; margin-top: 0; margin-bottom: 25px;">ORDER OF PLAY CHART</h2>
-        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-            <div style="flex: 1; min-width: 300px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #334155;">
-                <h3 style="color: #38bdf8; margin-top: 0; text-align: center;">Available Categories</h3>
-                <div id="availableCatsList" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;"></div>
-            </div>
-            <div style="flex: 1; min-width: 300px; background: #0f172a; padding: 20px; border-radius: 8px; border: 1px solid #10b981;">
-                <h3 style="color: #10b981; margin-top: 0; text-align: center;">Order of Play Chart</h3>
-                <div id="scheduledCatsList" style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;"></div>
-                <button onclick="saveOrderOfPlay()" style="width: 100%; padding: 12px; margin-top: 25px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">💾 Save & Publish Chart</button>
-            </div>
-        </div>
-        <div style="text-align: center; margin-top: 20px;">
-            <button onclick="toggleOrderOfPlay()" style="background: transparent; color: #94a3b8; border: 1px solid #94a3b8; padding: 8px 16px; border-radius: 5px; cursor: pointer;">Close</button>
-        </div>
-    </div>
-
-    <!-- 2. Fixture Manager (Hidden) -->
-    <div id="fixtureManager" style="display: none; width: 100%; max-width: 900px; margin: 20px auto; background: #1e293b; border-radius: 12px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.8); color: white; position: relative; z-index: 105;">
-        <h2 style="text-align: center; color: #eab308; margin-top: 0; margin-bottom: 20px;">MANAGE TODAY'S FIXTURES</h2>
-        
-        <!-- Dynamic Court Count Input -->
-        <div style="display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #334155;">
-            <label style="font-size: 14px; font-weight: bold; color: #38bdf8;">Number of Active Courts:</label>
-            <input type="number" id="activeCourtsCount" oninput="updateCourtDropdowns()" min="1" max="99" style="padding: 8px 15px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 4px; font-weight: bold; width: 100px; text-align: center; margin-bottom: 0;">
-        </div>
-
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155;">
-            <div style="flex: 1; min-width: 200px;">
-                <label style="font-size: 12px; color: #94a3b8;">Category</label>
-                <select id="fixCategory" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 4px; font-weight: bold;"></select>
-            </div>
-            <div style="flex: 1; min-width: 130px;">
-                <label style="font-size: 12px; color: #94a3b8;">Team A</label>
-                <select id="fixTeamA" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #ef4444; border-radius: 4px;"></select>
-            </div>
-            <div style="flex: 1; min-width: 130px;">
-                <label style="font-size: 12px; color: #94a3b8;">Team B</label>
-                <select id="fixTeamB" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #3b82f6; border-radius: 4px;"></select>
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label style="font-size: 12px; color: #94a3b8;">Court Assignment</label>
-                <select id="fixCourt" style="width: 100%; padding: 8px; margin-top: 5px; background: #1e293b; color: white; border: 1px solid #10b981; border-radius: 4px;"></select>
-            </div>
-            <div style="display: flex; align-items: flex-end;">
-                <button onclick="addManualFixture()" style="background: #eab308; color: #0f172a; border: none; padding: 9px 20px; border-radius: 4px; cursor: pointer; font-weight: bold;">Assign to Queue</button>
-            </div>
-        </div>
-
-        <div id="addedFixturesList" style="display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; margin-bottom: 20px;"></div>
-        <button onclick="saveManualFixtures()" style="width: 100%; padding: 12px; background: #10b981; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 16px;">💾 Save & Publish Fixtures</button>
-        <div style="text-align: center; margin-top: 15px;">
-            <button onclick="toggleFixtureManager()" style="background: transparent; color: #94a3b8; border: 1px solid #94a3b8; padding: 6px 12px; border-radius: 5px; cursor: pointer;">Close</button>
         </div>
     </div>
 
@@ -265,67 +131,17 @@
             <button onclick="toggleQRModal()" style="background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Close</button>
         </div>
     </div>
-    
-<!-- Points Configuration Modal -->
-    <div id="pointsConfigModal" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center;">
-        <div class="modal-content" style="background: #1e293b; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; position: relative; border: 1px solid #475569; box-shadow: 0 10px 30px rgba(0,0,0,0.6);">
-            <button onclick="closePointsModal()" style="position: absolute; top: 15px; right: 20px; background: transparent; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
-            
-            <h2 style="margin-top: 0; color: #fde047; border-bottom: 1px solid #334155; padding-bottom: 10px; font-size: 22px; text-transform: uppercase;">🏆 League Points System</h2>
-            
-            <label style="font-size: 14px; font-weight: bold; color: #cbd5e1; display: block; margin-bottom: 8px; margin-top: 20px;">Select Scoring Pattern</label>
-            <select id="scoringPattern" style="width: 100%; padding: 12px; border-radius: 6px; margin-bottom: 20px; background: #0f172a; color: white; border: 1px solid #475569; font-size: 14px; outline: none; cursor: pointer;" onchange="togglePointsView()">
-                <option value="overall_tie">Pattern A: Overall Tie Winner (Win majority of categories)</option>
-                <option value="per_game">Pattern B: Per Game Winner (Points per individual category)</option>
-            </select>
 
-            <!-- Pattern A: Overall Tie Configuration -->
-            <div id="overallTieConfig" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 25px;">
-                <p style="font-size: 12px; color: #94a3b8; margin-top: 0; margin-bottom: 15px; line-height: 1.4;">A team gets these points if they win the overall matchup (e.g., winning 5 out of 9 categories against the opponent).</p>
-                <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; font-weight: bold; color: #10b981;">Points for Winning Tie</label>
-                        <input type="number" id="ptsTieWin" value="2" style="width: 100%; padding: 10px; border-radius: 4px; border: 2px solid #10b981; background: #ffffff; color: #0f172a; margin-top: 5px; font-size: 18px; font-weight: 900; text-align: center; box-sizing: border-box;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; font-weight: bold; color: #ef4444;">Points for Losing Tie</label>
-                        <input type="number" id="ptsTieLoss" value="0" style="width: 100%; padding: 10px; border-radius: 4px; border: 2px solid #ef4444; background: #ffffff; color: #0f172a; margin-top: 5px; font-size: 18px; font-weight: 900; text-align: center; box-sizing: border-box;">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pattern B: Per Game Configuration -->
-            <div id="perGameConfig" style="background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 25px; display: none;">
-                <p style="font-size: 12px; color: #94a3b8; margin-top: 0; margin-bottom: 15px; line-height: 1.4;">A team gets these points for EVERY individual category match they win or draw within the tie.</p>
-                <div style="display: flex; gap: 15px;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; font-weight: bold; color: #10b981;">Points per Category Win</label>
-                        <input type="number" id="ptsGameWin" value="1" style="width: 100%; padding: 10px; border-radius: 4px; border: 2px solid #10b981; background: #ffffff; color: #0f172a; margin-top: 5px; font-size: 18px; font-weight: 900; text-align: center; box-sizing: border-box;">
-                    </div>
-                    <div style="flex: 1;">
-                        <label style="font-size: 12px; font-weight: bold; color: #f59e0b;">Points per Category Tie</label>
-                        <input type="number" id="ptsGameDraw" value="0" style="width: 100%; padding: 10px; border-radius: 4px; border: 2px solid #f59e0b; background: #ffffff; color: #0f172a; margin-top: 5px; font-size: 18px; font-weight: 900; text-align: center; box-sizing: border-box;">
-                    </div>
-                </div>
-            </div>
-            
-            <button style="background: #10b981; color: white; width: 100%; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer;" onclick="savePointsConfig()">Save Configuration</button>
-        </div>
-    </div>
-    
     <script>
-       // --- MULTI-TENANT STORAGE ENGINE ---
+        // --- MULTI-TENANT STORAGE ENGINE ---
         window.spaMemory = {};
 
         function getScopedKey(key) {
-            // These keys stay global so users can log in across the site
             const globalKeys = ['isAdmin', 'currentUserId', 'pendingOrganizers', 'approvedOrganizers'];
             if (globalKeys.includes(key)) return key;
-
             const userId = localStorage.getItem('currentUserId');
             if (!userId) return key; 
-            
-            return userId + '_' + key; // e.g. "org1_leagueManualFixtures"
+            return userId + '_' + key; 
         }
 
         function safeGetStorage(key, defaultVal) {
@@ -353,44 +169,25 @@
                 console.error("Storage limit reached! Could not save:", scopedKey);
             }
         }
-        
-        let allCategories = []; let scheduledOrder = [];
-        let manualFixtures = []; let auctionTeamsList = [];
 
         window.onload = function() {
             if (localStorage.getItem('isAdmin') === 'true' || localStorage.getItem('isAdmin') === 'organizer' || localStorage.getItem('isAdmin') === 'owner') {
                 const orgBtn = document.getElementById('organizerBtn');
                 if (orgBtn) orgBtn.style.display = 'inline-flex';
             }
-
-            loadTeamsForFixtures();
-            loadManualFixtures(); 
-            loadOrderOfPlayData(); 
             
-            let savedCount = safeGetStorage('leagueCourtCount', 3);
-            let courtSelect = document.getElementById('activeCourtsCount');
-            if (courtSelect) {
-                courtSelect.value = savedCount;
-            }
-            
-            updateCourtDropdowns();
             renderUmpireCourtPortals();
-            
-            // Initial load of matches
             loadPublicMatches();
         };
 
         function renderUmpireCourtPortals() {
             const container = document.getElementById('umpireCourtLinks');
             if(!container) return;
-            
             const count = parseInt(safeGetStorage('leagueCourtCount', 3)) || 3;
             container.innerHTML = '';
-            
             for(let i = 1; i <= count; i++) {
                 let courtName = `COURT ${i}`;
                 let loginUrl = `umpire.html?court=${encodeURIComponent(courtName)}`;
-                
                 container.innerHTML += `
                 <a href="${loginUrl}" target="_blank" style="background: #334155; color: white; border: 1px solid #475569; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; text-decoration: none;">
                     <span>⚖️ Court ${i} Scoreboard</span>
@@ -402,16 +199,13 @@
         function toggleQRModal() {
             const modal = document.getElementById('qrModal');
             modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
-            if(modal.style.display === 'flex') {
-                generateQRCodes();
-            }
+            if(modal.style.display === 'flex') generateQRCodes();
         }
 
         function generateQRCodes() {
             const count = parseInt(safeGetStorage('leagueCourtCount', 3)) || 3;
             const qrContainer = document.getElementById('qrCodesContainer');
             qrContainer.innerHTML = '';
-
             for(let i = 1; i <= count; i++) {
                 qrContainer.innerHTML += `
                 <div id="qr-box-${i}" style="background: #0f172a; padding: 12px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #334155;">
@@ -427,11 +221,9 @@
         function assignUmpire(courtNum) {
             let umpireName = prompt(`Please enter the Umpire's name for Court ${courtNum}:`);
             if (!umpireName || umpireName.trim() === "") return; 
-            
             let courtName = `COURT ${courtNum}`;
             let loginUrl = window.location.origin + `/umpire.html?court=${encodeURIComponent(courtName)}&umpire=${encodeURIComponent(umpireName.trim())}`;
             let qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(loginUrl)}`;
-            
             let box = document.getElementById(`qr-box-${courtNum}`);
             if(box) {
                 box.innerHTML = `
@@ -445,426 +237,17 @@
             }
         }
 
-        function updateCourtDropdowns() {
-            let activeInput = document.getElementById('activeCourtsCount');
-            if(!activeInput) return;
-            const count = parseInt(activeInput.value) || 3;
-            safeSetStorage('leagueCourtCount', count);
-            
-            let courtOptions = '';
-            for(let i = 1; i <= count; i++) {
-                let cName = `COURT ${i}`;
-                courtOptions += `<option value="${cName}">Court ${i}</option>`;
-            }
-            
-            let fixCourt = document.getElementById('fixCourt');
-            if(fixCourt) fixCourt.innerHTML = courtOptions;
-            
-            renderUmpireCourtPortals();
-        }
-
-        function loadTeamsForFixtures() {
-            try {
-                auctionTeamsList = safeGetStorage('auctionTeams', []);
-            } catch(e) {}
-            
-            let optionsHtml = '<option value="">Select a Franchise...</option>';
-            auctionTeamsList.forEach(team => {
-                optionsHtml += `<option value="${team.name}">${team.name.toUpperCase()}</option>`;
-            });
-            
-            let fA = document.getElementById('fixTeamA'); 
-            let fB = document.getElementById('fixTeamB');
-            
-            if(fA) {
-                fA.innerHTML = optionsHtml;
-                fA.onchange = function() { resetCategorySelection(); };
-            }
-            if(fB) {
-                fB.innerHTML = optionsHtml;
-                fB.onchange = function() { resetCategorySelection(); };
-            }
-        }
-
-        function resetCategorySelection() {
-            let fCat = document.getElementById('fixCategory');
-            if(fCat) {
-                fCat.value = ""; 
-            }
-            populateFixtureDropdowns(); 
-        }
-
-        function loadOrderOfPlayData() {
-            allCategories = [];
-            let officialCatsUpper = [];
-            
-            try {
-                // STRICT MODE: Only fetch from the official 'My Auction' Categories list
-                let parsedCats = safeGetStorage('auctionCats', []);
-                if(Array.isArray(parsedCats)) {
-                    parsedCats.forEach(c => {
-                        let catName = String(typeof c === 'object' ? (c.name || c.category) : c).trim();
-                        if (catName !== '') {
-                            officialCatsUpper.push(catName.toUpperCase());
-                        }
-                    });
-                }
-                
-                scheduledOrder = safeGetStorage('leagueOrderOfPlay', []);
-            } catch(e) {}
-
-            // AUTOMATIC PURGE: Remove old ghost categories from the right-hand chart
-            let validScheduled = [];
-            scheduledOrder.forEach(scheduledCat => {
-                if (officialCatsUpper.includes(String(scheduledCat).trim().toUpperCase())) {
-                    validScheduled.push(String(scheduledCat).trim().toUpperCase());
-                }
-            });
-            
-            // Remove any random duplicates caught in the saved order
-            scheduledOrder = [...new Set(validScheduled)];
-            safeSetStorage('leagueOrderOfPlay', scheduledOrder);
-
-            // Populate the left-hand list ONLY with official categories that aren't scheduled yet
-            officialCatsUpper.forEach(cat => {
-                if (!scheduledOrder.includes(cat)) {
-                    allCategories.push(cat);
-                }
-            });
-            
-            // Final duplicate wipe on the left side
-            allCategories = [...new Set(allCategories)];
-            
-            renderOrderManager(); 
-        }
-        
-        function loadManualFixtures() {
-            try {
-                manualFixtures = safeGetStorage('leagueManualFixtures', []);
-            } catch(e) {}
-        }
-
-        function toggleCategoriesModal() {
-            const modal = document.getElementById('manageCategoriesModal');
+        function togglePointsModal() {
+            const modal = document.getElementById('pointsModal');
             if (modal.style.display === 'none' || modal.style.display === '') {
-                renderActiveCategories();
+                populateStandings();
                 modal.style.display = 'flex';
             } else {
                 modal.style.display = 'none';
             }
         }
 
-        function addMatchDayCategory() {
-            const type = document.getElementById('newCatType').value;
-            const name = document.getElementById('newCatName').value.trim();
-            
-            if (!name) return alert("Please provide a custom name for the category.");
-            
-            let cats = safeGetStorage('auctionCats', []);
-            
-            const exists = cats.find(c => {
-                let cName = typeof c === 'object' ? c.name : c;
-                return cName.toLowerCase() === name.toLowerCase();
-            });
-            
-            if (exists) return alert("This category name already exists!");
-            
-            cats.push({ name: name, type: type, maxPlayers: '' });
-            safeSetStorage('auctionCats', cats);
-            
-            document.getElementById('newCatName').value = '';
-            document.getElementById('newCatType').value = '';
-            
-            renderActiveCategories();
-            
-            // Instantly refresh the other panels so the new category appears in the dropdowns
-            if (typeof loadOrderOfPlayData === 'function') loadOrderOfPlayData();
-            if (typeof populateFixtureDropdowns === 'function') populateFixtureDropdowns();
-        }
-
-        function renderActiveCategories() {
-            let cats = safeGetStorage('auctionCats', []);
-            let list = document.getElementById('activeCategoriesList');
-            list.innerHTML = '';
-            
-            if (cats.length === 0) {
-                list.innerHTML = '<span style="color: #64748b; font-size: 13px;">No categories defined yet.</span>';
-                return;
-            }
-
-            cats.forEach(c => {
-                let cName = typeof c === 'object' ? c.name : c;
-                let cType = (typeof c === 'object' && c.type) ? `<span style="background: #38bdf8; color: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: 10px;">${c.type}</span>` : '';
-                
-                list.innerHTML += `
-                <div style="background: #1e293b; padding: 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <div><strong style="color: white; font-size: 14px;">${cName}</strong> ${cType}</div>
-                </div>`;
-            });
-        }
-
-        function toggleOrderOfPlay() {
-            const mgr = document.getElementById('orderOfPlayManager');
-            const fixMgr = document.getElementById('fixtureManager');
-            const mainPortals = document.getElementById('mainPortals');
-            const header = document.getElementById('leagueHeader');
-            
-            if(fixMgr) fixMgr.style.display = 'none';
-            
-            if (mgr.style.display === 'none' || mgr.style.display === '') {
-                mgr.style.display = 'block';
-                if(mainPortals) mainPortals.style.display = 'none';
-                if(header) header.style.display = 'none';
-            } else {
-                mgr.style.display = 'none';
-                if(mainPortals) mainPortals.style.display = 'flex';
-                if(header) header.style.display = 'block';
-            }
-        }
-
-        function addToOrder(catIndex) {
-            let cat = allCategories.splice(catIndex, 1)[0];
-            scheduledOrder.push(cat); renderOrderManager();
-        }
-        
-        function removeFromOrder(catIndex) {
-            let cat = scheduledOrder.splice(catIndex, 1)[0].toUpperCase();
-            
-            // Only push back to the left side if it is still an official category in your dashboard
-            let rawCats = safeGetStorage('auctionCats', []);
-            let officialUpper = rawCats.map(c => String(typeof c === 'object' ? (c.name || c.category) : c).trim().toUpperCase());
-            
-            if (officialUpper.includes(cat) && !allCategories.includes(cat)) {
-                allCategories.push(cat); 
-            }
-            renderOrderManager();
-        }
-        
-        function renderOrderManager() {
-            const availList = document.getElementById('availableCatsList');
-            const orderList = document.getElementById('scheduledCatsList');
-            if(!availList || !orderList) return;
-            
-            availList.innerHTML = '';
-            allCategories.forEach((cat, index) => {
-                availList.innerHTML += `<div onclick="addToOrder(${index})" style="background: #334155; padding: 12px; border-radius: 5px; cursor: pointer; display: flex; justify-content: space-between; border-left: 4px solid #38bdf8;"><span>${cat}</span> <span>➕</span></div>`;
-            });
-            if(allCategories.length === 0) availList.innerHTML = '<p style="color:#64748b; text-align:center;">No more categories available.</p>';
-            
-            orderList.innerHTML = '';
-            
-            let scheduledCats = manualFixtures.map(f => f.category);
-
-            scheduledOrder.forEach((cat, index) => {
-                let isScheduled = scheduledCats.includes(cat);
-                let bgColor = isScheduled ? '#eab308' : '#10b981'; 
-                let textColor = '#0f172a';
-                let badge = isScheduled ? `<span style="background: #0f172a; color: #eab308; font-size: 10px; padding: 4px 8px; border-radius: 4px; margin-left: 10px; font-weight: 900; letter-spacing: 1px;">SCHEDULED</span>` : '';
-
-                orderList.innerHTML += `<div style="background: ${bgColor}; color: ${textColor}; font-weight: bold; padding: 12px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s;">
-                    <div style="display: flex; align-items: center;"><span>${index + 1}. ${cat}</span> ${badge}</div> 
-                    <span onclick="removeFromOrder(${index})" style="cursor: pointer; padding: 5px;">❌</span>
-                </div>`;
-            });
-            
-            if(scheduledOrder.length === 0) orderList.innerHTML = '<p style="color:#64748b; text-align:center;">Click a category on the left to add it.</p>';
-        }
-
-        function saveOrderOfPlay() {
-            if(!confirm("Are you sure you want to save and publish this Order of Play chart?")) return;
-            safeSetStorage('leagueOrderOfPlay', scheduledOrder);
-            toggleOrderOfPlay();
-        }
-
-        function toggleFixtureManager() {
-            const mgr = document.getElementById('fixtureManager');
-            const orderMgr = document.getElementById('orderOfPlayManager');
-            const mainPortals = document.getElementById('mainPortals');
-            const header = document.getElementById('leagueHeader');
-            
-            if(orderMgr) orderMgr.style.display = 'none';
-            
-            if (mgr.style.display === 'none' || mgr.style.display === '') {
-                mgr.style.display = 'block';
-                if(mainPortals) mainPortals.style.display = 'none';
-                if(header) header.style.display = 'none';
-                populateFixtureDropdowns();
-                renderFixtureManagerList();
-            } else {
-                mgr.style.display = 'none';
-                if(mainPortals) mainPortals.style.display = 'flex';
-                if(header) header.style.display = 'block';
-            }
-        }
-
-        function populateFixtureDropdowns() {
-            let fCat = document.getElementById('fixCategory');
-            let fA = document.getElementById('fixTeamA');
-            let fB = document.getElementById('fixTeamB');
-
-            let currentCat = fCat ? fCat.value : "";
-            let teamA = fA ? fA.value : "";
-            let teamB = fB ? fB.value : "";
-
-            let scheduledCatsForMatch = manualFixtures
-                .filter(f => (f.teamA === teamA && f.teamB === teamB) || (f.teamA === teamB && f.teamB === teamA))
-                .map(f => f.category);
-
-            let catOptions = '<option value="">Select Category...</option>';
-            let activeCats = scheduledOrder.length > 0 ? scheduledOrder : [...allCategories, ...scheduledOrder];
-
-            activeCats.forEach(cat => {
-                let isScheduled = scheduledCatsForMatch.includes(cat);
-                let label = isScheduled ? `✅ ${cat} (Scheduled)` : cat;
-                let style = isScheduled ? `color: #eab308; font-weight: bold; background: #0f172a;` : ``;
-                catOptions += `<option value="${cat}" style="${style}">${label}</option>`;
-            });
-            
-            if(fCat) {
-                fCat.innerHTML = catOptions;
-                if(currentCat && !scheduledCatsForMatch.includes(currentCat)) {
-                    fCat.value = currentCat; 
-                }
-            }
-        }
-
-        function addManualFixture() {
-            let catSelect = document.getElementById('fixCategory');
-            let teamASelect = document.getElementById('fixTeamA');
-            let teamBSelect = document.getElementById('fixTeamB');
-            let courtSelect = document.getElementById('fixCourt');
-            
-            let cat = catSelect.value;
-            let tA = teamASelect.value;
-            let tB = teamBSelect.value;
-            let court = courtSelect.value;
-            
-            if(!cat || !tA || !tB || !court) return alert("Please select a Category, both Teams, and a Court.");
-            if(tA === tB) return alert("Team A and Team B cannot be the same.");
-
-            let cleanCat = cat.replace('✅ ', '').replace(' (Scheduled)', '');
-
-            // Check if this exact match combination already exists in the queue
-            const isDuplicate = manualFixtures.some(f => 
-                f.category === cleanCat && 
-                ((f.teamA === tA && f.teamB === tB) || (f.teamA === tB && f.teamB === tA))
-            );
-
-            if (isDuplicate) {
-                alert(`⚠️ WARNING: The match ${tA} vs ${tB} for ${cleanCat} is already in the queue!`);
-                return; 
-            }
-
-            manualFixtures.push({ category: cleanCat, teamA: tA, teamB: tB, court: court });
-            
-            renderFixtureManagerList();
-            populateFixtureDropdowns(); 
-            renderOrderManager();
-
-            if(catSelect) catSelect.value = cat;
-            if(teamASelect) teamASelect.value = tA;
-            if(teamBSelect) teamBSelect.value = tB;
-            if(courtSelect) courtSelect.value = court;
-        }
-
-        function removeManualFixture(index) {
-            manualFixtures.splice(index, 1);
-            renderFixtureManagerList();
-            populateFixtureDropdowns(); 
-            renderOrderManager(); 
-        }
-
-        function renderFixtureManagerList() {
-            let listDiv = document.getElementById('addedFixturesList');
-            if(!listDiv) return;
-            listDiv.innerHTML = '';
-            
-            if(manualFixtures.length === 0) {
-                listDiv.innerHTML = '<p style="color:#64748b; text-align:center;">No fixtures added yet.</p>';
-                return;
-            }
-            
-            let courtTracker = {}; 
-
-            manualFixtures.forEach((f, i) => {
-                if(!courtTracker[f.court]) courtTracker[f.court] = 0;
-                courtTracker[f.court]++;
-                
-                let isFirst = courtTracker[f.court] === 1;
-                
-                let badge = isFirst 
-                    ? `<span style="background: #eab308; color: #0f172a; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-left: auto;">🔥 ON COURT</span>`
-                    : `<span style="background: #475569; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: auto;">⏳ IN QUEUE (#${courtTracker[f.court]})</span>`;
-                    
-                let borderCol = isFirst ? '#eab308' : '#475569';
-
-                listDiv.innerHTML += `
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px; border-radius: 5px; border-left: 4px solid ${borderCol}; margin-bottom: 8px;">
-                    <div style="font-size: 14px; display: flex; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px;">
-                        <div><strong>Match ${i+1}:</strong> ${f.category} | <span style="color:#ef4444">${f.teamA}</span> vs <span style="color:#3b82f6">${f.teamB}</span> | <span style="color:#10b981">${f.court}</span></div>
-                        ${badge}
-                    </div>
-                    <button onclick="removeManualFixture(${i})" style="background: #ef4444; color: white; border: none; border-radius: 4px; padding: 5px 10px; cursor: pointer; margin-left: 15px;">X</button>
-                </div>`;
-            });
-        }
-
-        async function saveManualFixtures() {
-            if(!confirm("Are you sure you want to save and publish these fixtures?")) return;
-            safeSetStorage('leagueManualFixtures', manualFixtures); 
-            toggleFixtureManager();
-        }
-        
-        // --- LEAGUE POINTS CONFIGURATION LOGIC ---
-        function openPointsModal() {
-            const config = safeGetStorage('leaguePointsConfig', {
-                pattern: 'overall_tie',
-                tieWin: 2,
-                tieLoss: 0,
-                gameWin: 1,
-                gameDraw: 0
-            });
-            
-            document.getElementById('scoringPattern').value = config.pattern;
-            document.getElementById('ptsTieWin').value = config.tieWin;
-            document.getElementById('ptsTieLoss').value = config.tieLoss;
-            document.getElementById('ptsGameWin').value = config.gameWin;
-            document.getElementById('ptsGameDraw').value = config.gameDraw;
-            
-            togglePointsView();
-            document.getElementById('pointsConfigModal').style.display = 'flex';
-        }
-
-        function closePointsModal() {
-            document.getElementById('pointsConfigModal').style.display = 'none';
-        }
-
-        function togglePointsView() {
-            const pattern = document.getElementById('scoringPattern').value;
-            if (pattern === 'overall_tie') {
-                document.getElementById('overallTieConfig').style.display = 'block';
-                document.getElementById('perGameConfig').style.display = 'none';
-            } else {
-                document.getElementById('overallTieConfig').style.display = 'none';
-                document.getElementById('perGameConfig').style.display = 'block';
-            }
-        }
-
-        function savePointsConfig() {
-            const config = {
-                pattern: document.getElementById('scoringPattern').value,
-                tieWin: parseInt(document.getElementById('ptsTieWin').value) || 0,
-                tieLoss: parseInt(document.getElementById('ptsTieLoss').value) || 0,
-                gameWin: parseInt(document.getElementById('ptsGameWin').value) || 0,
-                gameDraw: parseInt(document.getElementById('ptsGameDraw').value) || 0
-            };
-            
-            safeSetStorage('leaguePointsConfig', config);
-            closePointsModal();
-            alert("🏆 League Points Configuration Saved Successfully!");
-        }
-
-        async function populateStandings() {
+        function populateStandings() {
             const tbody = document.getElementById('standingsTableBody');
             if (!tbody) return;
             
@@ -1006,9 +389,8 @@
             tbody.innerHTML = html;
         }
 
-        async function loadPublicMatches() {
+        function loadPublicMatches() {
             let fixtures = safeGetStorage('leagueManualFixtures', []);
-            
             let courtCount = parseInt(safeGetStorage('leagueCourtCount', 3)) || 3;
             const grid = document.getElementById('splitCourtsGrid');
             const portals = document.getElementById('mainPortals');
@@ -1107,12 +489,6 @@
                 grid.innerHTML += panelHtml;
             }
         }
-        
-        // Ensure modal is hidden on load
-        document.addEventListener("DOMContentLoaded", () => {
-            const modal = document.getElementById('pointsConfigModal');
-            if (modal) modal.style.display = 'none';
-        });
     </script>
 </body>
 </html>
