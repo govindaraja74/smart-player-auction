@@ -915,38 +915,50 @@
             alert("Auction Details & Financials updated securely!");
         }
 
+        // --- NEW: DATABASE SCOPING (MULTI-TENANCY) ---
+        function getScopedKey(key) {
+            // These keys must remain global across the entire website so people can log in and sign up
+            const globalKeys = ['isAdmin', 'currentUserId', 'pendingOrganizers', 'approvedOrganizers'];
+            if (globalKeys.includes(key)) return key;
+
+            const userId = localStorage.getItem('currentUserId');
+            if (!userId) return key; // Fallback if no user is logged in
+            
+            return userId + '_' + key; // e.g. "org1_auctionSetup"
+        }
+
         window.spaMemory = {}; 
 
         function safeGetStorage(key, defaultVal) {
-          if (window.spaMemory && window.spaMemory[key] !== undefined) {
-            return JSON.parse(JSON.stringify(window.spaMemory[key]));
-        }
-        try {
-            const item = localStorage.getItem(key);
-            if (!item) return defaultVal;
-            const parsed = JSON.parse(item);
-            window.spaMemory[key] = parsed;
-            return JSON.parse(JSON.stringify(parsed));
-        } catch (e) {
-            return defaultVal;
-        }
-    }
-
-    // --- 2. CLOUD-SYNC SETTER ---
-   function safeSetStorage(key, data) {
-        window.spaMemory[key] = JSON.parse(JSON.stringify(data));
-        try {
-            localStorage.setItem(key, JSON.stringify(data));
-        } catch (e) {
-            console.error("Storage limit reached! Could not save:", key);
-            // Safely fail instead of destructively wiping the history
+            const scopedKey = getScopedKey(key);
+            if (window.spaMemory && window.spaMemory[scopedKey] !== undefined) {
+                return JSON.parse(JSON.stringify(window.spaMemory[scopedKey]));
+            }
+            try {
+                const item = localStorage.getItem(scopedKey);
+                if (!item) return defaultVal;
+                const parsed = JSON.parse(item);
+                window.spaMemory[scopedKey] = parsed;
+                return JSON.parse(JSON.stringify(parsed));
+            } catch (e) {
+                return defaultVal;
+            }
         }
 
-        // 🔥 INSTANT CLOUD BACKUP 🔥
-        if (typeof socket !== 'undefined' && socket.emit) {
-            socket.emit('save_auction_to_cloud', [window.spaMemory]);
+        function safeSetStorage(key, data) {
+            const scopedKey = getScopedKey(key);
+            window.spaMemory[scopedKey] = JSON.parse(JSON.stringify(data));
+            try {
+                localStorage.setItem(scopedKey, JSON.stringify(data));
+            } catch (e) {
+                console.error("Storage limit reached! Could not save:", scopedKey);
+            }
+
+            // 🔥 INSTANT CLOUD BACKUP 🔥
+            if (typeof socket !== 'undefined' && socket.emit) {
+                socket.emit('save_auction_to_cloud', [window.spaMemory]);
+            }
         }
-    }
 
     let activeSetupForSocket = safeGetStorage('auctionSetup', {});
     let activeTourneyIdForSocket = activeSetupForSocket.id || 'KBL2026';
@@ -1000,70 +1012,65 @@
         let liveBidHistory = []; 
         let livePlayerHistory = [];
 
-    function logoutAdmin() {
-        if(confirm("Are you sure you want to log out?")) {
-            localStorage.removeItem('isAdmin');
-            window.location.reload();
-        }
-    }
-
-    function checkOwnerPassword() {
-        const pwd = document.getElementById('ownerPasswordInput').value;
-        
-        if (pwd === "MasterUnlock2026") {
-            // Save login state permanently as OWNER
-            localStorage.setItem('isAdmin', 'owner');
-            document.getElementById('nav-owner').style.display = 'block'; // Show Owner Hub
-            
-            // Hide login, show main UI
-            document.getElementById('ownerLoginSection').classList.add('hidden');
-            document.getElementById('appMainUI').classList.remove('hidden'); 
-            document.getElementById('ownerErrorMessage').style.display = 'none';
-
-            // Fetch permanently saved data from the server
-            if (typeof socket !== 'undefined' && socket.connected) {
-                socket.emit('request_saved_auctions');
-                socket.on('load_saved_auctions', (serverHistory) => {
-                    if (serverHistory && serverHistory.length > 0) {
-                        safeSetStorage('auctionHistory', serverHistory);
-                        if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
-                    }
-                });
+        function logoutAdmin() {
+            if(confirm("Are you sure you want to log out?")) {
+                localStorage.removeItem('isAdmin');
+                localStorage.removeItem('currentUserId'); // Clear the specific user context
+                window.location.reload();
             }
-
-            // Load all dashboard components
-            try { populateAuctionDetails(); } catch(e){}
-            try { updateDashboardHistoryCard(); } catch(e){}
-            try { updateManualCategoryDropdowns(); } catch(e){}
-            try { renderFranchiseStandings(); } catch(e){}
-            try { renderPlayersDatabase('all'); } catch(e){}
-            try { renderOwnerHub(); } catch(e){}
-
-        } else {
-            // Show error message
-            document.getElementById('ownerErrorMessage').style.display = 'block';
         }
-    }
 
-    function checkPassword() {
+        function checkOwnerPassword() {
+            const pwd = document.getElementById('ownerPasswordInput').value;
+            
+            if (pwd === "MasterUnlock2026") {
+                localStorage.setItem('isAdmin', 'owner');
+                localStorage.setItem('currentUserId', 'owner'); // Set Owner Context
+                document.getElementById('nav-owner').style.display = 'block'; 
+                
+                document.getElementById('ownerLoginSection').classList.add('hidden');
+                document.getElementById('appMainUI').classList.remove('hidden'); 
+                document.getElementById('ownerErrorMessage').style.display = 'none';
+
+                if (typeof socket !== 'undefined' && socket.connected) {
+                    socket.emit('request_saved_auctions');
+                    socket.on('load_saved_auctions', (serverHistory) => {
+                        if (serverHistory && serverHistory.length > 0) {
+                            safeSetStorage('auctionHistory', serverHistory);
+                            if (typeof renderAuctionLibrary === 'function') renderAuctionLibrary();
+                        }
+                    });
+                }
+
+                try { populateAuctionDetails(); } catch(e){}
+                try { updateDashboardHistoryCard(); } catch(e){}
+                try { updateManualCategoryDropdowns(); } catch(e){}
+                try { renderFranchiseStandings(); } catch(e){}
+                try { renderPlayersDatabase('all'); } catch(e){}
+                try { renderOwnerHub(); } catch(e){}
+
+            } else {
+                document.getElementById('ownerErrorMessage').style.display = 'block';
+            }
+        }
+
+        function checkPassword() {
             const uid = document.getElementById('adminUserId').value.trim();
             const pwd = document.getElementById('adminPassword').value;
             let approvedOrganizers = JSON.parse(localStorage.getItem('approvedOrganizers') || '[]');
             
             let isApprovedOrganizer = approvedOrganizers.find(o => o.userId.toLowerCase() === uid.toLowerCase() && o.password === pwd);
 
-            // Checks for the typed password OR an auto-login trigger
             if ((uid.toLowerCase() === "owner" && pwd === "MasterUnlock2026") || pwd === "AUTO_LOGIN_OWNER") {
                 
-                // 🔥 SAVES THE LOGIN STATE PERMANENTLY AS OWNER 🔥
                 localStorage.setItem('isAdmin', 'owner');
-                document.getElementById('nav-owner').style.display = 'block'; // Show Owner Hub
+                localStorage.setItem('currentUserId', 'owner');
+                document.getElementById('nav-owner').style.display = 'block'; 
                 
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 document.getElementById('errorMessage').style.display = 'none';
 
-                // Fetch permanently saved data from the server
                 if (typeof socket !== 'undefined' && socket.connected) {
                     socket.emit('request_saved_auctions');
                     socket.on('load_saved_auctions', (serverHistory) => {
@@ -1082,15 +1089,15 @@
                 try { renderOwnerHub(); } catch(e){}
 
             } else if (isApprovedOrganizer || pwd === "AUTO_LOGIN_ORG") {
-                // 🔥 SAVES THE LOGIN STATE PERMANENTLY AS ORGANIZER 🔥
+                
                 localStorage.setItem('isAdmin', 'organizer');
-                document.getElementById('nav-owner').style.display = 'none'; // Hide Owner Hub
+                localStorage.setItem('currentUserId', (isApprovedOrganizer ? isApprovedOrganizer.userId.toLowerCase() : uid.toLowerCase()));
+                document.getElementById('nav-owner').style.display = 'none'; 
                 
                 document.getElementById('loginSection').classList.add('hidden');
                 document.getElementById('appMainUI').classList.remove('hidden'); 
                 document.getElementById('errorMessage').style.display = 'none';
 
-                // Fetch permanently saved data from the server
                 if (typeof socket !== 'undefined' && socket.connected) {
                     socket.emit('request_saved_auctions');
                     socket.on('load_saved_auctions', (serverHistory) => {
@@ -1111,29 +1118,30 @@
             }
         }
 
-     function safeInit() {
+        function safeInit() {
             // Check if the URL explicitly asks to force the login screen
             const urlParams = new URLSearchParams(window.location.search);
             const forceLogin = urlParams.get('forceLogin');
 
             if (forceLogin === 'true') {
-                // If the user came from the homepage login button, DON'T auto-login.
-                // Just stay on the login screen.
                 return;
             }
 
-            // Otherwise, check if you are already logged in, and instantly bypass the login screen!
             const adminStatus = localStorage.getItem('isAdmin');
+            const currentUserId = localStorage.getItem('currentUserId');
+
             if (adminStatus === 'owner') {
                 document.getElementById('adminPassword').value = "AUTO_LOGIN_OWNER";
                 document.getElementById('adminUserId').value = "owner";
                 checkPassword();
-            } else if (adminStatus === 'organizer') {
+            } else if (adminStatus === 'organizer' && currentUserId) {
                 document.getElementById('adminPassword').value = "AUTO_LOGIN_ORG";
+                document.getElementById('adminUserId').value = currentUserId;
                 checkPassword();
             }
             try { loadSavedMemory(); } catch(e) {}
         }
+
         // --- NEW: OWNER HUB FUNCTIONS ---
         function renderOwnerHub() {
             let pending = JSON.parse(localStorage.getItem('pendingOrganizers') || '[]');
@@ -3255,19 +3263,18 @@ function showFranchiseRoster(teamId) {
         let match = history.find(a => a && a.setup && String(a.setup.id) === String(id));
         if (!match) return alert("Auction archive not found!");
 
-        window.spaMemory = {};
+        window.spaMemory = {}; // Reset local session memory
         safeSetStorage('liveAuctionState', null);
         safeSetStorage('savedLivePlayer', null);
 
-        // 🔥 CRITICAL FIX: Clear previous deletions so they don't ghost-delete loaded teams
-        localStorage.setItem('deletedTeams', JSON.stringify([]));
-        localStorage.setItem('deletedPlayers', JSON.stringify([]));
+        safeSetStorage('deletedTeams', []);
+        safeSetStorage('deletedPlayers', []);
 
-        localStorage.setItem('auctionSetup', JSON.stringify(match.setup));
-        localStorage.setItem('auctionTeams', JSON.stringify(match.teams || []));
-        localStorage.setItem('auctionPlayers', JSON.stringify(match.players || []));
-        localStorage.setItem('auctionCats', JSON.stringify(match.cats || []));
-        localStorage.setItem('auctionBidTiers', JSON.stringify(match.tiers || []));
+        safeSetStorage('auctionSetup', match.setup);
+        safeSetStorage('auctionTeams', match.teams || []);
+        safeSetStorage('auctionPlayers', match.players || []);
+        safeSetStorage('auctionCats', match.cats || []);
+        safeSetStorage('auctionBidTiers', match.tiers || []);
 
         alert(`📂 Successfully loaded "${match.setup.name}"!`);
         window.location.reload();
