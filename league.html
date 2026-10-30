@@ -819,22 +819,11 @@
         }
 
         async function saveManualFixtures() {
-            if(!confirm("Are you sure you want to save and publish these fixtures to the Cloud Database?")) return;
+            if(!confirm("Are you sure you want to save and publish these fixtures?")) return;
             safeSetStorage('leagueManualFixtures', manualFixtures); 
-            
-            try {
-                await fetch('/api/fixtures', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(manualFixtures)
-                });
-            } catch (error) {
-                console.error("Cloud Sync Failed", error);
-                alert("Warning: Could not sync to MongoDB. Check server connection.");
-            }
-
             toggleFixtureManager();
         }
+        
         // --- LEAGUE POINTS CONFIGURATION LOGIC ---
         function openPointsModal() {
             const config = safeGetStorage('leaguePointsConfig', {
@@ -904,14 +893,7 @@
                 }
             } catch(e) {}
 
-            try {
-                const res = await fetch('/api/fixtures');
-                if(res.ok) fixtures = await res.json();
-            } catch(err) {}
-
-            if(!Array.isArray(fixtures) || fixtures.length === 0) {
-                try { fixtures = safeGetStorage('leagueManualFixtures', []); } catch(e) {}
-            }
+            fixtures = safeGetStorage('leagueManualFixtures', []);
 
             if (teams.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="padding: 15px; text-align: center; color: #94a3b8;">No teams registered yet.</td></tr>';
@@ -1034,19 +1016,8 @@
         }
 
         async function loadPublicMatches() {
-            let fixtures = [];
+            let fixtures = safeGetStorage('leagueManualFixtures', []);
             
-            try {
-                const res = await fetch('/api/fixtures');
-                if(res.ok) fixtures = await res.json();
-            } catch(err) {}
-
-            if(!Array.isArray(fixtures) || fixtures.length === 0) {
-                try {
-                    fixtures = safeGetStorage('leagueManualFixtures', []);
-                } catch(e) {}
-            }
-
             let courtCount = parseInt(safeGetStorage('leagueCourtCount', 3)) || 3;
             const grid = document.getElementById('splitCourtsGrid');
             const portals = document.getElementById('mainPortals');
