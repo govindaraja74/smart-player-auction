@@ -117,6 +117,45 @@
     </div>
 
     <script>
+        // --- MULTI-TENANT STORAGE ENGINE ---
+        window.spaMemory = {};
+
+        function getScopedKey(key) {
+            const globalKeys = ['isAdmin', 'currentUserId', 'pendingOrganizers', 'approvedOrganizers'];
+            if (globalKeys.includes(key)) return key;
+
+            const userId = localStorage.getItem('currentUserId');
+            if (!userId) return key; 
+            
+            return userId + '_' + key; 
+        }
+
+        function safeGetStorage(key, defaultVal) {
+            const scopedKey = getScopedKey(key);
+            if (window.spaMemory && window.spaMemory[scopedKey] !== undefined) {
+                return JSON.parse(JSON.stringify(window.spaMemory[scopedKey]));
+            }
+            try {
+                const item = localStorage.getItem(scopedKey);
+                if (!item) return defaultVal;
+                const parsed = JSON.parse(item);
+                window.spaMemory[scopedKey] = parsed;
+                return JSON.parse(JSON.stringify(parsed));
+            } catch (e) {
+                return defaultVal;
+            }
+        }
+
+        function safeSetStorage(key, data) {
+            const scopedKey = getScopedKey(key);
+            window.spaMemory[scopedKey] = JSON.parse(JSON.stringify(data));
+            try {
+                localStorage.setItem(scopedKey, JSON.stringify(data));
+            } catch (e) {
+                console.error("Storage limit reached! Could not save:", scopedKey);
+            }
+        }
+
         let myTeam = "";
         let allFixtures = [];
         let allPlayers = [];
@@ -136,7 +175,7 @@
         function loadFranchisesForLogin() {
             let teams = [];
             try {
-                teams = JSON.parse(localStorage.getItem('auctionTeams') || '[]');
+                teams = safeGetStorage('auctionTeams', []);
             } catch(e) {}
 
             const select = document.getElementById('franchiseSelect');
@@ -179,13 +218,11 @@
 
             // Load Global Data
             try {
-                let orderData = localStorage.getItem('leagueOrderOfPlay');
-                if(orderData) orderOfPlay = JSON.parse(orderData);
+                orderOfPlay = safeGetStorage('leagueOrderOfPlay', []);
             } catch(e) {}
 
             try {
-                let pData = localStorage.getItem('auctionPlayers');
-                if(pData) allPlayers = JSON.parse(pData);
+                allPlayers = safeGetStorage('auctionPlayers', []);
             } catch(e) {}
 
             // Try Cloud first, fallback to local for Fixtures
@@ -196,7 +233,7 @@
 
             if(!Array.isArray(allFixtures) || allFixtures.length === 0) {
                 try {
-                    allFixtures = JSON.parse(localStorage.getItem('leagueManualFixtures') || '[]');
+                    allFixtures = safeGetStorage('leagueManualFixtures', []);
                 } catch(e) {}
             }
 
@@ -224,7 +261,7 @@
             list.innerHTML = html;
         }
 
-        // NEW: Anti-Duplicate Selection Validation
+        // Anti-Duplicate Selection Validation
         function validatePlayerSelection(selectElement) {
             let selectedValue = selectElement.value;
             if (!selectedValue) return; // Empty selections are fine
@@ -423,7 +460,7 @@
             });
 
             // 3. Save to Database
-            localStorage.setItem('leagueManualFixtures', JSON.stringify(allFixtures));
+            safeSetStorage('leagueManualFixtures', allFixtures);
             
             try {
                 await fetch('/api/fixtures', {
