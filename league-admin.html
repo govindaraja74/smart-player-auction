@@ -222,6 +222,45 @@
         </div>
     </div>
     <script>
+       // --- MULTI-TENANT STORAGE ENGINE ---
+        window.spaMemory = {};
+
+        function getScopedKey(key) {
+            // These keys stay global so users can log in across the site
+            const globalKeys = ['isAdmin', 'currentUserId', 'pendingOrganizers', 'approvedOrganizers'];
+            if (globalKeys.includes(key)) return key;
+
+            const userId = localStorage.getItem('currentUserId');
+            if (!userId) return key; 
+            
+            return userId + '_' + key; // e.g. "org1_leagueManualFixtures"
+        }
+
+        function safeGetStorage(key, defaultVal) {
+            const scopedKey = getScopedKey(key);
+            if (window.spaMemory && window.spaMemory[scopedKey] !== undefined) {
+                return JSON.parse(JSON.stringify(window.spaMemory[scopedKey]));
+            }
+            try {
+                const item = localStorage.getItem(scopedKey);
+                if (!item) return defaultVal;
+                const parsed = JSON.parse(item);
+                window.spaMemory[scopedKey] = parsed;
+                return JSON.parse(JSON.stringify(parsed));
+            } catch (e) {
+                return defaultVal;
+            }
+        }
+
+        function safeSetStorage(key, data) {
+            const scopedKey = getScopedKey(key);
+            window.spaMemory[scopedKey] = JSON.parse(JSON.stringify(data));
+            try {
+                localStorage.setItem(scopedKey, JSON.stringify(data));
+            } catch (e) {
+                console.error("Storage limit reached! Could not save:", scopedKey);
+            }
+        } 
         let allCategories = []; let scheduledOrder = [];
         let manualFixtures = []; let auctionTeamsList = [];
 
